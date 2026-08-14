@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FORMA — Client Intake</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0B0B0E; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  a { color: #D6FF3F; text-decoration: none; }
+  a:hover { color: #E9FF8A; }
+  input, select, textarea, button { font-family: inherit; }
+  input[type="range"] { accent-color: #D6FF3F; }
+  ::placeholder { color: #55555F; }
+  input:focus, textarea:focus, select:focus { border-color: #D6FF3F !important; }
+  @keyframes forma-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media print { .no-print { display: none !important; } }
+</style>
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="120" fill="#0B0B0E"/><text x="60" y="72" font-family="Anton, Impact, sans-serif" font-size="34" fill="#D6FF3F" text-anchor="middle">FORMA</text></svg>
+</template>
+</helmet>
+
+<div style="{{ pageStyle }}">
+
+  <div class="no-print" style="position: sticky; top: 0; z-index: 20; background: rgba(11,11,14,.86); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.08)">
+    <div style="max-width: 980px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 20px">
+      <div style="display: flex; align-items: baseline; gap: 10px; flex: 1; min-width: 0">
+        <span style="font-family: Anton, Impact, sans-serif; font-size: 26px; letter-spacing: .14em; color: #D6FF3F; line-height: 1">FORMA</span>
+        <span style="font: 500 12px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A; white-space: nowrap">Mahmoud Radwan</span>
+      </div>
+      <div style="display: flex; gap: 4px; background: #15151A; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; padding: 4px">
+        <button type="button" onClick="{{ setEn }}" style="{{ enBtnStyle }}">EN</button>
+        <button type="button" onClick="{{ setAr }}" style="{{ arBtnStyle }}">ع</button>
+      </div>
+    </div>
+    <div style="height: 3px; background: rgba(255,255,255,.06)">
+      <div style="{{ barStyle }}"></div>
+    </div>
+  </div>
+
+  <div style="max-width: 980px; margin: 0 auto; padding: 0 24px 120px">
+
+    <div style="padding: 72px 0 56px; border-bottom: 1px solid rgba(255,255,255,.08)">
+      <div style="font: 600 12px/1 'DM Sans', sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #D6FF3F; margin-bottom: 22px">{{ t.kicker }}</div>
+      <h1 style="{{ h1Style }}">{{ t.heroTitle }}</h1>
+      <p style="{{ leadStyle }}">{{ t.heroLead }}</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px">
+        <span style="{{ pillStyle }}">{{ t.pillTime }}</span>
+        <span style="{{ pillStyle }}">{{ t.pillSave }}</span>
+        <span style="{{ pillStyle }}">{{ t.pillPrivate }}</span>
+      </div>
+    </div>
+
+    <form ref="{{ formRef }}" onSubmit="{{ onSubmit }}" style="display: grid; gap: 20px; padding-top: 40px">
+
+      <section style="{{ cardStyle }}">
+        <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">01</span><h2 style="{{ h2Style }}">{{ t.s1 }}</h2></div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px">
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fName }}</span><input name="fullName" required="" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fAge }}</span><input name="age" type="number" min="12" max="90" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fPhone }}</span><input name="phone" required="" placeholder="+20 1XX XXX XXXX" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fEmail }}</span><input name="email" type="email" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fCity }}</span><input name="city" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fJob }}</span><input name="job" style="{{ inStyle }}" /></label>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fGender }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.gender }}" as="c" hint-placeholder-count="2">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fActivity }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.activity }}" as="c" hint-placeholder-count="4">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="{{ cardStyle }}">
+        <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">02</span><h2 style="{{ h2Style }}">{{ t.s2 }}</h2></div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px">
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fHeight }}</span><input name="height" type="number" step="0.5" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fWeight }}</span><input name="weight" type="number" step="0.1" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fTarget }}</span><input name="targetWeight" type="number" step="0.1" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fWaist }}</span><input name="waist" type="number" step="0.5" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fHip }}</span><input name="hip" type="number" step="0.5" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fChest }}</span><input name="chest" type="number" step="0.5" style="{{ inStyle }}" /></label>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fWHistory }}</span><textarea name="weightHistory" rows="3" placeholder="{{ t.phWHistory }}" style="{{ taStyle }}"></textarea></label>
+      </section>
+
+      <section style="{{ cardStyle }}">
+        <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">03</span><h2 style="{{ h2Style }}">{{ t.s3 }}</h2></div>
+        <span style="{{ labStyle }}">{{ t.fGoal }}</span>
+        <div style="{{ chipRowStyle }}">
+          <sc-for list="{{ g.goal }}" as="c" hint-placeholder-count="7">
+            <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; margin-top: 26px">
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fDeadline }}</span><input name="deadline" placeholder="{{ t.phDeadline }}" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fBudgetTime }}</span><input name="sessionLength" placeholder="{{ t.phSession }}" style="{{ inStyle }}" /></label>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fWhy }}</span><textarea name="why" rows="3" placeholder="{{ t.phWhy }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fAttempts }}</span><textarea name="pastAttempts" rows="3" placeholder="{{ t.phAttempts }}" style="{{ taStyle }}"></textarea></label>
+      </section>
+
+      <section style="{{ cardStyle }}">
+        <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">04</span><h2 style="{{ h2Style }}">{{ t.s4 }}</h2></div>
+        <span style="{{ labStyle }}">{{ t.fExp }}</span>
+        <div style="{{ chipRowStyle }}">
+          <sc-for list="{{ g.exp }}" as="c" hint-placeholder-count="5">
+            <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fDays }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.days }}" as="c" hint-placeholder-count="5">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fEquip }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.equip }}" as="c" hint-placeholder-count="8">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 26px">
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fLoveEx }}</span><input name="lovedExercises" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fHateEx }}</span><input name="hatedExercises" style="{{ inStyle }}" /></label>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fProgram }}</span><textarea name="currentProgram" rows="3" placeholder="{{ t.phProgram }}" style="{{ taStyle }}"></textarea></label>
+      </section>
+
+      <section style="{{ cardStyle }}">
+        <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">05</span><h2 style="{{ h2Style }}">{{ t.s5 }}</h2></div>
+        <p style="{{ noteStyle }}">{{ t.healthNote }}</p>
+        <span style="{{ labStyle }}">{{ t.fInjuries }}</span>
+        <div style="{{ chipRowStyle }}">
+          <sc-for list="{{ g.injuries }}" as="c" hint-placeholder-count="9">
+            <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fInjDetails }}</span><textarea name="injuryDetails" rows="3" placeholder="{{ t.phInj }}" style="{{ taStyle }}"></textarea></label>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fConditions }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.conditions }}" as="c" hint-placeholder-count="10">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fMeds }}</span><textarea name="medications" rows="3" placeholder="{{ t.phMeds }}" style="{{ taStyle }}"></textarea></label>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 26px">
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fSurgery }}</span><input name="surgeries" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fBlood }}</span><input name="bloodWork" placeholder="{{ t.phBlood }}" style="{{ inStyle }}" /></label>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fSmoking }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.smoking }}" as="c" hint-placeholder-count="3">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fFemale }}</span><input name="femaleNotes" placeholder="{{ t.phFemale }}" style="{{ inStyle }}" /></label>
+      </section>
+
+      <section style="{{ cardStyle }}">
+        <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">06</span><h2 style="{{ h2Style }}">{{ t.s6 }}</h2></div>
+        <span style="{{ labStyle }}">{{ t.fDiet }}</span>
+        <div style="{{ chipRowStyle }}">
+          <sc-for list="{{ g.diet }}" as="c" hint-placeholder-count="7">
+            <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fLikes }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.likes }}" as="c" hint-placeholder-count="14">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labWarnStyle }}">{{ t.fDislikes }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.dislikes }}" as="c" hint-placeholder-count="14">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labWarnStyle }}">{{ t.fNeverEat }}</span><textarea name="neverEat" rows="2" placeholder="{{ t.phNeverEat }}" style="{{ taStyle }}"></textarea></label>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fAllergy }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.allergy }}" as="c" hint-placeholder-count="7">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fSupps }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.supps }}" as="c" hint-placeholder-count="9">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fMeals }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.meals }}" as="c" hint-placeholder-count="4">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fCook }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.cook }}" as="c" hint-placeholder-count="4">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fTypicalDay }}</span><textarea name="typicalDay" rows="5" placeholder="{{ t.phTypicalDay }}" style="{{ taStyle }}"></textarea></label>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 26px">
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fWater }}</span><input name="water" placeholder="{{ t.phWater }}" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fCaffeine }}</span><input name="caffeine" placeholder="{{ t.phCaffeine }}" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fCravings }}</span><input name="cravings" style="{{ inStyle }}" /></label>
+        </div>
+      </section>
+
+      <section style="{{ cardStyle }}">
+        <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">07</span><h2 style="{{ h2Style }}">{{ t.s7 }}</h2></div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px">
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fSleepH }}</span><input name="sleepHours" placeholder="{{ t.phSleep }}" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fSteps }}</span><input name="steps" placeholder="{{ t.phSteps }}" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ t.fSchedule }}</span><input name="workSchedule" placeholder="{{ t.phSchedule }}" style="{{ inStyle }}" /></label>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fSleepQ }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.sleepQ }}" as="c" hint-placeholder-count="4">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fStress }}</span>
+          <div style="display: flex; align-items: center; gap: 18px">
+            <input name="stress" type="range" min="1" max="10" defaultValue="5" onInput="{{ onStress }}" style="flex: 1; height: 4px" />
+            <span style="font-family: Anton, Impact, sans-serif; font-size: 30px; color: #D6FF3F; min-width: 44px; text-align: center">{{ stress }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section style="{{ cardAccentStyle }}">
+        <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">08</span><h2 style="{{ h2Style }}">{{ t.s8 }}</h2></div>
+        <p style="{{ noteStyle }}">{{ t.s8Note }}</p>
+        <span style="{{ labStyle }}">{{ t.fPastIssues }}</span>
+        <div style="{{ chipRowStyle }}">
+          <sc-for list="{{ g.pastIssues }}" as="c" hint-placeholder-count="10">
+            <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fDisliked }}</span><textarea name="dislikedBefore" rows="4" placeholder="{{ t.phDisliked }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fNeed }}</span><textarea name="needFromCoach" rows="3" placeholder="{{ t.phNeed }}" style="{{ taStyle }}"></textarea></label>
+        <div style="{{ fieldGapStyle }}">
+          <span style="{{ labStyle }}">{{ t.fComms }}</span>
+          <div style="{{ chipRowStyle }}">
+            <sc-for list="{{ g.comms }}" as="c" hint-placeholder-count="4">
+              <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fNotes }}</span><textarea name="notes" rows="3" placeholder="{{ t.phNotes }}" style="{{ taStyle }}"></textarea></label>
+      </section>
+
+      <div class="no-print" style="{{ submitWrapStyle }}">
+        <div style="{{ errStyle }}">{{ errMsg }}</div>
+        <button type="submit" style="{{ submitStyle }}">{{ submitLabel }}</button>
+        <p style="{{ finePrintStyle }}">{{ t.finePrint }}</p>
+      </div>
+    </form>
+  </div>
+
+  <div style="{{ successOverlayStyle }}">
+    <div style="{{ successCardStyle }}">
+      <div style="font-family: Anton, Impact, sans-serif; font-size: 64px; line-height: 1; color: #D6FF3F; letter-spacing: .12em">FORMA</div>
+      <h2 style="font: 700 26px/1.25 'DM Sans', sans-serif; color: #F4F3F0; margin: 26px 0 12px">{{ t.thanksTitle }}</h2>
+      <p style="font: 400 16px/1.65 'DM Sans', sans-serif; color: #9A9AA6; margin: 0 0 30px">{{ t.thanksBody }}</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center">
+        <button type="button" onClick="{{ downloadCopy }}" style="{{ ghostBtnStyle }}">{{ t.download }}</button>
+        <a href="https://wa.me/" target="_blank" rel="noreferrer" style="{{ ghostBtnStyle }}">{{ t.whatsapp }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+/* ============================================================
+   FORMA — client intake
+   1. Paste your Google Apps Script Web App URL below (see Setup page).
+   2. Everything else works automatically.
+   ============================================================ */
+const API_URL = "https://script.google.com/macros/s/AKfycbyqo5bc7GCE1QhjEDeS0zigzo1m2hcY_mEmJum1kh3_PQd2o7JxAesEZ70UMvkxJMHXLQ/exec";
+
+const G = {
+  gender: { multi: 0, opts: [["Male", "ذكر"], ["Female", "أنثى"]] },
+  activity: { multi: 0, opts: [["Desk job, mostly sitting", "عمل مكتبي، جلوس معظم اليوم"], ["On my feet part of the day", "أتحرك جزء من اليوم"], ["Physically active job", "عمل يتطلب مجهود"], ["Very physical job", "عمل شاق جداً"]] },
+  goal: { multi: 0, opts: [["Lose fat", "خسارة دهون"], ["Build muscle", "بناء عضل"], ["Recomposition", "تحسين تركيب الجسم"], ["Get stronger", "زيادة القوة"], ["Sport performance", "أداء رياضي"], ["General health", "صحة عامة"], ["Return after injury", "العودة بعد إصابة"]] },
+  exp: { multi: 0, opts: [["Complete beginner", "مبتدئ تماماً"], ["Under 1 year", "أقل من سنة"], ["1–3 years", "١–٣ سنوات"], ["3+ years", "أكثر من ٣ سنوات"], ["Returning after a break", "عائد بعد انقطاع"]] },
+  days: { multi: 0, opts: [["2 days", "يومان"], ["3 days", "٣ أيام"], ["4 days", "٤ أيام"], ["5 days", "٥ أيام"], ["6 days", "٦ أيام"]] },
+  equip: { multi: 1, opts: [["Full commercial gym", "جيم مجهز بالكامل"], ["Small local gym", "جيم صغير"], ["Home gym", "جيم منزلي"], ["Dumbbells only", "دمبل فقط"], ["Barbell & rack", "بار وحامل"], ["Machines", "أجهزة"], ["Resistance bands", "أستك مقاومة"], ["Cardio machines", "أجهزة كارديو"], ["Pull-up bar", "عقلة"], ["Bodyweight only", "وزن الجسم فقط"]] },
+  injuries: { multi: 1, opts: [["None", "لا يوجد"], ["Lower back", "أسفل الظهر"], ["Knee", "الركبة"], ["Shoulder", "الكتف"], ["Neck", "الرقبة"], ["Hip", "الحوض"], ["Elbow / wrist", "الكوع / الرسغ"], ["Ankle", "الكاحل"], ["Hernia", "فتاق"], ["Post-surgery", "بعد عملية"]] },
+  conditions: { multi: 1, opts: [["None", "لا يوجد"], ["High blood pressure", "ضغط مرتفع"], ["Diabetes / insulin resistance", "سكر / مقاومة أنسولين"], ["Thyroid", "الغدة الدرقية"], ["PCOS", "تكيس المبايض"], ["High cholesterol", "كوليسترول مرتفع"], ["Asthma", "ربو"], ["Heart condition", "مشكلة بالقلب"], ["Digestive / reflux", "مشاكل هضم / حمضية"], ["Anemia", "أنيميا"], ["Anxiety / depression", "قلق / اكتئاب"], ["Other", "أخرى"]] },
+  smoking: { multi: 0, opts: [["Never", "لا"], ["Sometimes", "أحياناً"], ["Daily", "يومياً"]] },
+  diet: { multi: 0, opts: [["No restrictions", "بدون قيود"], ["Vegetarian", "نباتي"], ["Vegan", "نباتي صرف"], ["Keto / low carb", "كيتو / قليل الكارب"], ["Intermittent fasting", "صيام متقطع"], ["Gluten free", "بدون جلوتين"], ["Other", "أخرى"]] },
+  likes: { multi: 1, opts: [["Chicken", "دجاج"], ["Beef", "لحم"], ["Fish", "سمك"], ["Eggs", "بيض"], ["Rice", "أرز"], ["Bread", "خبز"], ["Potato", "بطاطس"], ["Pasta", "مكرونة"], ["Oats", "شوفان"], ["Yogurt / milk", "زبادي / لبن"], ["Cheese", "جبن"], ["Beans / legumes", "بقوليات"], ["Nuts", "مكسرات"], ["Fruit", "فاكهة"], ["Vegetables", "خضار"], ["Protein shake", "بروتين شيك"]] },
+  dislikes: { multi: 1, opts: [["Chicken", "دجاج"], ["Beef", "لحم"], ["Fish", "سمك"], ["Eggs", "بيض"], ["Rice", "أرز"], ["Bread", "خبز"], ["Potato", "بطاطس"], ["Pasta", "مكرونة"], ["Oats", "شوفان"], ["Yogurt / milk", "زبادي / لبن"], ["Cheese", "جبن"], ["Beans / legumes", "بقوليات"], ["Nuts", "مكسرات"], ["Fruit", "فاكهة"], ["Vegetables", "خضار"], ["Protein shake", "بروتين شيك"]] },
+  allergy: { multi: 1, opts: [["None", "لا يوجد"], ["Lactose", "لاكتوز"], ["Gluten", "جلوتين"], ["Nuts", "مكسرات"], ["Eggs", "بيض"], ["Seafood", "مأكولات بحرية"], ["Soy", "صويا"], ["Other", "أخرى"]] },
+  supps: { multi: 1, opts: [["None", "لا يوجد"], ["Whey protein", "واي بروتين"], ["Creatine", "كرياتين"], ["Multivitamin", "فيتامينات متعددة"], ["Omega 3", "أوميجا ٣"], ["Vitamin D", "فيتامين د"], ["Pre-workout", "بري ووركاوت"], ["Fat burner", "حرق دهون"], ["Magnesium", "ماغنيسيوم"], ["Other", "أخرى"]] },
+  meals: { multi: 0, opts: [["2 meals", "وجبتان"], ["3 meals", "٣ وجبات"], ["4 meals", "٤ وجبات"], ["5+ meals", "٥ أو أكثر"]] },
+  cook: { multi: 0, opts: [["I cook myself", "أطبخ بنفسي"], ["Family cooks", "الأهل يطبخون"], ["Mostly delivery / outside", "طلبات / خارج البيت"], ["Meal prep service", "خدمة تجهيز وجبات"]] },
+  sleepQ: { multi: 0, opts: [["Great", "ممتاز"], ["Okay", "مقبول"], ["Poor", "سيء"], ["Very poor", "سيء جداً"]] },
+  pastIssues: { multi: 1, opts: [["Never had a coach", "لم أتدرب مع كوتش قبل"], ["Generic copy-paste plan", "برنامج جاهز منسوخ"], ["Coach replied slowly", "رد بطيء من الكوتش"], ["Too strict, no flexibility", "صارم جداً بدون مرونة"], ["Food I couldn't eat", "أكل لا أستطيع تناوله"], ["Too expensive for the value", "غالي مقابل الخدمة"], ["No form checks", "لا يوجد تصحيح أداء"], ["Plan too hard to follow", "البرنامج صعب التنفيذ"], ["Lost motivation", "فقدت الحماس"], ["No results", "بدون نتائج"]] },
+  comms: { multi: 0, opts: [["WhatsApp", "واتساب"], ["Telegram", "تيليجرام"], ["Email", "إيميل"], ["Phone call", "مكالمة"]] }
+};
+
+const T = {
+  en: {
+    kicker: "Online Coaching · Client Intake",
+    heroTitle: "Before we build your plan, tell me everything.",
+    heroLead: "This is the most important 10 minutes of your program. The more honest and detailed you are — the food you hate, the pain you feel, what failed before — the more your plan will actually fit your life instead of fighting it.",
+    pillTime: "≈ 10 minutes", pillSave: "Saves as you type", pillPrivate: "Private — only Coach Mahmoud sees it",
+    s1: "Who you are", s2: "Your numbers", s3: "Your goal", s4: "Training", s5: "Health & medical", s6: "Food", s7: "Lifestyle", s8: "Coaching fit",
+    fName: "Full name", fAge: "Age", fPhone: "WhatsApp number", fEmail: "Email", fCity: "City", fJob: "Job", fGender: "Gender", fActivity: "Daily activity at work",
+    fHeight: "Height (cm)", fWeight: "Current weight (kg)", fTarget: "Target weight (kg)", fWaist: "Waist (cm)", fHip: "Hips (cm)", fChest: "Chest (cm)",
+    fWHistory: "Weight history — last 6 months", phWHistory: "e.g. I was 92kg in January, went down to 86, then back up to 90 during Ramadan.",
+    fGoal: "Main goal", fDeadline: "Deadline or event", phDeadline: "e.g. wedding in November", fBudgetTime: "Time you have per session", phSession: "e.g. 60 minutes",
+    fWhy: "Why does this matter to you right now?", phWhy: "The real reason — not the polite one.",
+    fAttempts: "What have you already tried?", phAttempts: "Diets, apps, other coaches — and what happened.",
+    fExp: "Training experience", fDays: "Days per week you can train", fEquip: "What you have access to",
+    fLoveEx: "Exercises you enjoy", fHateEx: "Exercises you hate", fProgram: "What are you doing right now?", phProgram: "Current split, cardio, classes, sports…",
+    healthNote: "Be complete here. This section decides what I am allowed to program for you.",
+    fInjuries: "Injuries or pain areas", fInjDetails: "Describe the injury / pain", phInj: "Which movements hurt, when it started, any diagnosis.",
+    fConditions: "Medical conditions", fMeds: "Medications you take", phMeds: "Name, dose, and how long — including anything from a doctor.",
+    fSurgery: "Past surgeries", fBlood: "Recent blood work?", phBlood: "Yes / No — and date",
+    fSmoking: "Smoking", fFemale: "For women — cycle, pregnancy or postpartum notes", phFemale: "Optional",
+    fDiet: "Diet style", fLikes: "Foods you like — I'll build around these", fDislikes: "Foods you dislike", fNeverEat: "Foods you will absolutely NOT eat",
+    phNeverEat: "Anything on this line will never appear in your plan.",
+    fAllergy: "Allergies & intolerances", fSupps: "Supplements you take", fMeals: "Meals per day you prefer", fCook: "Who prepares your food",
+    fTypicalDay: "A typical day of eating", phTypicalDay: "Breakfast:\nLunch:\nDinner:\nSnacks:\nDrinks:",
+    fWater: "Water per day", phWater: "e.g. 1.5 L", fCaffeine: "Coffee / energy drinks", phCaffeine: "e.g. 2 cups", fCravings: "Biggest craving",
+    fSleepH: "Sleep hours", phSleep: "e.g. 6.5", fSteps: "Steps per day", phSteps: "e.g. 5000", fSchedule: "Work schedule", phSchedule: "e.g. 9–6, or night shifts",
+    fSleepQ: "Sleep quality", fStress: "Stress level (1 calm — 10 overwhelmed)",
+    s8Note: "This is the part most coaches never ask. Tell me what went wrong before so I don't repeat it.",
+    fPastIssues: "What you didn't like in past coaching", fDisliked: "Tell me more — what frustrated you?", phDisliked: "Be blunt. It helps me.",
+    fNeed: "What do you need most from me?", phNeed: "Accountability, simple food, form checks, patience…",
+    fComms: "How you prefer to talk", fNotes: "Anything else I should know", phNotes: "Travel, exams, work pressure, family, budget…",
+    finePrint: "Your answers go straight to Coach Mahmoud Radwan. Nothing is shared with anyone else.",
+    submit: "Send to Coach Mahmoud", sending: "Sending…", saved: "Saved on this device",
+    thanksTitle: "Got it. Welcome to FORMA.", thanksBody: "Your file is with Coach Mahmoud. You'll hear back within 24 hours with the first version of your plan.",
+    download: "Download my answers", whatsapp: "Message the coach",
+    errName: "Please add your name and WhatsApp number.", errSend: "Could not send. Check your connection and try again — your answers are still saved here."
+  },
+  ar: {
+    kicker: "تدريب أونلاين · استبيان العميل",
+    heroTitle: "قبل أن نبني برنامجك، احكِ لي كل شيء.",
+    heroLead: "هذه أهم عشر دقائق في رحلتك. كلما كنت أكثر صراحة وتفصيلاً — الأكل الذي لا تحبه، الألم الذي تشعر به، ما فشل معك سابقاً — كلما جاء برنامجك مناسباً لحياتك فعلاً بدل أن يصطدم بها.",
+    pillTime: "حوالي ١٠ دقائق", pillSave: "يُحفظ تلقائياً أثناء الكتابة", pillPrivate: "خاص — الكوتش محمود فقط يراه",
+    s1: "بياناتك", s2: "أرقامك", s3: "هدفك", s4: "التدريب", s5: "الصحة والحالة الطبية", s6: "الطعام", s7: "نمط الحياة", s8: "توقعاتك من التدريب",
+    fName: "الاسم الكامل", fAge: "العمر", fPhone: "رقم الواتساب", fEmail: "الإيميل", fCity: "المدينة", fJob: "العمل", fGender: "الجنس", fActivity: "نشاطك اليومي في العمل",
+    fHeight: "الطول (سم)", fWeight: "الوزن الحالي (كجم)", fTarget: "الوزن المستهدف (كجم)", fWaist: "الوسط (سم)", fHip: "الأرداف (سم)", fChest: "الصدر (سم)",
+    fWHistory: "تاريخ الوزن — آخر ٦ أشهر", phWHistory: "مثال: كنت ٩٢ كجم في يناير، نزلت ٨٦، ثم عدت ٩٠ في رمضان.",
+    fGoal: "الهدف الأساسي", fDeadline: "موعد أو مناسبة", phDeadline: "مثال: فرح في نوفمبر", fBudgetTime: "الوقت المتاح للتمرين", phSession: "مثال: ٦٠ دقيقة",
+    fWhy: "لماذا هذا مهم لك الآن؟", phWhy: "السبب الحقيقي، وليس المجامل.",
+    fAttempts: "ماذا جربت من قبل؟", phAttempts: "أنظمة، تطبيقات، كوتشات آخرين — وما حدث.",
+    fExp: "خبرتك في التدريب", fDays: "عدد أيام التمرين أسبوعياً", fEquip: "المتاح لديك",
+    fLoveEx: "تمارين تستمتع بها", fHateEx: "تمارين تكرهها", fProgram: "ماذا تفعل حالياً؟", phProgram: "التقسيم الحالي، كارديو، حصص، رياضة…",
+    healthNote: "كن دقيقاً هنا. هذا القسم يحدد ما يمكنني وصفه لك.",
+    fInjuries: "الإصابات أو مواضع الألم", fInjDetails: "اوصف الإصابة / الألم", phInj: "أي حركة تؤلمك، متى بدأت، وهل هناك تشخيص.",
+    fConditions: "الحالات الطبية", fMeds: "الأدوية التي تتناولها", phMeds: "الاسم، الجرعة، والمدة — وأي شيء وصفه الطبيب.",
+    fSurgery: "عمليات سابقة", fBlood: "تحليل دم حديث؟", phBlood: "نعم / لا — والتاريخ",
+    fSmoking: "التدخين", fFemale: "للسيدات — الدورة، الحمل أو ما بعد الولادة", phFemale: "اختياري",
+    fDiet: "نمط الأكل", fLikes: "أكل تحبه — سأبني عليه", fDislikes: "أكل لا تحبه", fNeverEat: "أكل لن تتناوله إطلاقاً",
+    phNeverEat: "أي شيء تكتبه هنا لن يظهر في برنامجك أبداً.",
+    fAllergy: "الحساسية وعدم التحمل", fSupps: "المكملات التي تتناولها", fMeals: "عدد الوجبات المفضل يومياً", fCook: "من يحضر طعامك",
+    fTypicalDay: "يوم أكل عادي عندك", phTypicalDay: "الفطار:\nالغداء:\nالعشاء:\nسناكس:\nمشروبات:",
+    fWater: "الماء يومياً", phWater: "مثال: ١.٥ لتر", fCaffeine: "قهوة / مشروبات طاقة", phCaffeine: "مثال: كوبان", fCravings: "أكثر شيء تشتهيه",
+    fSleepH: "ساعات النوم", phSleep: "مثال: ٦.٥", fSteps: "عدد الخطوات يومياً", phSteps: "مثال: ٥٠٠٠", fSchedule: "مواعيد العمل", phSchedule: "مثال: ٩–٦ أو ورديات ليلية",
+    fSleepQ: "جودة النوم", fStress: "مستوى التوتر (١ هادئ — ١٠ مرهق جداً)",
+    s8Note: "هذا الجزء لا يسأل عنه معظم الكوتشات. أخبرني ما الذي أخفق سابقاً حتى لا أكرره.",
+    fPastIssues: "ما لم يعجبك في تدريب سابق", fDisliked: "احكِ أكثر — ما الذي أزعجك؟", phDisliked: "كن صريحاً تماماً، هذا يساعدني.",
+    fNeed: "ما أكثر شيء تحتاجه مني؟", phNeed: "متابعة، أكل بسيط، تصحيح أداء، صبر…",
+    fComms: "طريقة التواصل المفضلة", fNotes: "أي شيء آخر يجب أن أعرفه", phNotes: "سفر، امتحانات، ضغط عمل، عائلة، ميزانية…",
+    finePrint: "إجاباتك تُرسل مباشرة إلى الكوتش محمود رضوان. لا تُشارك مع أي شخص آخر.",
+    submit: "أرسل إلى الكوتش محمود", sending: "جاري الإرسال…", saved: "محفوظ على هذا الجهاز",
+    thanksTitle: "تم. أهلاً بك في FORMA.", thanksBody: "ملفك وصل إلى الكوتش محمود. ستحصل على أول نسخة من برنامجك خلال ٢٤ ساعة.",
+    download: "تحميل إجاباتي", whatsapp: "راسل الكوتش",
+    errName: "من فضلك أضف اسمك ورقم الواتساب.", errSend: "لم يتم الإرسال. تحقق من الإنترنت وحاول مرة أخرى — إجاباتك محفوظة هنا."
+  }
+};
+
+const LIME = "#D6FF3F", INK = "#F4F3F0", MUTE = "#8A8A96", CARD = "#15151A", FIELD = "#0E0E12", LINE = "rgba(255,255,255,.09)";
+const FIELDS = ["fullName","age","phone","email","city","job","height","weight","targetWeight","waist","hip","chest","weightHistory","deadline","sessionLength","why","pastAttempts","lovedExercises","hatedExercises","currentProgram","injuryDetails","medications","surgeries","bloodWork","femaleNotes","neverEat","typicalDay","water","caffeine","cravings","sleepHours","steps","workSchedule","stress","dislikedBefore","needFromCoach","notes"];
+
+class Component extends DCLogic {
+  state = { lang: "en", sel: {}, stress: 5, sending: false, sent: false, err: "", progress: 0 };
+  form = null;
+
+  componentDidMount() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("forma:draft") || "null");
+      if (saved) {
+        const sel = {};
+        Object.keys(saved.sel || {}).forEach((k) => {
+          sel[k] = (saved.sel[k] || []).filter((v) => typeof v === "number");
+        });
+        this.setState({ lang: saved.lang || "en", sel: sel, stress: saved.stress || 5 });
+        setTimeout(() => this.restore(saved.text || {}), 0);
+      } else {
+        const nav = (navigator.language || "").toLowerCase();
+        if (nav.indexOf("ar") === 0) this.setState({ lang: "ar" });
+      }
+    } catch (e) {}
+    document.addEventListener("input", this.onAnyInput, true);
+    this.tick = setInterval(() => this.persist(), 4000);
+  }
+  componentWillUnmount() {
+    document.removeEventListener("input", this.onAnyInput, true);
+    clearInterval(this.tick);
+  }
+
+  formRef = (el) => { this.form = el; };
+
+  restore(text) {
+    if (!this.form) return;
+    FIELDS.forEach((k) => {
+      const el = this.form.elements[k];
+      if (el && text[k] != null) el.value = text[k];
+    });
+    this.measure();
+  }
+
+  onAnyInput = () => { this.measure(); };
+
+  measure() {
+    if (!this.form) return;
+    let filled = 0;
+    FIELDS.forEach((k) => {
+      const el = this.form.elements[k];
+      if (el && String(el.value || "").trim() && k !== "stress") filled++;
+    });
+    const groups = Object.keys(G).length;
+    const chosen = Object.keys(this.state.sel).filter((k) => (this.state.sel[k] || []).length).length;
+    const p = Math.round(((filled + chosen) / (FIELDS.length - 1 + groups)) * 100);
+    if (p !== this.state.progress) this.setState({ progress: Math.min(100, p) });
+  }
+
+  collectText() {
+    const out = {};
+    if (!this.form) return out;
+    FIELDS.forEach((k) => {
+      const el = this.form.elements[k];
+      if (el) out[k] = el.value || "";
+    });
+    return out;
+  }
+
+  persist() {
+    try {
+      localStorage.setItem("forma:draft", JSON.stringify({ lang: this.state.lang, sel: this.state.sel, stress: this.state.stress, text: this.collectText() }));
+    } catch (e) {}
+  }
+
+  toggle(key, idx, multi) {
+    const cur = (this.state.sel[key] || []).slice();
+    let next;
+    if (!multi) next = cur[0] === idx ? [] : [idx];
+    else next = cur.indexOf(idx) > -1 ? cur.filter((x) => x !== idx) : cur.concat([idx]);
+    this.setState({ sel: Object.assign({}, this.state.sel, { [key]: next }) }, () => { this.measure(); this.persist(); });
+  }
+
+  payload() {
+    const t = this.collectText();
+    const ar = this.state.lang === "ar";
+    const sel = {};
+    Object.keys(G).forEach((k) => {
+      sel[k] = (this.state.sel[k] || [])
+        .map((i) => (G[k].opts[i] ? G[k].opts[i][ar ? 1 : 0] : ""))
+        .filter(Boolean).join(", ");
+    });
+    return Object.assign({ submittedAt: new Date().toISOString(), lang: this.state.lang, stress: String(this.state.stress) }, t, sel);
+  }
+
+  onSubmit = (e) => {
+    e.preventDefault();
+    const data = this.payload();
+    if (!data.fullName || !data.phone) { this.setState({ err: T[this.state.lang].errName }); return; }
+    this.persist();
+    this.last = data;
+    if (!API_URL) { this.setState({ sent: true, err: "" }); return; }
+    this.setState({ sending: true, err: "" });
+    fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(data) })
+      .then((r) => r.text())
+      .then(() => {
+        try { localStorage.removeItem("forma:draft"); } catch (er) {}
+        this.setState({ sending: false, sent: true });
+      })
+      .catch(() => this.setState({ sending: false, err: T[this.state.lang].errSend }));
+  };
+
+  downloadCopy = () => {
+    const data = this.last || this.payload();
+    const lines = Object.keys(data).map((k) => k + ": " + data[k]);
+    const blob = new Blob(["FORMA — " + (data.fullName || "client") + "\n\n" + lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "FORMA-" + (data.fullName || "client").replace(/\s+/g, "-") + ".txt";
+    a.click();
+  };
+
+  onStress = (e) => { this.setState({ stress: Number(e.target.value) }); };
+
+  chipStyle(on) {
+    return {
+      padding: "11px 16px", minHeight: "46px", borderRadius: "999px", cursor: "pointer",
+      border: on ? "1px solid " + LIME : "1px solid " + LINE,
+      background: on ? LIME : "transparent",
+      color: on ? "#0B0B0E" : "#C9C9D2",
+      font: (on ? "700 " : "500 ") + "14px/1.2 'DM Sans', sans-serif",
+      transition: "background .14s, color .14s, border-color .14s"
+    };
+  }
+
+  renderVals() {
+    const lang = this.state.lang, ar = lang === "ar", t = T[lang];
+    const font = ar ? "'Cairo', 'DM Sans', sans-serif" : "'DM Sans', sans-serif";
+    const g = {};
+    Object.keys(G).forEach((key) => {
+      g[key] = G[key].opts.map((pair, idx) => {
+        const on = (this.state.sel[key] || []).indexOf(idx) > -1;
+        return { label: ar ? pair[1] : pair[0], style: this.chipStyle(on), onClick: () => this.toggle(key, idx, !!G[key].multi) };
+      });
+    });
+
+    const inStyle = { width: "100%", padding: "14px 16px", background: FIELD, border: "1px solid " + LINE, borderRadius: "12px", color: INK, font: "400 16px/1.4 " + font, outline: "none", minHeight: "50px" };
+
+    return {
+      t: t, g: g, stress: this.state.stress,
+      formRef: this.formRef, onSubmit: this.onSubmit, onStress: this.onStress, downloadCopy: this.downloadCopy,
+      setEn: () => this.setState({ lang: "en" }, () => this.persist()),
+      setAr: () => this.setState({ lang: "ar" }, () => this.persist()),
+      pageStyle: { minHeight: "100vh", background: "#0B0B0E", color: INK, fontFamily: font, direction: ar ? "rtl" : "ltr", textAlign: ar ? "right" : "left" },
+      enBtnStyle: { padding: "7px 14px", borderRadius: "999px", border: "none", cursor: "pointer", background: lang === "en" ? LIME : "transparent", color: lang === "en" ? "#0B0B0E" : MUTE, font: "700 12px/1 'DM Sans', sans-serif", letterSpacing: ".08em" },
+      arBtnStyle: { padding: "7px 14px", borderRadius: "999px", border: "none", cursor: "pointer", background: ar ? LIME : "transparent", color: ar ? "#0B0B0E" : MUTE, font: "700 14px/1 'Cairo', sans-serif" },
+      barStyle: { height: "100%", width: this.state.progress + "%", background: LIME, transition: "width .35s ease" },
+      h1Style: { font: (ar ? "800 " : "400 ") + "clamp(38px, 6.4vw, 74px)/1.02 " + (ar ? "'Cairo', sans-serif" : "Anton, Impact, sans-serif"), letterSpacing: ar ? "0" : "-.01em", textTransform: ar ? "none" : "uppercase", margin: "0 0 22px", maxWidth: "17ch", color: INK, textWrap: "pretty" },
+      leadStyle: { font: "400 17px/1.7 " + font, color: MUTE, margin: 0, maxWidth: "62ch", textWrap: "pretty" },
+      pillStyle: { padding: "8px 14px", border: "1px solid " + LINE, borderRadius: "999px", font: "500 13px/1 " + font, color: "#9A9AA6" },
+      cardStyle: { background: CARD, border: "1px solid rgba(255,255,255,.07)", borderRadius: "22px", padding: "clamp(22px, 3.4vw, 40px)" },
+      cardAccentStyle: { background: CARD, border: "1px solid rgba(214,255,63,.32)", borderRadius: "22px", padding: "clamp(22px, 3.4vw, 40px)" },
+      secHeadStyle: { display: "flex", alignItems: "center", gap: "14px", marginBottom: "28px", paddingBottom: "18px", borderBottom: "1px solid " + LINE },
+      secNumStyle: { font: "400 15px/1 Anton, Impact, sans-serif", letterSpacing: ".1em", color: LIME },
+      h2Style: { font: (ar ? "800 22px" : "400 26px") + "/1.1 " + (ar ? "'Cairo', sans-serif" : "Anton, Impact, sans-serif"), letterSpacing: ar ? "0" : ".02em", textTransform: ar ? "none" : "uppercase", margin: 0, color: INK },
+      labStyle: { display: "block", font: "600 12px/1.4 " + font, letterSpacing: ar ? "0" : ".08em", textTransform: ar ? "none" : "uppercase", color: "#7E7E8A", marginBottom: "10px" },
+      labWarnStyle: { display: "block", font: "600 12px/1.4 " + font, letterSpacing: ar ? "0" : ".08em", textTransform: ar ? "none" : "uppercase", color: "#FF8A5B", marginBottom: "10px" },
+      inStyle: inStyle,
+      taStyle: Object.assign({}, inStyle, { resize: "vertical", lineHeight: "1.6" }),
+      chipRowStyle: { display: "flex", flexWrap: "wrap", gap: "10px" },
+      fieldGapStyle: { display: "block", marginTop: "26px" },
+      noteStyle: { font: "400 15px/1.6 " + font, color: "#9A9AA6", margin: "-8px 0 24px", maxWidth: "60ch" },
+      submitWrapStyle: { display: "grid", justifyItems: "center", gap: "14px", paddingTop: "26px" },
+      errStyle: { font: "500 14px/1.5 " + font, color: "#FF8A5B", minHeight: "20px", textAlign: "center" },
+      errMsg: this.state.err,
+      submitLabel: this.state.sending ? t.sending : t.submit,
+      submitStyle: { width: "100%", maxWidth: "460px", padding: "22px 32px", border: "none", borderRadius: "999px", background: LIME, color: "#0B0B0E", font: (ar ? "800 17px" : "700 17px") + "/1 " + font, letterSpacing: ar ? "0" : ".02em", cursor: this.state.sending ? "wait" : "pointer", opacity: this.state.sending ? .6 : 1 },
+      finePrintStyle: { font: "400 13px/1.6 " + font, color: "#63636E", textAlign: "center", maxWidth: "48ch", margin: 0 },
+      successOverlayStyle: { position: "fixed", inset: 0, zIndex: 60, display: this.state.sent ? "grid" : "none", placeItems: "center", padding: "24px", background: "rgba(11,11,14,.96)", backdropFilter: "blur(8px)" },
+      successCardStyle: { maxWidth: "560px", textAlign: "center", background: CARD, border: "1px solid rgba(214,255,63,.28)", borderRadius: "26px", padding: "clamp(30px, 5vw, 56px)", animation: "forma-rise .4s ease both" },
+      ghostBtnStyle: { display: "inline-block", padding: "14px 22px", borderRadius: "999px", border: "1px solid " + LINE, background: "transparent", color: INK, font: "600 14px/1 " + font, cursor: "pointer" }
+    };
+  }
+}
+</script>
+</body>
+</html>

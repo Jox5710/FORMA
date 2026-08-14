@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FORMA — Coach Dashboard</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0B0B0E; }
+  * { box-sizing: border-box; }
+  a { color: #D6FF3F; text-decoration: none; }
+  a:hover { color: #E9FF8A; }
+  input, button, textarea { font-family: inherit; }
+  ::placeholder { color: #55555F; }
+  input:focus { border-color: #D6FF3F !important; outline: none; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #26262E; border-radius: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  @media print { .no-print { display: none !important; } html, body { background: #fff } }
+</style>
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="120" fill="#0B0B0E"/><rect x="20" y="34" width="34" height="52" rx="6" fill="#D6FF3F"/><rect x="62" y="34" width="38" height="10" rx="5" fill="#3A3A44"/><rect x="62" y="52" width="38" height="10" rx="5" fill="#3A3A44"/><rect x="62" y="70" width="26" height="10" rx="5" fill="#3A3A44"/></svg>
+</template>
+</helmet>
+
+<div style="{{ pageStyle }}">
+
+  <div class="no-print" style="display: flex; align-items: center; gap: 18px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,.08); background: #0E0E12; position: sticky; top: 0; z-index: 30">
+    <div style="display: flex; align-items: baseline; gap: 10px">
+      <span style="font-family: Anton, Impact, sans-serif; font-size: 24px; letter-spacing: .14em; color: #D6FF3F; line-height: 1">FORMA</span>
+      <span style="font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A">Coach Console</span>
+    </div>
+    <div style="flex: 1"></div>
+    <span style="font: 500 13px/1 'DM Sans', sans-serif; color: #6E6E7A">{{ statusText }}</span>
+    <button type="button" onClick="{{ refresh }}" style="{{ ghostBtn }}">Refresh</button>
+    <button type="button" onClick="{{ openSettings }}" style="{{ ghostBtn }}">Settings</button>
+  </div>
+
+  <div style="{{ gateStyle }}">
+    <div style="{{ gateCardStyle }}">
+      <div style="font-family: Anton, Impact, sans-serif; font-size: 44px; line-height: 1; letter-spacing: .12em; color: #D6FF3F">FORMA</div>
+      <h1 style="font: 700 22px/1.3 'DM Sans', sans-serif; margin: 22px 0 10px; color: #F4F3F0">Connect your client sheet</h1>
+      <p style="font: 400 15px/1.65 'DM Sans', sans-serif; color: #8A8A96; margin: 0 0 26px">Paste the Web App URL and access code from your Google Apps Script deployment. Stored on this device only — never in the published page.</p>
+      <label style="display: block; margin-bottom: 16px"><span style="{{ labStyle }}">Web App URL</span><input value="{{ apiDraft }}" onChange="{{ onApi }}" placeholder="https://script.google.com/macros/s/.../exec" style="{{ inStyle }}" /></label>
+      <label style="display: block; margin-bottom: 24px"><span style="{{ labStyle }}">Access code</span><input value="{{ codeDraft }}" onChange="{{ onCode }}" placeholder="FORMA-2026" style="{{ inStyle }}" /></label>
+      <div style="{{ gateErrStyle }}">{{ error }}</div>
+      <button type="button" onClick="{{ connect }}" style="{{ primaryBtn }}">Connect</button>
+      <p style="font: 400 13px/1.6 'DM Sans', sans-serif; color: #63636E; margin: 20px 0 0; text-align: center"><a href="setup.html">Read the 5-minute setup guide</a></p>
+    </div>
+  </div>
+
+  <div style="{{ appStyle }}">
+
+    <div class="no-print" style="{{ listPaneStyle }}">
+      <div style="padding: 18px 18px 12px; border-bottom: 1px solid rgba(255,255,255,.07)">
+        <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search name, goal, city…" style="{{ searchStyle }}" />
+        <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 14px">
+          <span style="font-family: Anton, Impact, sans-serif; font-size: 26px; color: #D6FF3F; line-height: 1">{{ countText }}</span>
+          <span style="font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #6E6E7A">clients</span>
+        </div>
+      </div>
+      <div style="overflow-y: auto; flex: 1">
+        <sc-for list="{{ rows }}" as="c" hint-placeholder-count="5">
+          <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">
+            <span style="font: 700 15px/1.3 'DM Sans', sans-serif; color: #F4F3F0">{{ c.name }}</span>
+            <span style="font: 500 12px/1.4 'DM Sans', sans-serif; color: #D6FF3F">{{ c.goal }}</span>
+            <span style="font: 400 12px/1.4 'DM Sans', sans-serif; color: #6E6E7A">{{ c.meta }}</span>
+          </button>
+        </sc-for>
+        <div style="{{ emptyListStyle }}">No clients match that search.</div>
+      </div>
+      <div style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.07); display: flex; gap: 10px">
+        <button type="button" onClick="{{ exportCsv }}" style="{{ ghostBtn }}">Export CSV</button>
+        <button type="button" onClick="{{ printPage }}" style="{{ ghostBtn }}">Print</button>
+      </div>
+    </div>
+
+    <div style="{{ detailPaneStyle }}">
+      <div style="{{ noSelStyle }}">
+        <p style="font: 400 16px/1.6 'DM Sans', sans-serif; color: #5A5A66; max-width: 34ch; text-align: center">Select a client to read their intake file.</p>
+      </div>
+
+      <div style="{{ detailStyle }}">
+        <div style="max-width: 900px; margin: 0 auto; padding: clamp(24px, 4vw, 54px)">
+          <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid rgba(255,255,255,.1)">
+            <div style="flex: 1; min-width: 220px">
+              <div style="font: 600 11px/1 'DM Sans', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #D6FF3F; margin-bottom: 14px">{{ sel.received }}</div>
+              <h1 style="font: 400 clamp(32px, 4.6vw, 54px)/1 Anton, Impact, sans-serif; text-transform: uppercase; letter-spacing: .01em; margin: 0; color: #F4F3F0">{{ sel.name }}</h1>
+              <p style="font: 400 15px/1.6 'DM Sans', sans-serif; color: #8A8A96; margin: 12px 0 0">{{ sel.subline }}</p>
+            </div>
+            <div class="no-print" style="display: flex; gap: 10px">
+              <a href="{{ sel.waLink }}" target="_blank" rel="noreferrer" style="{{ ghostBtn }}">WhatsApp</a>
+              <button type="button" onClick="{{ copyFile }}" style="{{ ghostBtn }}">{{ copyLabel }}</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin: 26px 0 34px">
+            <sc-for list="{{ sel.stats }}" as="s" hint-placeholder-count="5">
+              <div style="background: #15151A; border: 1px solid rgba(255,255,255,.07); border-radius: 16px; padding: 18px">
+                <div style="font: 600 10px/1 'DM Sans', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #6E6E7A; margin-bottom: 10px">{{ s.label }}</div>
+                <div style="font-family: Anton, Impact, sans-serif; font-size: 27px; line-height: 1; color: #F4F3F0">{{ s.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-for list="{{ sel.flags }}" as="f" hint-placeholder-count="0">
+            <div style="display: flex; gap: 14px; background: rgba(255,138,91,.08); border: 1px solid rgba(255,138,91,.34); border-radius: 16px; padding: 18px 20px; margin-bottom: 14px">
+              <span style="font: 700 11px/1.6 'DM Sans', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #FF8A5B; white-space: nowrap">{{ f.label }}</span>
+              <span style="font: 400 15px/1.6 'DM Sans', sans-serif; color: #EDD8CC">{{ f.value }}</span>
+            </div>
+          </sc-for>
+
+          <div style="display: grid; gap: 18px; margin-top: 24px">
+            <sc-for list="{{ sel.groups }}" as="grp" hint-placeholder-count="6">
+              <section style="background: #131318; border: 1px solid rgba(255,255,255,.07); border-radius: 20px; padding: clamp(20px, 3vw, 32px)">
+                <h2 style="font: 400 20px/1 Anton, Impact, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #F4F3F0; margin: 0 0 22px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.08)">{{ grp.title }}</h2>
+                <div style="display: grid; gap: 18px">
+                  <sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="4">
+                    <div style="display: grid; grid-template-columns: minmax(140px, 210px) 1fr; gap: 20px; align-items: start">
+                      <span style="font: 600 12px/1.5 'DM Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #6E6E7A">{{ it.label }}</span>
+                      <span style="{{ it.valueStyle }}">{{ it.value }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+const LIME = "#D6FF3F", INK = "#F4F3F0", MUTE = "#8A8A96", LINE = "rgba(255,255,255,.09)";
+
+const GROUPS = [
+  { title: "Contact", keys: [["phone", "WhatsApp"], ["email", "Email"], ["city", "City"], ["age", "Age"], ["gender", "Gender"], ["job", "Job"], ["activity", "Work activity"]] },
+  { title: "Body", keys: [["height", "Height (cm)"], ["weight", "Current weight"], ["targetWeight", "Target weight"], ["waist", "Waist"], ["hip", "Hips"], ["chest", "Chest"], ["weightHistory", "Weight history"]] },
+  { title: "Goal", keys: [["goal", "Main goal"], ["deadline", "Deadline"], ["why", "Why now"], ["pastAttempts", "Already tried"]] },
+  { title: "Training", keys: [["exp", "Experience"], ["days", "Days / week"], ["sessionLength", "Session length"], ["equip", "Equipment"], ["lovedExercises", "Enjoys"], ["hatedExercises", "Hates"], ["currentProgram", "Doing now"]] },
+  { title: "Health", keys: [["injuries", "Injuries"], ["injuryDetails", "Injury detail"], ["conditions", "Conditions"], ["medications", "Medications"], ["surgeries", "Surgeries"], ["bloodWork", "Blood work"], ["smoking", "Smoking"], ["femaleNotes", "Cycle / pregnancy"]] },
+  { title: "Food", keys: [["diet", "Diet style"], ["likes", "Likes"], ["dislikes", "Dislikes"], ["neverEat", "Will never eat"], ["allergy", "Allergies"], ["supps", "Supplements"], ["meals", "Meals / day"], ["cook", "Who cooks"], ["typicalDay", "Typical day"], ["water", "Water"], ["caffeine", "Caffeine"], ["cravings", "Cravings"]] },
+  { title: "Lifestyle", keys: [["sleepHours", "Sleep hours"], ["sleepQ", "Sleep quality"], ["stress", "Stress /10"], ["steps", "Steps"], ["workSchedule", "Schedule"]] },
+  { title: "Coaching fit", keys: [["pastIssues", "Past frustrations"], ["dislikedBefore", "In their words"], ["needFromCoach", "Needs from me"], ["comms", "Contact via"], ["notes", "Other notes"]] }
+];
+const FLAG_KEYS = [["medications", "Medication"], ["conditions", "Medical"], ["injuries", "Injury"], ["allergy", "Allergy"], ["neverEat", "Never eat"]];
+const NEG = ["", "none", "no", "لا يوجد", "لا", "n/a", "-"];
+
+const DEMO = [{
+  submittedAt: new Date(Date.now() - 3600e3).toISOString(), fullName: "Sample Client", phone: "+201000000000", city: "Cairo", age: "31", gender: "Male",
+  job: "Accountant", activity: "Desk job, mostly sitting", height: "178", weight: "94", targetWeight: "82", waist: "104",
+  goal: "Lose fat", deadline: "Wedding in November", why: "I avoid photos and my back hurts when I sit all day.",
+  exp: "Under 1 year", days: "4 days", equip: "Small local gym, Dumbbells only", hatedExercises: "Burpees",
+  injuries: "Lower back", injuryDetails: "Pain on deadlifts since 2023, disc bulge on MRI.", conditions: "High blood pressure",
+  medications: "Concor 5mg daily", allergy: "Lactose", neverEat: "Liver, mushrooms", likes: "Chicken, Rice, Eggs, Fruit",
+  dislikes: "Fish, Cheese", meals: "3 meals", cook: "Family cooks", typicalDay: "Breakfast: skipped\nLunch: rice + chicken\nDinner: sandwich",
+  water: "1 L", caffeine: "3 cups", sleepHours: "5.5", sleepQ: "Poor", stress: "8", steps: "3000",
+  pastIssues: "Generic copy-paste plan, Coach replied slowly", dislikedBefore: "Last coach sent the same PDF to everyone and never answered on weekends.",
+  needFromCoach: "Simple food I can eat with my family, and someone who checks on me.", comms: "WhatsApp", lang: "en", _demo: true
+}];
+
+class Component extends DCLogic {
+  state = { api: "", code: "", apiDraft: "", codeDraft: "", clients: [], loading: false, error: "", selIdx: -1, query: "", copied: false, connected: false, demo: false };
+
+  componentDidMount() {
+    let api = "", code = "";
+    try { api = localStorage.getItem("forma:api") || ""; code = localStorage.getItem("forma:code") || ""; } catch (e) {}
+    this.setState({ api: api, code: code, apiDraft: api, codeDraft: code });
+    if (api) this.load(api, code);
+    else this.setState({ clients: DEMO, demo: true, connected: false });
+  }
+
+  load(api, code) {
+    if (!api) return;
+    this.setState({ loading: true, error: "" });
+    const cb = "formaCb" + Date.now();
+    const done = (data) => {
+      delete window[cb];
+      if (s.parentNode) s.parentNode.removeChild(s);
+      clearTimeout(timer);
+      if (!data || data.ok === false) {
+        this.setState({ loading: false, error: (data && data.error) || "Wrong access code." });
+        return;
+      }
+      const list = (data.clients || []).slice().reverse();
+      this.setState({ clients: list, loading: false, connected: true, demo: false, error: "", selIdx: list.length ? 0 : -1 });
+    };
+    window[cb] = done;
+    const s = document.createElement("script");
+    s.src = api + (api.indexOf("?") > -1 ? "&" : "?") + "code=" + encodeURIComponent(code) + "&callback=" + cb;
+    s.onerror = () => { delete window[cb]; this.setState({ loading: false, error: "Could not reach that URL. Check the deployment is set to “Anyone”." }); };
+    const timer = setTimeout(() => { if (window[cb]) { delete window[cb]; this.setState({ loading: false, error: "Timed out. Re-deploy the script and paste the new URL." }); } }, 12000);
+    document.body.appendChild(s);
+  }
+
+  connect = () => {
+    const api = this.state.apiDraft.trim(), code = this.state.codeDraft.trim();
+    if (!api) { this.setState({ error: "Paste your Web App URL first." }); return; }
+    try { localStorage.setItem("forma:api", api); localStorage.setItem("forma:code", code); } catch (e) {}
+    this.setState({ api: api, code: code });
+    this.load(api, code);
+  };
+  refresh = () => { if (this.state.api) this.load(this.state.api, this.state.code); else this.setState({ connected: false }); };
+  openSettings = () => this.setState({ connected: false, error: "" });
+  onApi = (e) => this.setState({ apiDraft: e.target.value });
+  onCode = (e) => this.setState({ codeDraft: e.target.value });
+  onQuery = (e) => this.setState({ query: e.target.value, selIdx: -1 });
+  printPage = () => window.print();
+
+  filtered() {
+    const q = this.state.query.trim().toLowerCase();
+    const list = this.state.clients.map((c, i) => ({ c: c, i: i }));
+    if (!q) return list;
+    return list.filter((x) => JSON.stringify(x.c).toLowerCase().indexOf(q) > -1);
+  }
+
+  fileText(c) {
+    const lines = ["FORMA — " + (c.fullName || "client"), "Received: " + this.when(c.submittedAt), ""];
+    GROUPS.forEach((g) => {
+      lines.push("— " + g.title.toUpperCase() + " —");
+      g.keys.forEach((k) => { if (c[k[0]]) lines.push(k[1] + ": " + c[k[0]]); });
+      lines.push("");
+    });
+    return lines.join("\n");
+  }
+
+  copyFile = () => {
+    const c = this.current();
+    if (!c) return;
+    const txt = this.fileText(c);
+    const fin = () => { this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 1800); };
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(fin, fin);
+    else fin();
+  };
+
+  exportCsv = () => {
+    const keys = GROUPS.reduce((a, g) => a.concat(g.keys.map((k) => k[0])), ["submittedAt", "fullName"]);
+    const esc = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+    const rows = [keys.join(",")].concat(this.state.clients.map((c) => keys.map((k) => esc(c[k])).join(",")));
+    const blob = new Blob(["\ufeff" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "FORMA-clients.csv";
+    a.click();
+  };
+
+  when(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d)) return String(iso);
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) + " · " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  }
+
+  current() {
+    const f = this.filtered();
+    if (this.state.selIdx < 0) return null;
+    const hit = f.filter((x) => x.i === this.state.selIdx)[0];
+    return hit ? hit.c : null;
+  }
+
+  renderVals() {
+    const st = this.state;
+    const list = this.filtered();
+    const c = this.current();
+    const has = (v) => v && NEG.indexOf(String(v).trim().toLowerCase()) === -1;
+
+    const rows = list.map((x) => {
+      const on = x.i === st.selIdx;
+      return {
+        name: (x.c.fullName || "Unnamed") + (x.c._demo ? "  · demo" : ""),
+        goal: x.c.goal || "—",
+        meta: [x.c.city, x.c.weight ? x.c.weight + " kg" : "", this.when(x.c.submittedAt)].filter(Boolean).join(" · "),
+        onClick: () => this.setState({ selIdx: x.i, copied: false }),
+        style: {
+          display: "grid", gap: "5px", width: "100%", textAlign: "start", cursor: "pointer",
+          padding: "16px 18px", border: "none", borderBottom: "1px solid rgba(255,255,255,.06)",
+          borderInlineStart: on ? "3px solid " + LIME : "3px solid transparent",
+          background: on ? "#191920" : "transparent"
+        }
+      };
+    });
+
+    let sel = { name: "", subline: "", received: "", stats: [], flags: [], groups: [], waLink: "#" };
+    if (c) {
+      const drop = c.weight && c.targetWeight ? (Number(c.weight) - Number(c.targetWeight)).toFixed(1) : "";
+      sel = {
+        name: c.fullName || "Unnamed",
+        received: "Received " + this.when(c.submittedAt),
+        subline: [c.age ? c.age + " yrs" : "", c.gender, c.city, c.job, c.comms ? "prefers " + c.comms : ""].filter(Boolean).join(" · "),
+        waLink: c.phone ? "https://wa.me/" + String(c.phone).replace(/[^0-9]/g, "") : "#",
+        stats: [
+          { label: "Weight", value: c.weight ? c.weight + " kg" : "—" },
+          { label: "Target", value: c.targetWeight ? c.targetWeight + " kg" : "—" },
+          { label: "To lose", value: drop ? drop + " kg" : "—" },
+          { label: "Days / wk", value: (c.days || "—").replace(/\s*days?/i, "") },
+          { label: "Sleep", value: c.sleepHours ? c.sleepHours + " h" : "—" },
+          { label: "Stress", value: c.stress ? c.stress + "/10" : "—" }
+        ],
+        flags: FLAG_KEYS.filter((k) => has(c[k[0]])).map((k) => ({ label: k[1], value: c[k[0]] })),
+        groups: GROUPS.map((g) => ({
+          title: g.title,
+          items: g.keys.filter((k) => String(c[k[0]] || "").trim()).map((k) => ({
+            label: k[1],
+            value: c[k[0]],
+            valueStyle: { font: "400 15px/1.7 'DM Sans', 'Cairo', sans-serif", color: INK, whiteSpace: "pre-wrap", textWrap: "pretty" }
+          }))
+        })).filter((g) => g.items.length)
+      };
+    }
+
+    const inStyle = { width: "100%", padding: "14px 16px", background: "#0E0E12", border: "1px solid " + LINE, borderRadius: "12px", color: INK, font: "400 15px/1.4 'DM Sans', sans-serif" };
+    const gateOpen = !st.connected;
+
+    return {
+      rows: rows, sel: sel, query: st.query, apiDraft: st.apiDraft, codeDraft: st.codeDraft, error: st.error,
+      countText: String(list.length),
+      statusText: st.loading ? "Loading…" : st.demo ? "Demo data — not connected" : st.connected ? "Live · Google Sheet" : "",
+      copyLabel: st.copied ? "Copied ✓" : "Copy file",
+      connect: this.connect, refresh: this.refresh, openSettings: this.openSettings,
+      onApi: this.onApi, onCode: this.onCode, onQuery: this.onQuery,
+      copyFile: this.copyFile, exportCsv: this.exportCsv, printPage: this.printPage,
+      pageStyle: { minHeight: "100vh", background: "#0B0B0E", color: INK, fontFamily: "'DM Sans', sans-serif" },
+      gateStyle: { position: "fixed", inset: 0, zIndex: 50, display: gateOpen ? "grid" : "none", placeItems: "center", padding: "24px", background: "rgba(11,11,14,.95)", backdropFilter: "blur(10px)", overflowY: "auto" },
+      gateCardStyle: { width: "100%", maxWidth: "520px", background: "#15151A", border: "1px solid rgba(255,255,255,.09)", borderRadius: "24px", padding: "clamp(26px, 4vw, 44px)" },
+      gateErrStyle: { font: "500 14px/1.5 'DM Sans', sans-serif", color: "#FF8A5B", minHeight: "22px", marginBottom: "6px" },
+      appStyle: { display: "grid", gridTemplateColumns: "minmax(260px, 340px) 1fr", height: "calc(100vh - 65px)" },
+      listPaneStyle: { display: "flex", flexDirection: "column", borderInlineEnd: "1px solid rgba(255,255,255,.08)", background: "#0E0E12", minHeight: 0 },
+      detailPaneStyle: { overflowY: "auto", minHeight: 0 },
+      noSelStyle: { display: c ? "none" : "grid", placeItems: "center", height: "100%", padding: "40px" },
+      detailStyle: { display: c ? "block" : "none" },
+      emptyListStyle: { display: rows.length ? "none" : "block", padding: "26px 18px", font: "400 14px/1.6 'DM Sans', sans-serif", color: "#5A5A66" },
+      labStyle: { display: "block", font: "600 11px/1.4 'DM Sans', sans-serif", letterSpacing: ".12em", textTransform: "uppercase", color: "#7E7E8A", marginBottom: "9px" },
+      inStyle: inStyle,
+      searchStyle: Object.assign({}, inStyle, { padding: "12px 14px", borderRadius: "10px" }),
+      ghostBtn: { display: "inline-block", padding: "10px 16px", borderRadius: "999px", border: "1px solid " + LINE, background: "transparent", color: INK, font: "600 13px/1 'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" },
+      primaryBtn: { width: "100%", padding: "18px 24px", border: "none", borderRadius: "999px", background: LIME, color: "#0B0B0E", font: "700 16px/1 'DM Sans', sans-serif", cursor: "pointer" }
+    };
+  }
+}
+</script>
+</body>
+</html>
