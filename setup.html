@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="script" href="./vendor/react.production.min.js">
+<link rel="preload" as="script" href="./vendor/react-dom.production.min.js">
+<script>window.__resources={"https://unpkg.com/react@18.3.1/umd/react.production.min.js":"./vendor/react.production.min.js","https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js":"./vendor/react-dom.production.min.js"};</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -17,7 +21,10 @@
   * { box-sizing: border-box; }
   a { color: #D6FF3F; }
   a:hover { color: #E9FF8A; }
-  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .92em; background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 6px; padding: 2px 7px; color: #D6FF3F }
+  code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .92em; background: #1B1B22; border: 1px solid rgba(255,255,255,.08); border-radius: 6px; padding: 2px 7px; color: #D6FF3F; overflow-wrap: anywhere }
+  @media (max-width: 680px) {
+    .setup-wrap { padding: 44px 16px 72px !important; }
+  }
 </style>
 <template id="__bundler_thumbnail">
   <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="120" fill="#0B0B0E"/><circle cx="60" cy="60" r="26" fill="none" stroke="#D6FF3F" stroke-width="8"/><rect x="56" y="16" width="8" height="18" fill="#D6FF3F"/><rect x="56" y="86" width="8" height="18" fill="#D6FF3F"/></svg>
@@ -25,7 +32,7 @@
 </helmet>
 
 <div style="min-height: 100vh; background: #0B0B0E; color: #F4F3F0; font-family: 'DM Sans', sans-serif">
-  <div style="max-width: 820px; margin: 0 auto; padding: 72px 24px 120px">
+  <div class="setup-wrap" style="max-width: 820px; margin: 0 auto; padding: 72px 24px 120px">
 
     <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 44px">
       <span style="font-family: Anton, Impact, sans-serif; font-size: 26px; letter-spacing: .14em; color: #D6FF3F; line-height: 1">FORMA</span>
@@ -66,13 +73,14 @@
 
       <section style="{{ card }}">
         <div style="{{ head }}"><span style="{{ num }}">04</span><h2 style="{{ h2 }}">Connect the two pages</h2></div>
-        <p style="{{ p }}"><strong style="color:#F4F3F0">Client form:</strong> open <code>index.html</code> in any text editor, find <code>const API_URL = ""</code> near the top, and paste your <code>/exec</code> URL between the quotes.</p>
-        <p style="{{ p }}"><strong style="color:#F4F3F0">Dashboard:</strong> nothing to edit. Open it, paste the same URL plus your access code once — it remembers on your device and never stores them in the published files.</p>
+        <p style="{{ p }}"><strong style="color:#F4F3F0">Client form:</strong> open <code>index.html</code> in any text editor, find <code>const API_URL = "…"</code> near the top of the script, and paste your <code>/exec</code> URL between the quotes.</p>
+        <p style="{{ p }}"><strong style="color:#F4F3F0">Dashboard:</strong> open <code>dashboard.html</code> and paste the same <code>/exec</code> URL into its own <code>const API_URL = "…"</code> line. That is the only edit — the console then asks you for nothing but the access code, which stays on your device and never appears in the published files.</p>
+        <p style="{{ p }}">Optional: in <code>index.html</code> you can also set <code>const COACH_WHATSAPP = "+20…"</code> so the thank-you screen offers a direct message button.</p>
       </section>
 
       <section style="{{ card }}">
         <div style="{{ head }}"><span style="{{ num }}">05</span><h2 style="{{ h2 }}">Publish on GitHub</h2></div>
-        <p style="{{ p }}">Create a repository, upload <code>index.html</code> and <code>dashboard.html</code>, then <strong style="color:#F4F3F0">Settings → Pages → Branch: main → Save</strong>.</p>
+        <p style="{{ p }}">Create a repository and upload every file — <code>index.html</code>, <code>dashboard.html</code>, <code>setup.html</code>, <code>support.js</code> and the <code>vendor</code> folder — then <strong style="color:#F4F3F0">Settings → Pages → Branch: main → Save</strong>. The <code>vendor</code> folder holds the two React files the pages used to fetch from a CDN; keeping them alongside the site is what makes it load fast on mobile data.</p>
         <div style="display: grid; gap: 12px; margin-top: 20px">
           <div style="{{ kv }}"><span style="{{ kvK }}">Send clients</span><span style="{{ kvV }}">yourname.github.io/forma/</span></div>
           <div style="{{ kv }}"><span style="{{ kvK }}">Keep for yourself</span><span style="{{ kvV }}">yourname.github.io/forma/dashboard.html</span></div>
@@ -82,7 +90,8 @@
 
       <section style="{{ cardAccent }}">
         <div style="{{ head }}"><span style="{{ num }}">06</span><h2 style="{{ h2 }}">Good to know</h2></div>
-        <p style="{{ p }}">Drafts save in the client's browser as they type, so a lost connection never loses their answers.</p>
+        <p style="{{ p }}">Drafts save in the client's browser as they type, so a lost connection never loses their answers. If they hit Send with no internet, the file is queued and goes out by itself when they reconnect.</p>
+        <p style="{{ p }}">Every submission carries a <code>submissionId</code>. The script above uses it to ignore a repeat of the same file, so a client tapping Send twice cannot create two rows.</p>
         <p style="{{ p }}">New questions you add to the form appear automatically as new columns in the sheet — no script changes needed.</p>
         <p style="{{ p }}">Google's free quota is far above a coaching business's volume: roughly 20,000 submissions a day.</p>
         <p style="{{ p }}">Progress photos are intentionally not in the form — ask for those on WhatsApp. File uploads would need extra Drive permissions and slow the form down badly on mobile data.</p>
@@ -97,10 +106,16 @@ const CODE = [
   "",
   "const SHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';",
   "const ACCESS_CODE = 'FORMA-2026';   // invent your own, keep it private",
+  "const MAX_ROWS = 500;               // how many recent clients the console loads",
   "",
   "function sheet_() {",
   "  const ss = SpreadsheetApp.openById(SHEET_ID);",
   "  return ss.getSheetByName('Clients') || ss.insertSheet('Clients');",
+  "}",
+  "",
+  "function json_(o) {",
+  "  return ContentService.createTextOutput(JSON.stringify(o))",
+  "    .setMimeType(ContentService.MimeType.JSON);",
   "}",
   "",
   "function doPost(e) {",
@@ -114,9 +129,24 @@ const CODE = [
   "    Object.keys(obj).forEach(function (k) {",
   "      if (head.indexOf(k) === -1) { head.push(k); sh.getRange(1, head.length).setValue(k); }",
   "    });",
+  "",
+  "    // the form gives every file a submissionId, so a retry or a double tap",
+  "    // can never write the same client twice",
+  "    const idCol = head.indexOf('submissionId') + 1;",
+  "    const rows = sh.getLastRow();",
+  "    if (idCol > 0 && obj.submissionId && rows > 1) {",
+  "      const seen = sh.getRange(2, idCol, rows - 1, 1).getValues();",
+  "      for (var i = 0; i < seen.length; i++) {",
+  "        if (String(seen[i][0]) === String(obj.submissionId)) {",
+  "          return json_({ ok: true, duplicate: true });",
+  "        }",
+  "      }",
+  "    }",
+  "",
   "    sh.appendRow(head.map(function (h) { return obj[h] == null ? '' : obj[h]; }));",
-  "    return ContentService.createTextOutput(JSON.stringify({ ok: true }))",
-  "      .setMimeType(ContentService.MimeType.JSON);",
+  "    return json_({ ok: true });",
+  "  } catch (err) {",
+  "    return json_({ ok: false, error: String(err) });",
   "  } finally {",
   "    lock.releaseLock();",
   "  }",
@@ -129,15 +159,16 @@ const CODE = [
   "      return ContentService.createTextOutput(p.callback + '(' + JSON.stringify(o) + ')')",
   "        .setMimeType(ContentService.MimeType.JAVASCRIPT);",
   "    }",
-  "    return ContentService.createTextOutput(JSON.stringify(o))",
-  "      .setMimeType(ContentService.MimeType.JSON);",
+  "    return json_(o);",
   "  }",
   "  if (String(p.code) !== ACCESS_CODE) return out({ ok: false, error: 'Wrong access code.' });",
   "  const sh = sheet_();",
   "  const n = sh.getLastRow();",
-  "  if (n < 2) return out({ ok: true, clients: [] });",
-  "  const values = sh.getRange(1, 1, n, sh.getLastColumn()).getValues();",
-  "  const head = values.shift();",
+  "  if (n < 2) return out({ ok: true, clients: [], total: 0 });",
+  "  const cols = sh.getLastColumn();",
+  "  const head = sh.getRange(1, 1, 1, cols).getValues()[0];",
+  "  const start = Math.max(2, n - MAX_ROWS + 1);",
+  "  const values = sh.getRange(start, 1, n - start + 1, cols).getValues();",
   "  const clients = values.map(function (r) {",
   "    const o = {};",
   "    head.forEach(function (h, i) {",
@@ -146,7 +177,7 @@ const CODE = [
   "    });",
   "    return o;",
   "  });",
-  "  return out({ ok: true, clients: clients });",
+  "  return out({ ok: true, clients: clients, total: n - 1 });",
   "}"
 ].join("\n");
 

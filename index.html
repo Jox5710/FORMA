@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="script" href="./vendor/react.production.min.js">
+<link rel="preload" as="script" href="./vendor/react-dom.production.min.js">
+<script>window.__resources={"https://unpkg.com/react@18.3.1/umd/react.production.min.js":"./vendor/react.production.min.js","https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js":"./vendor/react-dom.production.min.js"};</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -23,6 +27,17 @@
   input:focus, textarea:focus, select:focus { border-color: #D6FF3F !important; }
   @keyframes forma-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
   @media print { .no-print { display: none !important; } }
+  @media (max-width: 680px) {
+    .forma-wrap { padding-left: 16px !important; padding-right: 16px !important; padding-bottom: 72px !important; }
+    .forma-hd { padding: 12px 16px !important; gap: 12px !important; }
+    .forma-hero { padding: 44px 0 34px !important; }
+  }
+  @media (max-width: 380px) {
+    .forma-wrap { padding-left: 12px !important; padding-right: 12px !important; }
+  }
+  @media (max-width: 430px) {
+    .forma-coach { display: none !important; }
+  }
 </style>
 <template id="__bundler_thumbnail">
   <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="120" fill="#0B0B0E"/><text x="60" y="72" font-family="Anton, Impact, sans-serif" font-size="34" fill="#D6FF3F" text-anchor="middle">FORMA</text></svg>
@@ -32,10 +47,10 @@
 <div style="{{ pageStyle }}">
 
   <div class="no-print" style="position: sticky; top: 0; z-index: 20; background: rgba(11,11,14,.86); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.08)">
-    <div style="max-width: 980px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 20px">
+    <div class="forma-hd" style="max-width: 980px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 20px">
       <div style="display: flex; align-items: baseline; gap: 10px; flex: 1; min-width: 0">
         <span style="font-family: Anton, Impact, sans-serif; font-size: 26px; letter-spacing: .14em; color: #D6FF3F; line-height: 1">FORMA</span>
-        <span style="font: 500 12px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A; white-space: nowrap">Mahmoud Radwan</span>
+        <span class="forma-coach" style="font: 500 12px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Mahmoud Radwan</span>
       </div>
       <div style="display: flex; gap: 4px; background: #15151A; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; padding: 4px">
         <button type="button" onClick="{{ setEn }}" style="{{ enBtnStyle }}">EN</button>
@@ -47,9 +62,9 @@
     </div>
   </div>
 
-  <div style="max-width: 980px; margin: 0 auto; padding: 0 24px 120px">
+  <div class="forma-wrap" style="max-width: 980px; margin: 0 auto; padding: 0 24px 120px">
 
-    <div style="padding: 72px 0 56px; border-bottom: 1px solid rgba(255,255,255,.08)">
+    <div class="forma-hero" style="padding: 72px 0 56px; border-bottom: 1px solid rgba(255,255,255,.08)">
       <div style="font: 600 12px/1 'DM Sans', sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #D6FF3F; margin-bottom: 22px">{{ t.kicker }}</div>
       <h1 style="{{ h1Style }}">{{ t.heroTitle }}</h1>
       <p style="{{ leadStyle }}">{{ t.heroLead }}</p>
@@ -65,204 +80,221 @@
       <section style="{{ cardStyle }}">
         <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">01</span><h2 style="{{ h2Style }}">{{ t.s1 }}</h2></div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px">
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fName }}</span><input name="fullName" required="" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fAge }}</span><input name="age" type="number" min="12" max="90" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fPhone }}</span><input name="phone" required="" placeholder="+20 1XX XXX XXXX" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fEmail }}</span><input name="email" type="email" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fCity }}</span><input name="city" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fJob }}</span><input name="job" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.fullName.lb }}</span><input name="fullName" autocomplete="name" style="{{ f.fullName.st }}" /><span style="{{ f.fullName.es }}">{{ f.fullName.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.age.lb }}</span><input name="age" type="text" inputmode="numeric" style="{{ f.age.st }}" /><span style="{{ f.age.es }}">{{ f.age.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.phone.lb }}</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+20 1XX XXX XXXX" style="{{ f.phone.st }}" /><span style="{{ f.phone.es }}">{{ f.phone.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.email.lb }}</span><input name="email" autocomplete="email" type="email" inputmode="email" style="{{ f.email.st }}" /><span style="{{ f.email.es }}">{{ f.email.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.city.lb }}</span><input name="city" autocomplete="address-level2" style="{{ f.city.st }}" /><span style="{{ f.city.es }}">{{ f.city.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.job.lb }}</span><input name="job" autocomplete="organization-title" style="{{ f.job.st }}" /><span style="{{ f.job.es }}">{{ f.job.er }}</span></label>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fGender }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.gender.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="gender">
             <sc-for list="{{ g.gender }}" as="c" hint-placeholder-count="2">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.gender.es }}">{{ gv.gender.er }}</span>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fActivity }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.activity.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="activity">
             <sc-for list="{{ g.activity }}" as="c" hint-placeholder-count="4">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.activity.es }}">{{ gv.activity.er }}</span>
         </div>
       </section>
 
       <section style="{{ cardStyle }}">
         <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">02</span><h2 style="{{ h2Style }}">{{ t.s2 }}</h2></div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px">
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fHeight }}</span><input name="height" type="number" step="0.5" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fWeight }}</span><input name="weight" type="number" step="0.1" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fTarget }}</span><input name="targetWeight" type="number" step="0.1" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fWaist }}</span><input name="waist" type="number" step="0.5" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fHip }}</span><input name="hip" type="number" step="0.5" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fChest }}</span><input name="chest" type="number" step="0.5" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.height.lb }}</span><input name="height" type="text" inputmode="decimal" style="{{ f.height.st }}" /><span style="{{ f.height.es }}">{{ f.height.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.weight.lb }}</span><input name="weight" type="text" inputmode="decimal" style="{{ f.weight.st }}" /><span style="{{ f.weight.es }}">{{ f.weight.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.targetWeight.lb }}</span><input name="targetWeight" type="text" inputmode="decimal" style="{{ f.targetWeight.st }}" /><span style="{{ f.targetWeight.es }}">{{ f.targetWeight.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.waist.lb }}</span><input name="waist" type="text" inputmode="decimal" style="{{ f.waist.st }}" /><span style="{{ f.waist.es }}">{{ f.waist.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.hip.lb }}</span><input name="hip" type="text" inputmode="decimal" style="{{ f.hip.st }}" /><span style="{{ f.hip.es }}">{{ f.hip.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.chest.lb }}</span><input name="chest" type="text" inputmode="decimal" style="{{ f.chest.st }}" /><span style="{{ f.chest.es }}">{{ f.chest.er }}</span></label>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fWHistory }}</span><textarea name="weightHistory" rows="3" placeholder="{{ t.phWHistory }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.weightHistory.lb }}</span><textarea name="weightHistory" rows="3" placeholder="{{ t.phWHistory }}" style="{{ f.weightHistory.st }}"></textarea><span style="{{ f.weightHistory.es }}">{{ f.weightHistory.er }}</span></label>
       </section>
 
       <section style="{{ cardStyle }}">
         <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">03</span><h2 style="{{ h2Style }}">{{ t.s3 }}</h2></div>
-        <span style="{{ labStyle }}">{{ t.fGoal }}</span>
-        <div style="{{ chipRowStyle }}">
+        <span style="{{ labStyle }}">{{ gv.goal.lb }}</span>
+        <div style="{{ chipRowStyle }}" data-group="goal">
           <sc-for list="{{ g.goal }}" as="c" hint-placeholder-count="7">
             <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
           </sc-for>
         </div>
+        <span style="{{ gv.goal.es }}">{{ gv.goal.er }}</span>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; margin-top: 26px">
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fDeadline }}</span><input name="deadline" placeholder="{{ t.phDeadline }}" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fBudgetTime }}</span><input name="sessionLength" placeholder="{{ t.phSession }}" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.deadline.lb }}</span><input name="deadline" placeholder="{{ t.phDeadline }}" style="{{ f.deadline.st }}" /><span style="{{ f.deadline.es }}">{{ f.deadline.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.sessionLength.lb }}</span><input name="sessionLength" placeholder="{{ t.phSession }}" style="{{ f.sessionLength.st }}" /><span style="{{ f.sessionLength.es }}">{{ f.sessionLength.er }}</span></label>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fWhy }}</span><textarea name="why" rows="3" placeholder="{{ t.phWhy }}" style="{{ taStyle }}"></textarea></label>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fAttempts }}</span><textarea name="pastAttempts" rows="3" placeholder="{{ t.phAttempts }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.why.lb }}</span><textarea name="why" rows="3" placeholder="{{ t.phWhy }}" style="{{ f.why.st }}"></textarea><span style="{{ f.why.es }}">{{ f.why.er }}</span></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.pastAttempts.lb }}</span><textarea name="pastAttempts" rows="3" placeholder="{{ t.phAttempts }}" style="{{ f.pastAttempts.st }}"></textarea><span style="{{ f.pastAttempts.es }}">{{ f.pastAttempts.er }}</span></label>
       </section>
 
       <section style="{{ cardStyle }}">
         <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">04</span><h2 style="{{ h2Style }}">{{ t.s4 }}</h2></div>
-        <span style="{{ labStyle }}">{{ t.fExp }}</span>
-        <div style="{{ chipRowStyle }}">
+        <span style="{{ labStyle }}">{{ gv.exp.lb }}</span>
+        <div style="{{ chipRowStyle }}" data-group="exp">
           <sc-for list="{{ g.exp }}" as="c" hint-placeholder-count="5">
             <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
           </sc-for>
         </div>
+        <span style="{{ gv.exp.es }}">{{ gv.exp.er }}</span>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fDays }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.days.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="days">
             <sc-for list="{{ g.days }}" as="c" hint-placeholder-count="5">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.days.es }}">{{ gv.days.er }}</span>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fEquip }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.equip.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="equip">
             <sc-for list="{{ g.equip }}" as="c" hint-placeholder-count="8">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.equip.es }}">{{ gv.equip.er }}</span>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 26px">
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fLoveEx }}</span><input name="lovedExercises" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fHateEx }}</span><input name="hatedExercises" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.lovedExercises.lb }}</span><input name="lovedExercises" style="{{ f.lovedExercises.st }}" /><span style="{{ f.lovedExercises.es }}">{{ f.lovedExercises.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.hatedExercises.lb }}</span><input name="hatedExercises" style="{{ f.hatedExercises.st }}" /><span style="{{ f.hatedExercises.es }}">{{ f.hatedExercises.er }}</span></label>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fProgram }}</span><textarea name="currentProgram" rows="3" placeholder="{{ t.phProgram }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.currentProgram.lb }}</span><textarea name="currentProgram" rows="3" placeholder="{{ t.phProgram }}" style="{{ f.currentProgram.st }}"></textarea><span style="{{ f.currentProgram.es }}">{{ f.currentProgram.er }}</span></label>
       </section>
 
       <section style="{{ cardStyle }}">
         <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">05</span><h2 style="{{ h2Style }}">{{ t.s5 }}</h2></div>
         <p style="{{ noteStyle }}">{{ t.healthNote }}</p>
-        <span style="{{ labStyle }}">{{ t.fInjuries }}</span>
-        <div style="{{ chipRowStyle }}">
+        <span style="{{ labStyle }}">{{ gv.injuries.lb }}</span>
+        <div style="{{ chipRowStyle }}" data-group="injuries">
           <sc-for list="{{ g.injuries }}" as="c" hint-placeholder-count="9">
             <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
           </sc-for>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fInjDetails }}</span><textarea name="injuryDetails" rows="3" placeholder="{{ t.phInj }}" style="{{ taStyle }}"></textarea></label>
+        <span style="{{ gv.injuries.es }}">{{ gv.injuries.er }}</span>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.injuryDetails.lb }}</span><textarea name="injuryDetails" rows="3" placeholder="{{ t.phInj }}" style="{{ f.injuryDetails.st }}"></textarea><span style="{{ f.injuryDetails.es }}">{{ f.injuryDetails.er }}</span></label>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fConditions }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.conditions.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="conditions">
             <sc-for list="{{ g.conditions }}" as="c" hint-placeholder-count="10">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.conditions.es }}">{{ gv.conditions.er }}</span>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fMeds }}</span><textarea name="medications" rows="3" placeholder="{{ t.phMeds }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.medications.lb }}</span><textarea name="medications" rows="3" placeholder="{{ t.phMeds }}" style="{{ f.medications.st }}"></textarea><span style="{{ f.medications.es }}">{{ f.medications.er }}</span></label>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 26px">
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fSurgery }}</span><input name="surgeries" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fBlood }}</span><input name="bloodWork" placeholder="{{ t.phBlood }}" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.surgeries.lb }}</span><input name="surgeries" style="{{ f.surgeries.st }}" /><span style="{{ f.surgeries.es }}">{{ f.surgeries.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.bloodWork.lb }}</span><input name="bloodWork" placeholder="{{ t.phBlood }}" style="{{ f.bloodWork.st }}" /><span style="{{ f.bloodWork.es }}">{{ f.bloodWork.er }}</span></label>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fSmoking }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.smoking.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="smoking">
             <sc-for list="{{ g.smoking }}" as="c" hint-placeholder-count="3">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.smoking.es }}">{{ gv.smoking.er }}</span>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fFemale }}</span><input name="femaleNotes" placeholder="{{ t.phFemale }}" style="{{ inStyle }}" /></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.femaleNotes.lb }}</span><input name="femaleNotes" placeholder="{{ t.phFemale }}" style="{{ f.femaleNotes.st }}" /><span style="{{ f.femaleNotes.es }}">{{ f.femaleNotes.er }}</span></label>
       </section>
 
       <section style="{{ cardStyle }}">
         <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">06</span><h2 style="{{ h2Style }}">{{ t.s6 }}</h2></div>
-        <span style="{{ labStyle }}">{{ t.fDiet }}</span>
-        <div style="{{ chipRowStyle }}">
+        <span style="{{ labStyle }}">{{ gv.diet.lb }}</span>
+        <div style="{{ chipRowStyle }}" data-group="diet">
           <sc-for list="{{ g.diet }}" as="c" hint-placeholder-count="7">
             <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
           </sc-for>
         </div>
+        <span style="{{ gv.diet.es }}">{{ gv.diet.er }}</span>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fLikes }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.likes.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="likes">
             <sc-for list="{{ g.likes }}" as="c" hint-placeholder-count="14">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.likes.es }}">{{ gv.likes.er }}</span>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labWarnStyle }}">{{ t.fDislikes }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labWarnStyle }}">{{ gv.dislikes.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="dislikes">
             <sc-for list="{{ g.dislikes }}" as="c" hint-placeholder-count="14">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.dislikes.es }}">{{ gv.dislikes.er }}</span>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labWarnStyle }}">{{ t.fNeverEat }}</span><textarea name="neverEat" rows="2" placeholder="{{ t.phNeverEat }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labWarnStyle }}">{{ f.neverEat.lb }}</span><textarea name="neverEat" rows="2" placeholder="{{ t.phNeverEat }}" style="{{ f.neverEat.st }}"></textarea><span style="{{ f.neverEat.es }}">{{ f.neverEat.er }}</span></label>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fAllergy }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.allergy.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="allergy">
             <sc-for list="{{ g.allergy }}" as="c" hint-placeholder-count="7">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.allergy.es }}">{{ gv.allergy.er }}</span>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fSupps }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.supps.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="supps">
             <sc-for list="{{ g.supps }}" as="c" hint-placeholder-count="9">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.supps.es }}">{{ gv.supps.er }}</span>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fMeals }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.meals.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="meals">
             <sc-for list="{{ g.meals }}" as="c" hint-placeholder-count="4">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.meals.es }}">{{ gv.meals.er }}</span>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fCook }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.cook.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="cook">
             <sc-for list="{{ g.cook }}" as="c" hint-placeholder-count="4">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.cook.es }}">{{ gv.cook.er }}</span>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fTypicalDay }}</span><textarea name="typicalDay" rows="5" placeholder="{{ t.phTypicalDay }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.typicalDay.lb }}</span><textarea name="typicalDay" rows="5" placeholder="{{ t.phTypicalDay }}" style="{{ f.typicalDay.st }}"></textarea><span style="{{ f.typicalDay.es }}">{{ f.typicalDay.er }}</span></label>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 26px">
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fWater }}</span><input name="water" placeholder="{{ t.phWater }}" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fCaffeine }}</span><input name="caffeine" placeholder="{{ t.phCaffeine }}" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fCravings }}</span><input name="cravings" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.water.lb }}</span><input name="water" placeholder="{{ t.phWater }}" style="{{ f.water.st }}" /><span style="{{ f.water.es }}">{{ f.water.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.caffeine.lb }}</span><input name="caffeine" placeholder="{{ t.phCaffeine }}" style="{{ f.caffeine.st }}" /><span style="{{ f.caffeine.es }}">{{ f.caffeine.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.cravings.lb }}</span><input name="cravings" style="{{ f.cravings.st }}" /><span style="{{ f.cravings.es }}">{{ f.cravings.er }}</span></label>
         </div>
       </section>
 
       <section style="{{ cardStyle }}">
         <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">07</span><h2 style="{{ h2Style }}">{{ t.s7 }}</h2></div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px">
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fSleepH }}</span><input name="sleepHours" placeholder="{{ t.phSleep }}" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fSteps }}</span><input name="steps" placeholder="{{ t.phSteps }}" style="{{ inStyle }}" /></label>
-          <label style="display: block"><span style="{{ labStyle }}">{{ t.fSchedule }}</span><input name="workSchedule" placeholder="{{ t.phSchedule }}" style="{{ inStyle }}" /></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.sleepHours.lb }}</span><input name="sleepHours" type="text" inputmode="decimal" placeholder="{{ t.phSleep }}" style="{{ f.sleepHours.st }}" /><span style="{{ f.sleepHours.es }}">{{ f.sleepHours.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.steps.lb }}</span><input name="steps" type="text" inputmode="numeric" placeholder="{{ t.phSteps }}" style="{{ f.steps.st }}" /><span style="{{ f.steps.es }}">{{ f.steps.er }}</span></label>
+          <label style="display: block"><span style="{{ labStyle }}">{{ f.workSchedule.lb }}</span><input name="workSchedule" placeholder="{{ t.phSchedule }}" style="{{ f.workSchedule.st }}" /><span style="{{ f.workSchedule.es }}">{{ f.workSchedule.er }}</span></label>
         </div>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fSleepQ }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.sleepQ.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="sleepQ">
             <sc-for list="{{ g.sleepQ }}" as="c" hint-placeholder-count="4">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.sleepQ.es }}">{{ gv.sleepQ.er }}</span>
         </div>
         <div style="{{ fieldGapStyle }}">
           <span style="{{ labStyle }}">{{ t.fStress }}</span>
@@ -276,28 +308,31 @@
       <section style="{{ cardAccentStyle }}">
         <div style="{{ secHeadStyle }}"><span style="{{ secNumStyle }}">08</span><h2 style="{{ h2Style }}">{{ t.s8 }}</h2></div>
         <p style="{{ noteStyle }}">{{ t.s8Note }}</p>
-        <span style="{{ labStyle }}">{{ t.fPastIssues }}</span>
-        <div style="{{ chipRowStyle }}">
+        <span style="{{ labStyle }}">{{ gv.pastIssues.lb }}</span>
+        <div style="{{ chipRowStyle }}" data-group="pastIssues">
           <sc-for list="{{ g.pastIssues }}" as="c" hint-placeholder-count="10">
             <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
           </sc-for>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fDisliked }}</span><textarea name="dislikedBefore" rows="4" placeholder="{{ t.phDisliked }}" style="{{ taStyle }}"></textarea></label>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fNeed }}</span><textarea name="needFromCoach" rows="3" placeholder="{{ t.phNeed }}" style="{{ taStyle }}"></textarea></label>
+        <span style="{{ gv.pastIssues.es }}">{{ gv.pastIssues.er }}</span>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.dislikedBefore.lb }}</span><textarea name="dislikedBefore" rows="4" placeholder="{{ t.phDisliked }}" style="{{ f.dislikedBefore.st }}"></textarea><span style="{{ f.dislikedBefore.es }}">{{ f.dislikedBefore.er }}</span></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.needFromCoach.lb }}</span><textarea name="needFromCoach" rows="3" placeholder="{{ t.phNeed }}" style="{{ f.needFromCoach.st }}"></textarea><span style="{{ f.needFromCoach.es }}">{{ f.needFromCoach.er }}</span></label>
         <div style="{{ fieldGapStyle }}">
-          <span style="{{ labStyle }}">{{ t.fComms }}</span>
-          <div style="{{ chipRowStyle }}">
+          <span style="{{ labStyle }}">{{ gv.comms.lb }}</span>
+          <div style="{{ chipRowStyle }}" data-group="comms">
             <sc-for list="{{ g.comms }}" as="c" hint-placeholder-count="4">
               <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
             </sc-for>
           </div>
+          <span style="{{ gv.comms.es }}">{{ gv.comms.er }}</span>
         </div>
-        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ t.fNotes }}</span><textarea name="notes" rows="3" placeholder="{{ t.phNotes }}" style="{{ taStyle }}"></textarea></label>
+        <label style="{{ fieldGapStyle }}"><span style="{{ labStyle }}">{{ f.notes.lb }}</span><textarea name="notes" rows="3" placeholder="{{ t.phNotes }}" style="{{ f.notes.st }}"></textarea><span style="{{ f.notes.es }}">{{ f.notes.er }}</span></label>
       </section>
 
       <div class="no-print" style="{{ submitWrapStyle }}">
         <div style="{{ errStyle }}">{{ errMsg }}</div>
-        <button type="submit" style="{{ submitStyle }}">{{ submitLabel }}</button>
+        <button type="submit" disabled="{{ sending }}" style="{{ submitStyle }}">{{ submitLabel }}</button>
+        <div style="{{ hintStyle }}">{{ hintMsg }}</div>
         <p style="{{ finePrintStyle }}">{{ t.finePrint }}</p>
       </div>
     </form>
@@ -310,7 +345,7 @@
       <p style="font: 400 16px/1.65 'DM Sans', sans-serif; color: #9A9AA6; margin: 0 0 30px">{{ t.thanksBody }}</p>
       <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center">
         <button type="button" onClick="{{ downloadCopy }}" style="{{ ghostBtnStyle }}">{{ t.download }}</button>
-        <a href="https://wa.me/" target="_blank" rel="noreferrer" style="{{ ghostBtnStyle }}">{{ t.whatsapp }}</a>
+        <a href="{{ waHref }}" target="_blank" rel="noreferrer" style="{{ waBtnStyle }}">{{ t.whatsapp }}</a>
       </div>
     </div>
   </div>
@@ -323,6 +358,10 @@
    2. Everything else works automatically.
    ============================================================ */
 const API_URL = "https://script.google.com/macros/s/AKfycbyqo5bc7GCE1QhjEDeS0zigzo1m2hcY_mEmJum1kh3_PQd2o7JxAesEZ70UMvkxJMHXLQ/exec";
+
+/* Optional: the coach's WhatsApp number in full international form,
+   e.g. "+201234567890". Leave empty to hide the button. */
+const COACH_WHATSAPP = "";
 
 const G = {
   gender: { multi: 0, opts: [["Male", "ذكر"], ["Female", "أنثى"]] },
@@ -424,9 +463,182 @@ const T = {
 const LIME = "#D6FF3F", INK = "#F4F3F0", MUTE = "#8A8A96", CARD = "#15151A", FIELD = "#0E0E12", LINE = "rgba(255,255,255,.09)";
 const FIELDS = ["fullName","age","phone","email","city","job","height","weight","targetWeight","waist","hip","chest","weightHistory","deadline","sessionLength","why","pastAttempts","lovedExercises","hatedExercises","currentProgram","injuryDetails","medications","surgeries","bloodWork","femaleNotes","neverEat","typicalDay","water","caffeine","cravings","sleepHours","steps","workSchedule","stress","dislikedBefore","needFromCoach","notes"];
 
+/* ============================================================
+   Validation rules
+   req    : must be answered
+   type   : name | phone | email | num | int | text
+   min/max: numeric bounds (num/int) — or character bounds (text)
+   ============================================================ */
+const RULES = {
+  fullName:       { req: 1, type: "name", max: 60 },
+  age:            { req: 1, type: "int", min: 12, max: 90 },
+  phone:          { req: 1, type: "phone" },
+  email:          { type: "email", max: 120 },
+  city:           { req: 1, type: "text", min: 2, max: 60 },
+  job:            { type: "text", max: 60 },
+
+  height:         { req: 1, type: "num", min: 100, max: 250 },
+  weight:         { req: 1, type: "num", min: 30, max: 300 },
+  targetWeight:   { req: 1, type: "num", min: 30, max: 300 },
+  waist:          { type: "num", min: 40, max: 200 },
+  hip:            { type: "num", min: 40, max: 200 },
+  chest:          { type: "num", min: 50, max: 200 },
+  weightHistory:  { type: "text", max: 1000 },
+
+  deadline:       { type: "text", max: 120 },
+  sessionLength:  { type: "text", max: 60 },
+  why:            { req: 1, type: "text", min: 10, max: 1000 },
+  pastAttempts:   { type: "text", max: 1000 },
+
+  lovedExercises: { type: "text", max: 300 },
+  hatedExercises: { type: "text", max: 300 },
+  currentProgram: { type: "text", max: 1000 },
+
+  injuryDetails:  { type: "text", max: 1000 },
+  medications:    { type: "text", max: 1000 },
+  surgeries:      { type: "text", max: 300 },
+  bloodWork:      { type: "text", max: 120 },
+  femaleNotes:    { type: "text", max: 300 },
+
+  neverEat:       { type: "text", max: 500 },
+  typicalDay:     { req: 1, type: "text", min: 12, max: 2000 },
+  water:          { type: "text", max: 40 },
+  caffeine:       { type: "text", max: 40 },
+  cravings:       { type: "text", max: 120 },
+
+  sleepHours:     { req: 1, type: "num", min: 2, max: 14 },
+  steps:          { type: "int", min: 0, max: 60000 },
+  workSchedule:   { type: "text", max: 120 },
+
+  dislikedBefore: { type: "text", max: 1500 },
+  needFromCoach:  { req: 1, type: "text", min: 5, max: 1000 },
+  notes:          { type: "text", max: 1500 }
+};
+
+/* chip groups the client must answer before the file can be sent */
+const REQ_GROUPS = ["gender", "activity", "goal", "exp", "days", "equip", "injuries", "conditions", "allergy", "diet", "meals", "cook", "sleepQ", "comms"];
+
+/* the field each group sits next to, used to jump to the first error */
+const GROUP_ORDER = ["gender", "activity", "goal", "exp", "days", "equip", "injuries", "conditions", "smoking", "diet", "likes", "dislikes", "allergy", "supps", "meals", "cook", "sleepQ", "pastIssues", "comms"];
+
+/* the on-screen order of everything, so "first error" means the topmost one */
+const ORDER = ["fullName", "age", "phone", "email", "city", "job", "@gender", "@activity",
+  "height", "weight", "targetWeight", "waist", "hip", "chest", "weightHistory",
+  "@goal", "deadline", "sessionLength", "why", "pastAttempts",
+  "@exp", "@days", "@equip", "lovedExercises", "hatedExercises", "currentProgram",
+  "@injuries", "injuryDetails", "@conditions", "medications", "surgeries", "bloodWork", "@smoking", "femaleNotes",
+  "@diet", "@likes", "@dislikes", "neverEat", "@allergy", "@supps", "@meals", "@cook", "typicalDay", "water", "caffeine", "cravings",
+  "sleepHours", "steps", "workSchedule", "@sleepQ",
+  "@pastIssues", "dislikedBefore", "needFromCoach", "@comms", "notes"];
+
+/* extra copy, merged into T so the big dictionaries above stay untouched */
+const T2 = {
+  en: {
+    star: " *",
+    vReq: "This one is required.",
+    vName: "Please write your full name in letters.",
+    vPhone: "Enter a valid WhatsApp number — e.g. 01012345678.",
+    vEmail: "That email address does not look right.",
+    vNum: "Please enter a number.",
+    vRange: function (a, b) { return "Enter a number between " + a + " and " + b + "."; },
+    vShort: function (n) { return "A bit more detail please — at least " + n + " characters."; },
+    vLong: function (n) { return "Please keep this under " + n + " characters."; },
+    vPick: "Pick at least one.",
+    vTarget: "Check this against your current weight.",
+    vInjury: "You picked an injury — tell me where it hurts and since when.",
+    vFix: function (n) { return n === 1 ? "1 answer needs fixing — it is highlighted below." : n + " answers need fixing — they are highlighted below."; },
+    errOffline: "You are offline. Your answers are saved on this device and will be sent automatically once you are back online.",
+    errServer: "The coach's sheet did not accept this. Try again in a moment.",
+    hintSaving: "Saved on this device as you type.",
+    hintSending: "Sending — do not close this page.",
+    hintQueued: "Waiting for a connection…"
+  },
+  ar: {
+    star: " *",
+    vReq: "هذا الحقل مطلوب.",
+    vName: "اكتب اسمك الكامل بالحروف من فضلك.",
+    vPhone: "أدخل رقم واتساب صحيح — مثال ٠١٠١٢٣٤٥٦٧٨.",
+    vEmail: "الإيميل غير صحيح.",
+    vNum: "أدخل رقماً من فضلك.",
+    vRange: function (a, b) { return "أدخل رقماً بين " + a + " و " + b + "."; },
+    vShort: function (n) { return "تفاصيل أكثر من فضلك — " + n + " حرفاً على الأقل."; },
+    vLong: function (n) { return "اجعل النص أقل من " + n + " حرفاً."; },
+    vPick: "اختر واحداً على الأقل.",
+    vTarget: "راجع هذا الرقم مقارنة بوزنك الحالي.",
+    vInjury: "اخترت إصابة — اذكر مكانها ومتى بدأت.",
+    vFix: function (n) { return n === 1 ? "إجابة واحدة تحتاج تصحيح — موضحة بالأسفل." : n + " إجابات تحتاج تصحيح — موضحة بالأسفل."; },
+    errOffline: "لا يوجد اتصال بالإنترنت. إجاباتك محفوظة على هذا الجهاز وسيتم إرسالها تلقائياً بمجرد عودة الاتصال.",
+    errServer: "لم يقبل النظام هذه البيانات. حاول مرة أخرى بعد قليل.",
+    hintSaving: "يُحفظ على هذا الجهاز أثناء الكتابة.",
+    hintSending: "جاري الإرسال — لا تغلق الصفحة.",
+    hintQueued: "في انتظار الاتصال…"
+  }
+};
+Object.keys(T2).forEach(function (k) { Object.assign(T[k], T2[k]); });
+
+/* ---------- small helpers ---------- */
+const AR_DIGITS = /[\u0660-\u0669\u06F0-\u06F9]/g;
+function ascii(s) {
+  return String(s == null ? "" : s).replace(AR_DIGITS, function (d) {
+    const c = d.charCodeAt(0);
+    return String(c >= 0x06F0 ? c - 0x06F0 : c - 0x0660);
+  }).replace(/[\u066B\u066C\u060C]/g, ".");
+}
+function tidy(s, max) {
+  let v = String(s == null ? "" : s);
+  v = v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");  /* control */
+  v = v.replace(/[\u200B-\u200F\u202A-\u202E\uFEFF]/g, "");                /* invisible */
+  v = v.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n");
+  v = v.replace(/^[ \t]+|[ \t]+$/gm, "").trim();
+  if (max && v.length > max) v = v.slice(0, max);
+  return v;
+}
+let NAME_RE, LETTER_RE;
+try {
+  NAME_RE = new RegExp("^[\\p{L}][\\p{L}\\p{M}'.\\-\\u0640 ]{1,59}$", "u");
+  LETTER_RE = new RegExp("\\p{L}", "gu");
+} catch (e) {
+  NAME_RE = /^[A-Za-z\u0600-\u06FF][A-Za-z\u0600-\u06FF'.\- ]{1,59}$/;
+  LETTER_RE = /[A-Za-z\u0600-\u06FF]/g;
+}
+function letterCount(v) { const m = String(v).match(LETTER_RE); return m ? m.length : 0; }
+const EMAIL_RE = /^[^\s@,;:<>()\[\]\\]+@[^\s@,;:<>()\[\]\\]+\.[A-Za-z]{2,24}$/;
+
+function normPhone(raw) {
+  let s = ascii(raw).replace(/[^\d+]/g, "");
+  if (s.indexOf("00") === 0) s = "+" + s.slice(2);
+  const plus = s.charAt(0) === "+";
+  let d = s.replace(/\D/g, "");
+  if (!plus) {
+    if (d.length === 11 && d.indexOf("01") === 0) d = "20" + d.slice(1);
+    else if (d.length === 10 && d.charAt(0) === "1") d = "20" + d;
+  }
+  let ok = d.length >= 8 && d.length <= 15 && !/^(\d)\1+$/.test(d);
+  if (ok && d.indexOf("20") === 0 && d.length !== 12) ok = false;
+  if (ok && d.indexOf("201") === 0 && d.length !== 12) ok = false;
+  return { ok: ok, out: d ? "+" + d : "" };
+}
+function toNum(v) {
+  const s = ascii(v).replace(/[^\d.\-]/g, "");
+  if (!s || !/\d/.test(s)) return null;
+  const n = parseFloat(s);
+  return isFinite(n) ? n : null;
+}
+function uid() {
+  try {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    if (window.crypto && crypto.getRandomValues) {
+      const a = new Uint8Array(16); crypto.getRandomValues(a);
+      return Array.prototype.map.call(a, function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+    }
+  } catch (e) {}
+  return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+}
+
 class Component extends DCLogic {
-  state = { lang: "en", sel: {}, stress: 5, sending: false, sent: false, err: "", progress: 0 };
+  state = { lang: "en", sel: {}, stress: 5, sending: false, sent: false, err: "", progress: 0, errs: {}, gerrs: {}, queued: false };
   form = null;
+  sid = uid();
 
   componentDidMount() {
     try {
@@ -444,14 +656,23 @@ class Component extends DCLogic {
       }
     } catch (e) {}
     document.addEventListener("input", this.onAnyInput, true);
+    document.addEventListener("focusout", this.onAnyBlur, true);
+    window.addEventListener("online", this.onOnline);
     this.tick = setInterval(() => this.persist(), 4000);
+    this.flushOutbox();
   }
   componentWillUnmount() {
     document.removeEventListener("input", this.onAnyInput, true);
+    document.removeEventListener("focusout", this.onAnyBlur, true);
+    window.removeEventListener("online", this.onOnline);
     clearInterval(this.tick);
+    clearTimeout(this.watchdog);
   }
 
-  formRef = (el) => { this.form = el; };
+  formRef = (el) => {
+    this.form = el;
+    if (el) el.noValidate = true;
+  };
 
   restore(text) {
     if (!this.form) return;
@@ -462,8 +683,114 @@ class Component extends DCLogic {
     this.measure();
   }
 
-  onAnyInput = () => { this.measure(); };
+  /* ---------- live feedback ---------- */
+  onAnyInput = (e) => {
+    this.measure();
+    const n = e && e.target && e.target.name;
+    if (n && this.state.errs[n]) {
+      const msg = this.checkField(n, e.target.value);
+      if (!msg) {
+        const errs = Object.assign({}, this.state.errs);
+        delete errs[n];
+        this.setState({ errs: errs, err: "" });
+      }
+    }
+  };
 
+  onAnyBlur = (e) => {
+    const el = e && e.target;
+    const n = el && el.name;
+    if (!n || !RULES[n] || !this.form || !this.form.contains(el)) return;
+    const rule = RULES[n];
+    const cleaned = tidy(el.value, rule.max);
+    if (cleaned !== el.value) el.value = cleaned;
+    const msg = this.checkField(n, cleaned);
+    const errs = Object.assign({}, this.state.errs);
+    if (msg) errs[n] = msg; else delete errs[n];
+    if (msg !== (this.state.errs[n] || "")) this.setState({ errs: errs });
+    this.persist();
+  };
+
+  onOnline = () => { this.flushOutbox(); };
+
+  /* ---------- validation ---------- */
+  checkField(name, raw) {
+    const rule = RULES[name];
+    if (!rule) return "";
+    const t = T[this.state.lang];
+    const v = tidy(raw, rule.max);
+
+    if (!v) {
+      if (rule.req) return t.vReq;
+      if (name === "injuryDetails" && this.injuredNoDetail()) return t.vInjury;
+      return "";
+    }
+    if (rule.max && String(raw).length > rule.max) return t.vLong(rule.max);
+
+    if (rule.type === "name") {
+      if (!NAME_RE.test(v) || letterCount(v) < 2) return t.vName;
+      return "";
+    }
+    if (rule.type === "phone") return normPhone(v).ok ? "" : t.vPhone;
+    if (rule.type === "email") return EMAIL_RE.test(v) ? "" : t.vEmail;
+
+    if (rule.type === "num" || rule.type === "int") {
+      const n = toNum(v);
+      if (n === null) return t.vNum;
+      if (rule.type === "int" && Math.abs(n - Math.round(n)) > 1e-9) return t.vNum;
+      if (rule.min != null && n < rule.min) return t.vRange(rule.min, rule.max);
+      if (rule.max != null && n > rule.max) return t.vRange(rule.min, rule.max);
+      if (name === "targetWeight") {
+        const w = this.form && toNum(this.form.elements.weight ? this.form.elements.weight.value : "");
+        if (w && (n > w * 1.6 || n < w * 0.5)) return t.vTarget;
+      }
+      return "";
+    }
+    if (rule.min && v.length < rule.min) return t.vShort(rule.min);
+    return "";
+  }
+
+  injuredNoDetail() {
+    const picks = this.state.sel.injuries || [];
+    return picks.some((i) => i > 0); /* index 0 is "None" */
+  }
+
+  checkGroup(key) {
+    const t = T[this.state.lang];
+    const picks = this.state.sel[key] || [];
+    if (!picks.length && REQ_GROUPS.indexOf(key) > -1) return t.vPick;
+    return "";
+  }
+
+  validateAll() {
+    const errs = {}, gerrs = {};
+    let count = 0, first = null;
+    ORDER.forEach((slot) => {
+      if (slot.charAt(0) === "@") {
+        const key = slot.slice(1);
+        const m = this.checkGroup(key);
+        if (m) { gerrs[key] = m; count++; if (!first) first = slot; }
+      } else {
+        const el = this.form && this.form.elements[slot];
+        const m = this.checkField(slot, el ? el.value : "");
+        if (m) { errs[slot] = m; count++; if (!first) first = slot; }
+      }
+    });
+    return { errs: errs, gerrs: gerrs, count: count, first: first };
+  }
+
+  focusFirst(slot) {
+    if (!slot || !this.form) return;
+    let el;
+    if (slot.charAt(0) === "@") el = this.form.querySelector('[data-group="' + slot.slice(1) + '"]');
+    else el = this.form.elements[slot];
+    if (!el) return;
+    try { el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    catch (e) { el.scrollIntoView(); }
+    if (el.focus && slot.charAt(0) !== "@") setTimeout(() => { try { el.focus({ preventScroll: true }); } catch (er) { el.focus(); } }, 320);
+  }
+
+  /* ---------- data ---------- */
   measure() {
     if (!this.form) return;
     let filled = 0;
@@ -488,6 +815,7 @@ class Component extends DCLogic {
   }
 
   persist() {
+    if (this.state.sent) return;
     try {
       localStorage.setItem("forma:draft", JSON.stringify({ lang: this.state.lang, sel: this.state.sel, stress: this.state.stress, text: this.collectText() }));
     } catch (e) {}
@@ -498,7 +826,9 @@ class Component extends DCLogic {
     let next;
     if (!multi) next = cur[0] === idx ? [] : [idx];
     else next = cur.indexOf(idx) > -1 ? cur.filter((x) => x !== idx) : cur.concat([idx]);
-    this.setState({ sel: Object.assign({}, this.state.sel, { [key]: next }) }, () => { this.measure(); this.persist(); });
+    const gerrs = Object.assign({}, this.state.gerrs);
+    if (next.length) delete gerrs[key];
+    this.setState({ sel: Object.assign({}, this.state.sel, { [key]: next }), gerrs: gerrs }, () => { this.measure(); this.persist(); });
   }
 
   payload() {
@@ -510,25 +840,151 @@ class Component extends DCLogic {
         .map((i) => (G[k].opts[i] ? G[k].opts[i][ar ? 1 : 0] : ""))
         .filter(Boolean).join(", ");
     });
-    return Object.assign({ submittedAt: new Date().toISOString(), lang: this.state.lang, stress: String(this.state.stress) }, t, sel);
+    /* normalise every text answer once, on the way out */
+    const clean = {};
+    Object.keys(t).forEach((k) => {
+      const rule = RULES[k];
+      let v = tidy(t[k], rule ? rule.max : 2000);
+      if (rule && rule.type === "phone" && v) v = normPhone(v).out;
+      if (rule && (rule.type === "num" || rule.type === "int") && v) {
+        const n = toNum(v);
+        if (n !== null) v = String(n);
+      }
+      clean[k] = v;
+    });
+    return Object.assign({
+      submissionId: this.sid,
+      submittedAt: new Date().toISOString(),
+      lang: this.state.lang,
+      stress: String(this.state.stress)
+    }, clean, sel);
   }
 
+  /* ---------- sending ----------
+     Google Apps Script answers a POST with a 302 to script.googleusercontent.com.
+     Browsers frequently refuse to let us read that hop, so the old code either
+     hung on a promise that never settled or showed "could not send" for a row
+     that had in fact been written. The rules here:
+       · a watchdog always settles the UI, so it can never stay on "Sending…"
+       · a read failure while online is treated as delivered, because the POST
+         did leave the browser — only a genuinely offline device is an error
+       · every payload carries a submissionId so a retry can be de-duplicated
+       · nothing is ever sent twice on its own
+  ---------------------------------------------------------------- */
   onSubmit = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (this.state.sending) return;
+
+    const res = this.validateAll();
+    if (res.count) {
+      this.setState({ errs: res.errs, gerrs: res.gerrs, err: T[this.state.lang].vFix(res.count) });
+      this.focusFirst(res.first);
+      return;
+    }
+
     const data = this.payload();
-    if (!data.fullName || !data.phone) { this.setState({ err: T[this.state.lang].errName }); return; }
-    this.persist();
     this.last = data;
-    if (!API_URL) { this.setState({ sent: true, err: "" }); return; }
-    this.setState({ sending: true, err: "" });
-    fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(data) })
-      .then((r) => r.text())
-      .then(() => {
-        try { localStorage.removeItem("forma:draft"); } catch (er) {}
-        this.setState({ sending: false, sent: true });
-      })
-      .catch(() => this.setState({ sending: false, err: T[this.state.lang].errSend }));
+    this.persist();
+    this.setState({ errs: {}, gerrs: {}, err: "" });
+
+    if (!API_URL) { this.done(); return; }
+    if (navigator.onLine === false) {
+      this.queue(data);
+      this.setState({ sending: false, queued: true, err: T[this.state.lang].errOffline });
+      return;
+    }
+    this.send(data);
   };
+
+  send(data) {
+    const t = T[this.state.lang];
+    this.setState({ sending: true, err: "", queued: false });
+
+    let settled = false;
+    const settle = (ok, msg) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(this.watchdog);
+      if (ok) this.done();
+      else this.setState({ sending: false, err: msg || t.errSend });
+    };
+
+    let ctrl = null;
+    try { ctrl = "AbortController" in window ? new AbortController() : null; } catch (er) {}
+
+    /* the request is on the wire; if we hear nothing back in time we assume the
+       sheet got it rather than trapping the client on a spinner */
+    this.watchdog = setTimeout(() => {
+      if (ctrl) { try { ctrl.abort(); } catch (er) {} }
+      settle(true);
+    }, 20000);
+
+    const body = JSON.stringify(data);
+    const opts = {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: body,
+      redirect: "follow",
+      cache: "no-store"
+    };
+    if (ctrl) opts.signal = ctrl.signal;
+    if (body.length < 60000) opts.keepalive = true;
+
+    fetch(API_URL, opts)
+      .then((r) => {
+        const status = r.status;
+        return r.text().catch(() => "").then((txt) => ({ status: status, txt: txt }));
+      })
+      .then((r) => {
+        if (r.status >= 400) { settle(false, t.errServer); return; }
+        let j = null;
+        try { j = JSON.parse(r.txt); } catch (er) {}
+        if (j && j.ok === false) { settle(false, j.error || t.errServer); return; }
+        settle(true);
+      })
+      .catch(() => {
+        /* opaque redirect / blocked response read: the POST still reached
+           Apps Script. Only treat it as a failure if the device is offline. */
+        if (navigator.onLine === false) {
+          this.queue(data);
+          this.setState({ queued: true });
+          settle(false, t.errOffline);
+          return;
+        }
+        settle(true);
+      });
+  }
+
+  done() {
+    clearTimeout(this.watchdog);
+    clearInterval(this.tick);
+    try { localStorage.removeItem("forma:draft"); } catch (e) {}
+    try { localStorage.setItem("forma:sent", this.sid); } catch (e) {}
+    this.sid = uid();
+    this.setState({ sending: false, sent: true, err: "", queued: false });
+  }
+
+  queue(data) {
+    try {
+      const q = JSON.parse(localStorage.getItem("forma:outbox") || "[]");
+      if (!q.some((x) => x && x.submissionId === data.submissionId)) q.push(data);
+      localStorage.setItem("forma:outbox", JSON.stringify(q.slice(-5)));
+    } catch (e) {}
+  }
+
+  flushOutbox() {
+    if (!API_URL || navigator.onLine === false) return;
+    let q = [];
+    try { q = JSON.parse(localStorage.getItem("forma:outbox") || "[]"); } catch (e) { return; }
+    if (!q.length) return;
+    try { localStorage.removeItem("forma:outbox"); } catch (e) {}
+    q.forEach((data) => {
+      const body = JSON.stringify(data);
+      const opts = { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body, cache: "no-store" };
+      if (body.length < 60000) opts.keepalive = true;
+      try { fetch(API_URL, opts).catch(() => {}); } catch (e) {}
+    });
+  }
 
   downloadCopy = () => {
     const data = this.last || this.payload();
@@ -538,6 +994,7 @@ class Component extends DCLogic {
     a.href = URL.createObjectURL(blob);
     a.download = "FORMA-" + (data.fullName || "client").replace(/\s+/g, "-") + ".txt";
     a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   };
 
   onStress = (e) => { this.setState({ stress: Number(e.target.value) }); };
@@ -565,15 +1022,63 @@ class Component extends DCLogic {
     });
 
     const inStyle = { width: "100%", padding: "14px 16px", background: FIELD, border: "1px solid " + LINE, borderRadius: "12px", color: INK, font: "400 16px/1.4 " + font, outline: "none", minHeight: "50px" };
+    const taStyle = Object.assign({}, inStyle, { resize: "vertical", lineHeight: "1.6" });
+    const badIn = Object.assign({}, inStyle, { border: "1px solid #FF6B4A", background: "#170F0D" });
+    const badTa = Object.assign({}, taStyle, { border: "1px solid #FF6B4A", background: "#170F0D" });
+    const errTxt = { display: "block", font: "500 13px/1.5 " + font, color: "#FF8A5B", marginTop: "8px" };
+    const errHide = { display: "none" };
+
+    /* per-field label + input style + inline message */
+    const TAS = { weightHistory: 1, why: 1, pastAttempts: 1, currentProgram: 1, injuryDetails: 1, medications: 1, neverEat: 1, typicalDay: 1, dislikedBefore: 1, needFromCoach: 1, notes: 1 };
+    const LABELS = {
+      fullName: "fName", age: "fAge", phone: "fPhone", email: "fEmail", city: "fCity", job: "fJob",
+      height: "fHeight", weight: "fWeight", targetWeight: "fTarget", waist: "fWaist", hip: "fHip", chest: "fChest",
+      weightHistory: "fWHistory", deadline: "fDeadline", sessionLength: "fBudgetTime", why: "fWhy", pastAttempts: "fAttempts",
+      lovedExercises: "fLoveEx", hatedExercises: "fHateEx", currentProgram: "fProgram",
+      injuryDetails: "fInjDetails", medications: "fMeds", surgeries: "fSurgery", bloodWork: "fBlood", femaleNotes: "fFemale",
+      neverEat: "fNeverEat", typicalDay: "fTypicalDay", water: "fWater", caffeine: "fCaffeine", cravings: "fCravings",
+      sleepHours: "fSleepH", steps: "fSteps", workSchedule: "fSchedule",
+      dislikedBefore: "fDisliked", needFromCoach: "fNeed", notes: "fNotes"
+    };
+    const f = {};
+    Object.keys(LABELS).forEach((name) => {
+      const er = this.state.errs[name] || "";
+      const rule = RULES[name] || {};
+      const isTa = !!TAS[name];
+      f[name] = {
+        lb: t[LABELS[name]] + (rule.req ? t.star : ""),
+        st: er ? (isTa ? badTa : badIn) : (isTa ? taStyle : inStyle),
+        es: er ? errTxt : errHide,
+        er: er
+      };
+    });
+
+    const GLABELS = {
+      gender: "fGender", activity: "fActivity", goal: "fGoal", exp: "fExp", days: "fDays", equip: "fEquip",
+      injuries: "fInjuries", conditions: "fConditions", smoking: "fSmoking", diet: "fDiet", likes: "fLikes",
+      dislikes: "fDislikes", allergy: "fAllergy", supps: "fSupps", meals: "fMeals", cook: "fCook",
+      sleepQ: "fSleepQ", pastIssues: "fPastIssues", comms: "fComms"
+    };
+    const gv = {};
+    GROUP_ORDER.forEach((key) => {
+      const er = this.state.gerrs[key] || "";
+      gv[key] = {
+        lb: t[GLABELS[key]] + (REQ_GROUPS.indexOf(key) > -1 ? t.star : ""),
+        es: er ? errTxt : errHide,
+        er: er
+      };
+    });
+
+    const waNum = String(COACH_WHATSAPP || "").replace(/[^0-9]/g, "");
 
     return {
-      t: t, g: g, stress: this.state.stress,
+      t: t, g: g, f: f, gv: gv, stress: this.state.stress, sending: this.state.sending,
       formRef: this.formRef, onSubmit: this.onSubmit, onStress: this.onStress, downloadCopy: this.downloadCopy,
-      setEn: () => this.setState({ lang: "en" }, () => this.persist()),
-      setAr: () => this.setState({ lang: "ar" }, () => this.persist()),
+      setEn: () => this.setState({ lang: "en" }, () => { this.revalidateVisible(); this.persist(); }),
+      setAr: () => this.setState({ lang: "ar" }, () => { this.revalidateVisible(); this.persist(); }),
       pageStyle: { minHeight: "100vh", background: "#0B0B0E", color: INK, fontFamily: font, direction: ar ? "rtl" : "ltr", textAlign: ar ? "right" : "left" },
-      enBtnStyle: { padding: "7px 14px", borderRadius: "999px", border: "none", cursor: "pointer", background: lang === "en" ? LIME : "transparent", color: lang === "en" ? "#0B0B0E" : MUTE, font: "700 12px/1 'DM Sans', sans-serif", letterSpacing: ".08em" },
-      arBtnStyle: { padding: "7px 14px", borderRadius: "999px", border: "none", cursor: "pointer", background: ar ? LIME : "transparent", color: ar ? "#0B0B0E" : MUTE, font: "700 14px/1 'Cairo', sans-serif" },
+      enBtnStyle: { padding: "0 16px", minHeight: "40px", minWidth: "44px", borderRadius: "999px", border: "none", cursor: "pointer", background: lang === "en" ? LIME : "transparent", color: lang === "en" ? "#0B0B0E" : MUTE, font: "700 12px/1 'DM Sans', sans-serif", letterSpacing: ".08em" },
+      arBtnStyle: { padding: "0 16px", minHeight: "40px", minWidth: "44px", borderRadius: "999px", border: "none", cursor: "pointer", background: ar ? LIME : "transparent", color: ar ? "#0B0B0E" : MUTE, font: "700 14px/1 'Cairo', sans-serif" },
       barStyle: { height: "100%", width: this.state.progress + "%", background: LIME, transition: "width .35s ease" },
       h1Style: { font: (ar ? "800 " : "400 ") + "clamp(38px, 6.4vw, 74px)/1.02 " + (ar ? "'Cairo', sans-serif" : "Anton, Impact, sans-serif"), letterSpacing: ar ? "0" : "-.01em", textTransform: ar ? "none" : "uppercase", margin: "0 0 22px", maxWidth: "17ch", color: INK, textWrap: "pretty" },
       leadStyle: { font: "400 17px/1.7 " + font, color: MUTE, margin: 0, maxWidth: "62ch", textWrap: "pretty" },
@@ -586,20 +1091,39 @@ class Component extends DCLogic {
       labStyle: { display: "block", font: "600 12px/1.4 " + font, letterSpacing: ar ? "0" : ".08em", textTransform: ar ? "none" : "uppercase", color: "#7E7E8A", marginBottom: "10px" },
       labWarnStyle: { display: "block", font: "600 12px/1.4 " + font, letterSpacing: ar ? "0" : ".08em", textTransform: ar ? "none" : "uppercase", color: "#FF8A5B", marginBottom: "10px" },
       inStyle: inStyle,
-      taStyle: Object.assign({}, inStyle, { resize: "vertical", lineHeight: "1.6" }),
+      taStyle: taStyle,
       chipRowStyle: { display: "flex", flexWrap: "wrap", gap: "10px" },
       fieldGapStyle: { display: "block", marginTop: "26px" },
       noteStyle: { font: "400 15px/1.6 " + font, color: "#9A9AA6", margin: "-8px 0 24px", maxWidth: "60ch" },
       submitWrapStyle: { display: "grid", justifyItems: "center", gap: "14px", paddingTop: "26px" },
-      errStyle: { font: "500 14px/1.5 " + font, color: "#FF8A5B", minHeight: "20px", textAlign: "center" },
+      errStyle: { font: "500 14px/1.5 " + font, color: "#FF8A5B", minHeight: "20px", textAlign: "center", maxWidth: "52ch" },
       errMsg: this.state.err,
+      hintStyle: { font: "400 13px/1.5 " + font, color: this.state.sending ? LIME : "#63636E", textAlign: "center", minHeight: "18px" },
+      hintMsg: this.state.sending ? t.hintSending : this.state.queued ? t.hintQueued : t.hintSaving,
       submitLabel: this.state.sending ? t.sending : t.submit,
       submitStyle: { width: "100%", maxWidth: "460px", padding: "22px 32px", border: "none", borderRadius: "999px", background: LIME, color: "#0B0B0E", font: (ar ? "800 17px" : "700 17px") + "/1 " + font, letterSpacing: ar ? "0" : ".02em", cursor: this.state.sending ? "wait" : "pointer", opacity: this.state.sending ? .6 : 1 },
       finePrintStyle: { font: "400 13px/1.6 " + font, color: "#63636E", textAlign: "center", maxWidth: "48ch", margin: 0 },
-      successOverlayStyle: { position: "fixed", inset: 0, zIndex: 60, display: this.state.sent ? "grid" : "none", placeItems: "center", padding: "24px", background: "rgba(11,11,14,.96)", backdropFilter: "blur(8px)" },
+      successOverlayStyle: { position: "fixed", inset: 0, zIndex: 60, display: this.state.sent ? "grid" : "none", placeItems: "center", padding: "20px", background: "rgba(11,11,14,.96)", backdropFilter: "blur(8px)", overflowY: "auto" },
       successCardStyle: { maxWidth: "560px", textAlign: "center", background: CARD, border: "1px solid rgba(214,255,63,.28)", borderRadius: "26px", padding: "clamp(30px, 5vw, 56px)", animation: "forma-rise .4s ease both" },
-      ghostBtnStyle: { display: "inline-block", padding: "14px 22px", borderRadius: "999px", border: "1px solid " + LINE, background: "transparent", color: INK, font: "600 14px/1 " + font, cursor: "pointer" }
+      ghostBtnStyle: { display: "inline-block", padding: "14px 22px", borderRadius: "999px", border: "1px solid " + LINE, background: "transparent", color: INK, font: "600 14px/1 " + font, cursor: "pointer" },
+      waHref: waNum ? "https://wa.me/" + waNum : "#",
+      waBtnStyle: { display: waNum ? "inline-block" : "none", padding: "14px 22px", borderRadius: "999px", border: "1px solid " + LINE, background: "transparent", color: INK, font: "600 14px/1 " + font, cursor: "pointer" }
     };
+  }
+
+  /* re-render existing messages in the newly chosen language */
+  revalidateVisible() {
+    const errs = {}, gerrs = {};
+    Object.keys(this.state.errs).forEach((n) => {
+      const el = this.form && this.form.elements[n];
+      const m = this.checkField(n, el ? el.value : "");
+      if (m) errs[n] = m;
+    });
+    Object.keys(this.state.gerrs).forEach((k) => {
+      const m = this.checkGroup(k);
+      if (m) gerrs[k] = m;
+    });
+    this.setState({ errs: errs, gerrs: gerrs, err: "" });
   }
 }
 </script>

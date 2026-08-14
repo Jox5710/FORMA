@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="script" href="./vendor/react.production.min.js">
+<link rel="preload" as="script" href="./vendor/react-dom.production.min.js">
+<script>window.__resources={"https://unpkg.com/react@18.3.1/umd/react.production.min.js":"./vendor/react.production.min.js","https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js":"./vendor/react-dom.production.min.js"};</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -24,6 +28,12 @@
   ::-webkit-scrollbar-thumb { background: #26262E; border-radius: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   @media print { .no-print { display: none !important; } html, body { background: #fff } }
+  @media (max-width: 900px) {
+    .dash-hd { padding: 12px 16px !important; gap: 10px !important; }
+  }
+  @media (max-width: 560px) {
+    .dash-status { display: none !important; }
+  }
 </style>
 <template id="__bundler_thumbnail">
   <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="120" fill="#0B0B0E"/><rect x="20" y="34" width="34" height="52" rx="6" fill="#D6FF3F"/><rect x="62" y="34" width="38" height="10" rx="5" fill="#3A3A44"/><rect x="62" y="52" width="38" height="10" rx="5" fill="#3A3A44"/><rect x="62" y="70" width="26" height="10" rx="5" fill="#3A3A44"/></svg>
@@ -32,14 +42,14 @@
 
 <div style="{{ pageStyle }}">
 
-  <div class="no-print" style="display: flex; align-items: center; gap: 18px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,.08); background: #0E0E12; position: sticky; top: 0; z-index: 30">
+  <div class="no-print dash-hd" style="display: flex; align-items: center; gap: 18px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,.08); background: #0E0E12; position: sticky; top: 0; z-index: 30">
     <div style="display: flex; align-items: baseline; gap: 10px">
       <span style="font-family: Anton, Impact, sans-serif; font-size: 24px; letter-spacing: .14em; color: #D6FF3F; line-height: 1">FORMA</span>
       <span style="font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A">Coach Console</span>
     </div>
     <div style="flex: 1"></div>
-    <span style="font: 500 13px/1 'DM Sans', sans-serif; color: #6E6E7A">{{ statusText }}</span>
-    <button type="button" onClick="{{ refresh }}" style="{{ ghostBtn }}">Refresh</button>
+    <span class="dash-status" style="{{ statusStyle }}">{{ statusText }}</span>
+    <button type="button" onClick="{{ refresh }}" style="{{ ghostBtn }}">{{ refreshLabel }}</button>
     <button type="button" onClick="{{ openSettings }}" style="{{ ghostBtn }}">Settings</button>
   </div>
 
@@ -47,12 +57,14 @@
     <div style="{{ gateCardStyle }}">
       <div style="font-family: Anton, Impact, sans-serif; font-size: 44px; line-height: 1; letter-spacing: .12em; color: #D6FF3F">FORMA</div>
       <h1 style="font: 700 22px/1.3 'DM Sans', sans-serif; margin: 22px 0 10px; color: #F4F3F0">Connect your client sheet</h1>
-      <p style="font: 400 15px/1.65 'DM Sans', sans-serif; color: #8A8A96; margin: 0 0 26px">Paste the Web App URL and access code from your Google Apps Script deployment. Stored on this device only — never in the published page.</p>
-      <label style="display: block; margin-bottom: 16px"><span style="{{ labStyle }}">Web App URL</span><input value="{{ apiDraft }}" onChange="{{ onApi }}" placeholder="https://script.google.com/macros/s/.../exec" style="{{ inStyle }}" /></label>
-      <label style="display: block; margin-bottom: 24px"><span style="{{ labStyle }}">Access code</span><input value="{{ codeDraft }}" onChange="{{ onCode }}" placeholder="FORMA-2026" style="{{ inStyle }}" /></label>
+      <p style="font: 400 15px/1.65 'DM Sans', sans-serif; color: #8A8A96; margin: 0 0 26px">Enter your access code to open the client files. The code is kept on this device only — never in the published page.</p>
+      <label style="display: block; margin-bottom: 24px"><span style="{{ labStyle }}">Access code</span><input ref="{{ codeRef }}" type="password" defaultValue="{{ codeDraft }}" onInput="{{ onCode }}" onKeyDown="{{ onCodeKey }}" autoComplete="current-password" style="{{ inStyle }}" /></label>
       <div style="{{ gateErrStyle }}">{{ error }}</div>
-      <button type="button" onClick="{{ connect }}" style="{{ primaryBtn }}">Connect</button>
-      <p style="font: 400 13px/1.6 'DM Sans', sans-serif; color: #63636E; margin: 20px 0 0; text-align: center"><a href="setup.html">Read the 5-minute setup guide</a></p>
+      <button type="button" onClick="{{ connect }}" style="{{ primaryBtn }}">{{ connectLabel }}</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px">
+        <a href="setup.html" style="font: 400 13px/1.6 'DM Sans', sans-serif">Read the 5-minute setup guide</a>
+        <button type="button" onClick="{{ forget }}" style="{{ forgetStyle }}">Forget this device</button>
+      </div>
     </div>
   </div>
 
@@ -60,20 +72,26 @@
 
     <div class="no-print" style="{{ listPaneStyle }}">
       <div style="padding: 18px 18px 12px; border-bottom: 1px solid rgba(255,255,255,.07)">
-        <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search name, goal, city…" style="{{ searchStyle }}" />
+        <input ref="{{ searchRef }}" defaultValue="{{ queryInit }}" onInput="{{ onQuery }}" placeholder="Search name, goal, city…  ( / )" style="{{ searchStyle }}" />
         <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 14px">
           <span style="font-family: Anton, Impact, sans-serif; font-size: 26px; color: #D6FF3F; line-height: 1">{{ countText }}</span>
-          <span style="font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #6E6E7A">clients</span>
+          <span style="font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #6E6E7A">{{ countLabel }}</span>
+          <div style="flex: 1"></div>
+          <button type="button" onClick="{{ toggleSort }}" style="{{ sortBtn }}">{{ sortLabel }}</button>
         </div>
       </div>
-      <div style="overflow-y: auto; flex: 1">
+      <div ref="{{ listRef }}" style="overflow-y: auto; flex: 1; contain: content">
         <sc-for list="{{ rows }}" as="c" hint-placeholder-count="5">
-          <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">
-            <span style="font: 700 15px/1.3 'DM Sans', sans-serif; color: #F4F3F0">{{ c.name }}</span>
+          <button type="button" onClick="{{ c.onClick }}" data-sel="{{ c.selFlag }}" style="{{ c.style }}">
+            <span style="display: flex; align-items: baseline; gap: 8px">
+              <span style="font: 700 15px/1.3 'DM Sans', sans-serif; color: #F4F3F0">{{ c.name }}</span>
+              <span style="{{ c.badgeStyle }}">{{ c.badge }}</span>
+            </span>
             <span style="font: 500 12px/1.4 'DM Sans', sans-serif; color: #D6FF3F">{{ c.goal }}</span>
             <span style="font: 400 12px/1.4 'DM Sans', sans-serif; color: #6E6E7A">{{ c.meta }}</span>
           </button>
         </sc-for>
+        <button type="button" onClick="{{ showMore }}" style="{{ moreStyle }}">{{ moreLabel }}</button>
         <div style="{{ emptyListStyle }}">No clients match that search.</div>
       </div>
       <div style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.07); display: flex; gap: 10px">
@@ -84,7 +102,7 @@
 
     <div style="{{ detailPaneStyle }}">
       <div style="{{ noSelStyle }}">
-        <p style="font: 400 16px/1.6 'DM Sans', sans-serif; color: #5A5A66; max-width: 34ch; text-align: center">Select a client to read their intake file.</p>
+        <p style="font: 400 16px/1.6 'DM Sans', sans-serif; color: #5A5A66; max-width: 34ch; text-align: center">Select a client to read their intake file. Use ↑ ↓ to move, / to search.</p>
       </div>
 
       <div style="{{ detailStyle }}">
@@ -95,9 +113,11 @@
               <h1 style="font: 400 clamp(32px, 4.6vw, 54px)/1 Anton, Impact, sans-serif; text-transform: uppercase; letter-spacing: .01em; margin: 0; color: #F4F3F0">{{ sel.name }}</h1>
               <p style="font: 400 15px/1.6 'DM Sans', sans-serif; color: #8A8A96; margin: 12px 0 0">{{ sel.subline }}</p>
             </div>
-            <div class="no-print" style="display: flex; gap: 10px">
-              <a href="{{ sel.waLink }}" target="_blank" rel="noreferrer" style="{{ ghostBtn }}">WhatsApp</a>
+            <div class="no-print" style="display: flex; gap: 10px; flex-wrap: wrap">
+              <button type="button" onClick="{{ goBack }}" style="{{ backBtn }}">← All clients</button>
+              <a href="{{ sel.waLink }}" target="_blank" rel="noreferrer" style="{{ waBtn }}">WhatsApp</a>
               <button type="button" onClick="{{ copyFile }}" style="{{ ghostBtn }}">{{ copyLabel }}</button>
+              <button type="button" onClick="{{ downloadFile }}" style="{{ ghostBtn }}">Download</button>
             </div>
           </div>
 
@@ -119,7 +139,7 @@
 
           <div style="display: grid; gap: 18px; margin-top: 24px">
             <sc-for list="{{ sel.groups }}" as="grp" hint-placeholder-count="6">
-              <section style="background: #131318; border: 1px solid rgba(255,255,255,.07); border-radius: 20px; padding: clamp(20px, 3vw, 32px)">
+              <section style="background: #131318; border: 1px solid rgba(255,255,255,.07); border-radius: 20px; padding: clamp(20px, 3vw, 32px); content-visibility: auto; contain-intrinsic-size: auto 320px">
                 <h2 style="font: 400 20px/1 Anton, Impact, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #F4F3F0; margin: 0 0 22px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.08)">{{ grp.title }}</h2>
                 <div style="display: grid; gap: 18px">
                   <sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="4">
@@ -139,7 +159,21 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+/* ============================================================
+   The coach's Google Apps Script Web App URL. Same value as the
+   one in index.html — set it once here and the console just asks
+   for the access code.
+   ============================================================ */
+const API_URL = "https://script.google.com/macros/s/AKfycbyqo5bc7GCE1QhjEDeS0zigzo1m2hcY_mEmJum1kh3_PQd2o7JxAesEZ70UMvkxJMHXLQ/exec";
+
 const LIME = "#D6FF3F", INK = "#F4F3F0", MUTE = "#8A8A96", LINE = "rgba(255,255,255,.09)";
+
+/* how many rows are painted before "show more" — keeps a 500-client sheet
+   as fast to scroll as a 20-client one */
+const PAGE = 60;
+const CACHE_KEY = "forma:cache";
+const SEEN_KEY = "forma:seen";
+const REFRESH_MS = 60000;
 
 const GROUPS = [
   { title: "Contact", keys: [["phone", "WhatsApp"], ["email", "Email"], ["city", "City"], ["age", "Age"], ["gender", "Gender"], ["job", "Job"], ["activity", "Work activity"]] },
@@ -153,6 +187,7 @@ const GROUPS = [
 ];
 const FLAG_KEYS = [["medications", "Medication"], ["conditions", "Medical"], ["injuries", "Injury"], ["allergy", "Allergy"], ["neverEat", "Never eat"]];
 const NEG = ["", "none", "no", "لا يوجد", "لا", "n/a", "-"];
+const CSV_KEYS = GROUPS.reduce((a, g) => a.concat(g.keys.map((k) => k[0])), ["submittedAt", "fullName"]);
 
 const DEMO = [{
   submittedAt: new Date(Date.now() - 3600e3).toISOString(), fullName: "Sample Client", phone: "+201000000000", city: "Cairo", age: "31", gender: "Male",
@@ -167,59 +202,244 @@ const DEMO = [{
   needFromCoach: "Simple food I can eat with my family, and someone who checks on me.", comms: "WhatsApp", lang: "en", _demo: true
 }];
 
+/* one pass over each client when it arrives: a lowercase search blob and a
+   sortable timestamp. The old build re-ran JSON.stringify over every client on
+   every keystroke — this does the work once, at load. */
+function prepare(list) {
+  const out = [];
+  for (let i = 0; i < list.length; i++) {
+    const c = list[i];
+    if (!c || typeof c !== "object") continue;
+    let blob = "";
+    for (const k in c) {
+      if (k.charAt(0) === "_") continue;
+      const v = c[k];
+      if (v != null && v !== "") blob += v + " ";
+    }
+    const row = Object.assign({}, c);
+    row._key = c.submissionId || ((c.submittedAt || "") + "|" + (c.fullName || "") + "|" + i);
+    row._blob = blob.toLowerCase();
+    row._ts = Date.parse(c.submittedAt) || 0;
+    out.push(row);
+  }
+  return out;
+}
+
 class Component extends DCLogic {
-  state = { api: "", code: "", apiDraft: "", codeDraft: "", clients: [], loading: false, error: "", selIdx: -1, query: "", copied: false, connected: false, demo: false };
+  state = {
+    code: "", codeDraft: "",
+    clients: [], loading: false, error: "", selKey: "", query: "", copied: false,
+    connected: false, demo: false, cached: false, limit: PAGE, sort: "new",
+    narrow: false
+  };
 
   componentDidMount() {
-    let api = "", code = "";
-    try { api = localStorage.getItem("forma:api") || ""; code = localStorage.getItem("forma:code") || ""; } catch (e) {}
-    this.setState({ api: api, code: code, apiDraft: api, codeDraft: code });
-    if (api) this.load(api, code);
-    else this.setState({ clients: DEMO, demo: true, connected: false });
+    let code = "";
+    try { code = localStorage.getItem("forma:code") || ""; } catch (e) {}
+    try { this.seen = Number(localStorage.getItem(SEEN_KEY) || 0); } catch (e) { this.seen = 0; }
+
+    this.setState({ code: code, codeDraft: code, narrow: this.isNarrow() });
+
+    if (API_URL && code) {
+      const cached = this.readCache();
+      if (cached && cached.length) {
+        const list = this.sorted(prepare(cached));
+        this.setState({ clients: list, connected: true, cached: true, selKey: "" });
+      }
+      this.load(code);
+    } else {
+      const list = prepare(DEMO);
+      this.setState({ clients: list, demo: true, connected: false, selKey: list[0]._key });
+      if (!API_URL) this.setState({ error: "No Web App URL is set in dashboard.html yet." });
+    }
+
+    document.addEventListener("keydown", this.onKey);
+    window.addEventListener("focus", this.onFocus);
+    window.addEventListener("resize", this.onResize);
   }
 
-  load(api, code) {
-    if (!api) return;
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.onKey);
+    window.removeEventListener("focus", this.onFocus);
+    window.removeEventListener("resize", this.onResize);
+    clearTimeout(this.qTimer);
+    clearTimeout(this.rTimer);
+    this.killJsonp();
+  }
+
+  isNarrow() {
+    try { return window.matchMedia("(max-width: 900px)").matches; }
+    catch (e) { return window.innerWidth <= 900; }
+  }
+
+  onResize = () => {
+    clearTimeout(this.rTimer);
+    this.rTimer = setTimeout(() => {
+      const n = this.isNarrow();
+      if (n !== this.state.narrow) this.setState({ narrow: n });
+    }, 120);
+  };
+
+  /* ---------------- transport ---------------- */
+  killJsonp() {
+    clearTimeout(this.jTimer);
+    if (this.cbName) { try { delete window[this.cbName]; } catch (e) { window[this.cbName] = undefined; } this.cbName = ""; }
+    if (this.jScript && this.jScript.parentNode) this.jScript.parentNode.removeChild(this.jScript);
+    this.jScript = null;
+  }
+
+  load(code) {
+    const api = API_URL;
+    if (!api || this.state.loading) return;
+    this.killJsonp();
     this.setState({ loading: true, error: "" });
-    const cb = "formaCb" + Date.now();
-    const done = (data) => {
-      delete window[cb];
-      if (s.parentNode) s.parentNode.removeChild(s);
-      clearTimeout(timer);
+    this.lastLoad = Date.now();
+
+    const cb = "formaCb" + Date.now().toString(36);
+    this.cbName = cb;
+
+    window[cb] = (data) => {
+      this.killJsonp();
       if (!data || data.ok === false) {
-        this.setState({ loading: false, error: (data && data.error) || "Wrong access code." });
+        this.setState({ loading: false, connected: false, error: (data && data.error) || "Wrong access code." });
         return;
       }
-      const list = (data.clients || []).slice().reverse();
-      this.setState({ clients: list, loading: false, connected: true, demo: false, error: "", selIdx: list.length ? 0 : -1 });
+      const list = this.sorted(prepare(data.clients || []));
+      this.writeCache(data.clients || []);
+      const keep = list.some((c) => c._key === this.state.selKey) ? this.state.selKey : (list.length ? list[0]._key : "");
+      this.setState({ clients: list, loading: false, connected: true, demo: false, cached: false, error: "", selKey: keep });
     };
-    window[cb] = done;
+
     const s = document.createElement("script");
-    s.src = api + (api.indexOf("?") > -1 ? "&" : "?") + "code=" + encodeURIComponent(code) + "&callback=" + cb;
-    s.onerror = () => { delete window[cb]; this.setState({ loading: false, error: "Could not reach that URL. Check the deployment is set to “Anyone”." }); };
-    const timer = setTimeout(() => { if (window[cb]) { delete window[cb]; this.setState({ loading: false, error: "Timed out. Re-deploy the script and paste the new URL." }); } }, 12000);
+    s.async = true;
+    s.src = api + (api.indexOf("?") > -1 ? "&" : "?") + "code=" + encodeURIComponent(code) + "&callback=" + cb + "&t=" + Date.now();
+    s.onerror = () => {
+      this.killJsonp();
+      this.setState({ loading: false, error: "Could not reach the sheet. Check your connection and try Refresh." });
+    };
+    this.jScript = s;
+    this.jTimer = setTimeout(() => {
+      if (this.cbName === cb) {
+        this.killJsonp();
+        this.setState({ loading: false, error: "Timed out. Re-deploy the script and paste the new URL." });
+      }
+    }, 15000);
     document.body.appendChild(s);
   }
 
-  connect = () => {
-    const api = this.state.apiDraft.trim(), code = this.state.codeDraft.trim();
-    if (!api) { this.setState({ error: "Paste your Web App URL first." }); return; }
-    try { localStorage.setItem("forma:api", api); localStorage.setItem("forma:code", code); } catch (e) {}
-    this.setState({ api: api, code: code });
-    this.load(api, code);
+  readCache() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+      return raw && Array.isArray(raw.clients) ? raw.clients : null;
+    } catch (e) { return null; }
+  }
+
+  writeCache(clients) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), clients: clients.slice(-400) })); }
+    catch (e) { try { localStorage.removeItem(CACHE_KEY); } catch (er) {} }
+  }
+
+  /* ---------------- events ---------------- */
+  onFocus = () => {
+    if (this.state.connected && !this.state.demo && !this.state.loading && Date.now() - (this.lastLoad || 0) > REFRESH_MS) this.load(this.state.code);
   };
-  refresh = () => { if (this.state.api) this.load(this.state.api, this.state.code); else this.setState({ connected: false }); };
+
+  onKey = (e) => {
+    if (e.defaultPrevented) return;
+    const tag = (e.target && e.target.tagName) || "";
+    const typing = tag === "INPUT" || tag === "TEXTAREA";
+    if (e.key === "/" && !typing) { e.preventDefault(); if (this.search) this.search.focus(); return; }
+    if (e.key === "Escape" && typing && this.search && e.target === this.search) {
+      this.search.value = ""; clearTimeout(this.qTimer); this.setState({ query: "", limit: PAGE }); return;
+    }
+    if (typing) return;
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "j" && e.key !== "k") return;
+    const list = this.filtered();
+    if (!list.length) return;
+    const at = list.findIndex((c) => c._key === this.state.selKey);
+    const dir = (e.key === "ArrowDown" || e.key === "j") ? 1 : -1;
+    const next = Math.max(0, Math.min(list.length - 1, (at < 0 ? 0 : at + dir)));
+    e.preventDefault();
+    const limit = Math.max(this.state.limit, next + 1);
+    this.setState({ selKey: list[next]._key, copied: false, limit: limit }, () => this.scrollRowIntoView());
+  };
+
+  scrollRowIntoView() {
+    if (!this.list) return;
+    const el = this.list.querySelector('[data-sel="1"]');
+    if (el && el.scrollIntoView) { try { el.scrollIntoView({ block: "nearest" }); } catch (e) {} }
+  }
+
+  searchRef = (el) => { this.search = el; };
+  listRef = (el) => { this.list = el; };
+
+  /* the input stays uncontrolled and state lands after a short pause, so a
+     500-row list is not re-rendered on every keypress */
+  onQuery = (e) => {
+    const v = e.target.value;
+    clearTimeout(this.qTimer);
+    this.qTimer = setTimeout(() => this.setState({ query: v, limit: PAGE }), 140);
+  };
+
+  codeRef = (el) => { this.codeEl = el; };
+  onCode = (e) => { this.codeDraft = e.target.value; };
+  onCodeKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.connect(); } };
+
+  connect = () => {
+    const code = (this.codeDraft != null ? this.codeDraft : this.state.codeDraft).trim();
+    if (!API_URL) { this.setState({ error: "No Web App URL is set in dashboard.html yet." }); return; }
+    if (!code) { this.setState({ error: "Enter your access code." }); return; }
+    try { localStorage.setItem("forma:code", code); } catch (e) {}
+    this.setState({ code: code, codeDraft: code });
+    this.load(code);
+  };
+
+  refresh = () => { if (this.state.code) this.load(this.state.code); else this.setState({ connected: false }); };
   openSettings = () => this.setState({ connected: false, error: "" });
-  onApi = (e) => this.setState({ apiDraft: e.target.value });
-  onCode = (e) => this.setState({ codeDraft: e.target.value });
-  onQuery = (e) => this.setState({ query: e.target.value, selIdx: -1 });
+  goBack = () => this.setState({ selKey: "", copied: false });
   printPage = () => window.print();
+  toggleSort = () => this.setState({ sort: this.state.sort === "new" ? "az" : "new", clients: this.sorted(this.state.clients, this.state.sort === "new" ? "az" : "new") });
+  showMore = () => this.setState({ limit: this.state.limit + PAGE * 2 });
+
+  forget = () => {
+    try {
+      ["forma:api", "forma:code", CACHE_KEY, SEEN_KEY].forEach((k) => localStorage.removeItem(k));
+    } catch (e) {}
+    const list = prepare(DEMO);
+    this.codeDraft = "";
+    if (this.codeEl) this.codeEl.value = "";
+    this.setState({ code: "", codeDraft: "", clients: list, demo: true, connected: false, cached: false, error: "", selKey: list[0]._key });
+  };
+
+  /* ---------------- derived data ---------------- */
+  sorted(list, mode) {
+    const m = mode || this.state.sort;
+    const out = list.slice();
+    if (m === "az") out.sort((a, b) => String(a.fullName || "").localeCompare(String(b.fullName || "")));
+    else out.sort((a, b) => b._ts - a._ts);
+    return out;
+  }
 
   filtered() {
     const q = this.state.query.trim().toLowerCase();
-    const list = this.state.clients.map((c, i) => ({ c: c, i: i }));
-    if (!q) return list;
-    return list.filter((x) => JSON.stringify(x.c).toLowerCase().indexOf(q) > -1);
+    if (this._fq === q && this._fc === this.state.clients) return this._fr;
+    let out;
+    if (!q) out = this.state.clients;
+    else {
+      const terms = q.split(/\s+/).filter(Boolean);
+      out = this.state.clients.filter((c) => {
+        for (let i = 0; i < terms.length; i++) if (c._blob.indexOf(terms[i]) === -1) return false;
+        return true;
+      });
+    }
+    this._fq = q; this._fc = this.state.clients; this._fr = out;
+    return out;
+  }
+
+  current() {
+    const list = this.filtered();
+    for (let i = 0; i < list.length; i++) if (list[i]._key === this.state.selKey) return list[i];
+    return null;
   }
 
   fileText(c) {
@@ -236,21 +456,34 @@ class Component extends DCLogic {
     const c = this.current();
     if (!c) return;
     const txt = this.fileText(c);
-    const fin = () => { this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 1800); };
+    const fin = () => { this.setState({ copied: true }); clearTimeout(this.copyTimer); this.copyTimer = setTimeout(() => this.setState({ copied: false }), 1800); };
     if (navigator.clipboard) navigator.clipboard.writeText(txt).then(fin, fin);
     else fin();
   };
 
-  exportCsv = () => {
-    const keys = GROUPS.reduce((a, g) => a.concat(g.keys.map((k) => k[0])), ["submittedAt", "fullName"]);
-    const esc = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
-    const rows = [keys.join(",")].concat(this.state.clients.map((c) => keys.map((k) => esc(c[k])).join(",")));
-    const blob = new Blob(["\ufeff" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "FORMA-clients.csv";
-    a.click();
+  downloadFile = () => {
+    const c = this.current();
+    if (!c) return;
+    this.save(new Blob([this.fileText(c)], { type: "text/plain;charset=utf-8" }),
+      "FORMA-" + String(c.fullName || "client").replace(/\s+/g, "-") + ".txt");
   };
+
+  exportCsv = () => {
+    const esc = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+    const src = this.filtered();
+    const rows = [CSV_KEYS.join(",")];
+    for (let i = 0; i < src.length; i++) rows.push(CSV_KEYS.map((k) => esc(src[i][k])).join(","));
+    this.save(new Blob(["﻿" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" }), "FORMA-clients.csv");
+  };
+
+  save(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
 
   when(iso) {
     if (!iso) return "";
@@ -259,90 +492,129 @@ class Component extends DCLogic {
     return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) + " · " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
   }
 
-  current() {
-    const f = this.filtered();
-    if (this.state.selIdx < 0) return null;
-    const hit = f.filter((x) => x.i === this.state.selIdx)[0];
-    return hit ? hit.c : null;
+  /* the detail pane is the most expensive thing on the page, so it is built
+     once per selected client instead of on every render */
+  detail(c) {
+    if (!c) return null;
+    if (this._dKey === c._key && this._dSrc === c) return this._dVal;
+    const has = (v) => v && NEG.indexOf(String(v).trim().toLowerCase()) === -1;
+    const drop = c.weight && c.targetWeight ? (Number(c.weight) - Number(c.targetWeight)).toFixed(1) : "";
+    const valueStyle = { font: "400 15px/1.7 'DM Sans', 'Cairo', sans-serif", color: INK, whiteSpace: "pre-wrap", textWrap: "pretty" };
+    const val = {
+      name: c.fullName || "Unnamed",
+      received: "Received " + this.when(c.submittedAt),
+      subline: [c.age ? c.age + " yrs" : "", c.gender, c.city, c.job, c.comms ? "prefers " + c.comms : ""].filter(Boolean).join(" · "),
+      waLink: c.phone ? "https://wa.me/" + String(c.phone).replace(/[^0-9]/g, "") : "",
+      stats: [
+        { label: "Weight", value: c.weight ? c.weight + " kg" : "—" },
+        { label: "Target", value: c.targetWeight ? c.targetWeight + " kg" : "—" },
+        { label: "To lose", value: drop ? drop + " kg" : "—" },
+        { label: "Days / wk", value: (c.days || "—").replace(/\s*days?/i, "") },
+        { label: "Sleep", value: c.sleepHours ? c.sleepHours + " h" : "—" },
+        { label: "Stress", value: c.stress ? c.stress + "/10" : "—" }
+      ],
+      flags: FLAG_KEYS.filter((k) => has(c[k[0]])).map((k) => ({ label: k[1], value: c[k[0]] })),
+      groups: GROUPS.map((g) => ({
+        title: g.title,
+        items: g.keys.filter((k) => String(c[k[0]] || "").trim()).map((k) => ({ label: k[1], value: c[k[0]], valueStyle: valueStyle }))
+      })).filter((g) => g.items.length)
+    };
+    this._dKey = c._key; this._dSrc = c; this._dVal = val;
+    return val;
   }
 
   renderVals() {
     const st = this.state;
     const list = this.filtered();
     const c = this.current();
-    const has = (v) => v && NEG.indexOf(String(v).trim().toLowerCase()) === -1;
+    const shown = list.length > st.limit ? list.slice(0, st.limit) : list;
 
-    const rows = list.map((x) => {
-      const on = x.i === st.selIdx;
+    /* shared style objects — created once per render, not once per row */
+    const rowBase = {
+      display: "grid", gap: "5px", width: "100%", textAlign: "start", cursor: "pointer",
+      padding: "16px 18px", border: "none", borderBottom: "1px solid rgba(255,255,255,.06)",
+      borderInlineStart: "3px solid transparent", background: "transparent", color: INK
+    };
+    const rowOn = Object.assign({}, rowBase, { borderInlineStart: "3px solid " + LIME, background: "#191920" });
+    const badgeOn = { font: "700 9px/1 'DM Sans', sans-serif", letterSpacing: ".14em", textTransform: "uppercase", color: "#0B0B0E", background: LIME, borderRadius: "999px", padding: "4px 7px" };
+    const badgeOff = { display: "none" };
+
+    const rows = shown.map((x) => {
+      const on = x._key === st.selKey;
+      const isNew = !st.demo && x._ts > this.seen;
       return {
-        name: (x.c.fullName || "Unnamed") + (x.c._demo ? "  · demo" : ""),
-        goal: x.c.goal || "—",
-        meta: [x.c.city, x.c.weight ? x.c.weight + " kg" : "", this.when(x.c.submittedAt)].filter(Boolean).join(" · "),
-        onClick: () => this.setState({ selIdx: x.i, copied: false }),
-        style: {
-          display: "grid", gap: "5px", width: "100%", textAlign: "start", cursor: "pointer",
-          padding: "16px 18px", border: "none", borderBottom: "1px solid rgba(255,255,255,.06)",
-          borderInlineStart: on ? "3px solid " + LIME : "3px solid transparent",
-          background: on ? "#191920" : "transparent"
-        }
+        name: (x.fullName || "Unnamed") + (x._demo ? "  · demo" : ""),
+        goal: x.goal || "—",
+        meta: [x.city, x.weight ? x.weight + " kg" : "", this.when(x.submittedAt)].filter(Boolean).join(" · "),
+        badge: isNew ? "new" : "",
+        badgeStyle: isNew ? badgeOn : badgeOff,
+        onClick: () => this.setState({ selKey: x._key, copied: false }, () => {
+          if (this.state.narrow) window.scrollTo(0, 0);
+        }),
+        style: on ? rowOn : rowBase,
+        selFlag: on ? "1" : "0"
       };
     });
 
-    let sel = { name: "", subline: "", received: "", stats: [], flags: [], groups: [], waLink: "#" };
-    if (c) {
-      const drop = c.weight && c.targetWeight ? (Number(c.weight) - Number(c.targetWeight)).toFixed(1) : "";
-      sel = {
-        name: c.fullName || "Unnamed",
-        received: "Received " + this.when(c.submittedAt),
-        subline: [c.age ? c.age + " yrs" : "", c.gender, c.city, c.job, c.comms ? "prefers " + c.comms : ""].filter(Boolean).join(" · "),
-        waLink: c.phone ? "https://wa.me/" + String(c.phone).replace(/[^0-9]/g, "") : "#",
-        stats: [
-          { label: "Weight", value: c.weight ? c.weight + " kg" : "—" },
-          { label: "Target", value: c.targetWeight ? c.targetWeight + " kg" : "—" },
-          { label: "To lose", value: drop ? drop + " kg" : "—" },
-          { label: "Days / wk", value: (c.days || "—").replace(/\s*days?/i, "") },
-          { label: "Sleep", value: c.sleepHours ? c.sleepHours + " h" : "—" },
-          { label: "Stress", value: c.stress ? c.stress + "/10" : "—" }
-        ],
-        flags: FLAG_KEYS.filter((k) => has(c[k[0]])).map((k) => ({ label: k[1], value: c[k[0]] })),
-        groups: GROUPS.map((g) => ({
-          title: g.title,
-          items: g.keys.filter((k) => String(c[k[0]] || "").trim()).map((k) => ({
-            label: k[1],
-            value: c[k[0]],
-            valueStyle: { font: "400 15px/1.7 'DM Sans', 'Cairo', sans-serif", color: INK, whiteSpace: "pre-wrap", textWrap: "pretty" }
-          }))
-        })).filter((g) => g.items.length)
-      };
-    }
-
+    const sel = this.detail(c) || { name: "", subline: "", received: "", stats: [], flags: [], groups: [], waLink: "" };
     const inStyle = { width: "100%", padding: "14px 16px", background: "#0E0E12", border: "1px solid " + LINE, borderRadius: "12px", color: INK, font: "400 15px/1.4 'DM Sans', sans-serif" };
+    const ghostBtn = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 16px", minHeight: "40px", borderRadius: "999px", border: "1px solid " + LINE, background: "transparent", color: INK, font: "600 13px/1 'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" };
     const gateOpen = !st.connected;
+    const more = list.length - shown.length;
+    const narrow = st.narrow;
 
     return {
-      rows: rows, sel: sel, query: st.query, apiDraft: st.apiDraft, codeDraft: st.codeDraft, error: st.error,
+      rows: rows, sel: sel, queryInit: st.query, codeDraft: st.codeDraft, error: st.error,
       countText: String(list.length),
-      statusText: st.loading ? "Loading…" : st.demo ? "Demo data — not connected" : st.connected ? "Live · Google Sheet" : "",
+      countLabel: st.query ? "matches" : "clients",
+      statusText: st.loading ? "Refreshing…" : (st.error && st.connected) ? st.error : st.demo ? "Demo data — not connected" : st.cached ? "Saved copy — refreshing" : st.connected ? "Live · Google Sheet" : "",
+      statusStyle: { font: "500 13px/1 'DM Sans', sans-serif", color: st.loading ? LIME : (st.error && st.connected) ? "#FF8A5B" : "#6E6E7A", maxWidth: "44ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+      refreshLabel: st.loading ? "…" : "Refresh",
+      connectLabel: st.loading ? "Connecting…" : "Connect",
       copyLabel: st.copied ? "Copied ✓" : "Copy file",
-      connect: this.connect, refresh: this.refresh, openSettings: this.openSettings,
-      onApi: this.onApi, onCode: this.onCode, onQuery: this.onQuery,
-      copyFile: this.copyFile, exportCsv: this.exportCsv, printPage: this.printPage,
+      sortLabel: st.sort === "new" ? "Newest" : "A–Z",
+      moreLabel: more > 0 ? "Show " + Math.min(more, PAGE * 2) + " more of " + list.length : "",
+      moreStyle: more > 0
+        ? { width: "100%", padding: "14px 18px", border: "none", borderBottom: "1px solid rgba(255,255,255,.06)", background: "transparent", color: LIME, font: "600 13px/1 'DM Sans', sans-serif", cursor: "pointer" }
+        : { display: "none" },
+      connect: this.connect, refresh: this.refresh, openSettings: this.openSettings, forget: this.forget,
+      onCode: this.onCode, onCodeKey: this.onCodeKey, onQuery: this.onQuery, toggleSort: this.toggleSort, showMore: this.showMore,
+      copyFile: this.copyFile, downloadFile: this.downloadFile, exportCsv: this.exportCsv, printPage: this.printPage,
+      searchRef: this.searchRef, listRef: this.listRef, codeRef: this.codeRef, goBack: this.goBack,
       pageStyle: { minHeight: "100vh", background: "#0B0B0E", color: INK, fontFamily: "'DM Sans', sans-serif" },
       gateStyle: { position: "fixed", inset: 0, zIndex: 50, display: gateOpen ? "grid" : "none", placeItems: "center", padding: "24px", background: "rgba(11,11,14,.95)", backdropFilter: "blur(10px)", overflowY: "auto" },
       gateCardStyle: { width: "100%", maxWidth: "520px", background: "#15151A", border: "1px solid rgba(255,255,255,.09)", borderRadius: "24px", padding: "clamp(26px, 4vw, 44px)" },
       gateErrStyle: { font: "500 14px/1.5 'DM Sans', sans-serif", color: "#FF8A5B", minHeight: "22px", marginBottom: "6px" },
-      appStyle: { display: "grid", gridTemplateColumns: "minmax(260px, 340px) 1fr", height: "calc(100vh - 65px)" },
-      listPaneStyle: { display: "flex", flexDirection: "column", borderInlineEnd: "1px solid rgba(255,255,255,.08)", background: "#0E0E12", minHeight: 0 },
-      detailPaneStyle: { overflowY: "auto", minHeight: 0 },
-      noSelStyle: { display: c ? "none" : "grid", placeItems: "center", height: "100%", padding: "40px" },
+      forgetStyle: { border: "none", background: "transparent", color: "#63636E", font: "500 13px/1.6 'DM Sans', sans-serif", cursor: "pointer", padding: 0 },
+      appStyle: narrow
+        ? { display: "block", height: "auto" }
+        : { display: "grid", gridTemplateColumns: "minmax(260px, 340px) 1fr", height: "calc(100vh - 65px)" },
+      listPaneStyle: narrow
+        ? { display: c ? "none" : "flex", flexDirection: "column", background: "#0E0E12", height: "calc(100vh - 62px)", minHeight: 0 }
+        : { display: "flex", flexDirection: "column", borderInlineEnd: "1px solid rgba(255,255,255,.08)", background: "#0E0E12", minHeight: 0 },
+      detailPaneStyle: narrow
+        ? { display: c ? "block" : "none", overflowY: "auto", height: "calc(100vh - 62px)", minHeight: 0 }
+        : { overflowY: "auto", minHeight: 0 },
+      noSelStyle: { display: !c && !narrow ? "grid" : "none", placeItems: "center", height: "100%", padding: "40px" },
       detailStyle: { display: c ? "block" : "none" },
+      backBtn: narrow ? ghostBtn : { display: "none" },
       emptyListStyle: { display: rows.length ? "none" : "block", padding: "26px 18px", font: "400 14px/1.6 'DM Sans', sans-serif", color: "#5A5A66" },
       labStyle: { display: "block", font: "600 11px/1.4 'DM Sans', sans-serif", letterSpacing: ".12em", textTransform: "uppercase", color: "#7E7E8A", marginBottom: "9px" },
       inStyle: inStyle,
       searchStyle: Object.assign({}, inStyle, { padding: "12px 14px", borderRadius: "10px" }),
-      ghostBtn: { display: "inline-block", padding: "10px 16px", borderRadius: "999px", border: "1px solid " + LINE, background: "transparent", color: INK, font: "600 13px/1 'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" },
+      ghostBtn: ghostBtn,
+      waBtn: sel.waLink ? ghostBtn : Object.assign({}, ghostBtn, { display: "none" }),
+      sortBtn: { border: "1px solid " + LINE, background: "transparent", color: "#8A8A96", font: "600 11px/1 'DM Sans', sans-serif", letterSpacing: ".1em", textTransform: "uppercase", borderRadius: "999px", padding: "0 14px", minHeight: "34px", cursor: "pointer" },
       primaryBtn: { width: "100%", padding: "18px 24px", border: "none", borderRadius: "999px", background: LIME, color: "#0B0B0E", font: "700 16px/1 'DM Sans', sans-serif", cursor: "pointer" }
     };
+  }
+
+  componentDidUpdate() {
+    /* once the coach has actually seen the list, "new" resets for next visit */
+    if (this.state.connected && !this.state.demo && !this.seenWritten && this.state.clients.length) {
+      this.seenWritten = true;
+      try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch (e) {}
+    }
   }
 }
 </script>
