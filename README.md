@@ -3,6 +3,9 @@
 A client intake form and a private coach console. Static site: no server, no build step,
 no monthly cost. Publish it on GitHub Pages and it runs off Google Sheets.
 
+Read a client's file, write their diet and training plans next to it, and send the finished
+plan to them as a PDF — without leaving the page.
+
 ## Files
 
 | File | What it is |
@@ -68,4 +71,33 @@ navigation: `↑ ↓` or `j k` to move, `/` to search, `Esc` to clear.
 **Both pages work on a phone.** The form reflows to one column with no sideways scroll and
 inputs large enough that iOS will not zoom. The console switches to an inbox layout on
 narrow screens: the client list first, tapping a client opens their file full-screen with a
-back button.
+back button. On a phone the page itself scrolls rather than a pane inside it, so the browser
+bar collapses and nothing is cut off at the bottom; intake answers stack label-above-value
+instead of squeezing into a 140px column; and every console input is 16px, which is what
+stops iOS zooming in when you tap the search box.
+
+## Writing plans
+
+Open a client and the file has three tabs: **Intake · Diet plan · Training plan**.
+
+- **Diet.** Daily targets for calories, protein, carbs, fat and water, then meals, then the
+  foods in each meal with quantity and macros. Meal and day totals add themselves up and
+  show how far each one is from the target — lime inside 5%, orange outside.
+- **Training.** A split, then days, then exercises with sets, reps, rest and tempo. Every
+  exercise has a **video link** field; paste a URL and the ▶ next to it lights up so you can
+  check the link before the client gets it.
+- Their allergies, the foods they will never eat, their injuries and their equipment sit as
+  chips above the editor, so you are never writing a plan against answers you cannot see.
+- **Start from intake** builds the skeleton from their own answers: their meal count, their
+  training days, a protein target from their goal weight.
+- Rows can be reordered, duplicated and deleted, and a delete can be undone.
+
+Plans save themselves to the device you write them on, under `forma:plans`. They are **not**
+in the Google Sheet, so they do not follow you to another computer — and nothing about the
+Apps Script changes, so there is no re-deploy.
+
+**Export PDF** prints through the browser, which gives selectable text, a small file and
+correctly joined Arabic. **Send on WhatsApp** hands the phone's share sheet a real PDF; on a
+desktop, where no browser will let a page attach a file to a chat, it saves the PDF and opens
+the chat with the plan written out so you attach it in one drag. Each plan carries its own
+EN / ع switch, and an Arabic plan is laid out right-to-left in the PDF too.

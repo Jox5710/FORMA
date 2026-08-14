@@ -18,21 +18,57 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet" />
 <style>
   html, body { margin: 0; padding: 0; background: #0B0B0E; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { overflow-x: hidden; }
   * { box-sizing: border-box; }
   a { color: #D6FF3F; text-decoration: none; }
   a:hover { color: #E9FF8A; }
-  input, button, textarea { font-family: inherit; }
+  input, button, textarea, select { font-family: inherit; }
   ::placeholder { color: #55555F; }
-  input:focus { border-color: #D6FF3F !important; outline: none; }
+  input:focus, textarea:focus { border-color: #D6FF3F !important; outline: none; }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb { background: #26262E; border-radius: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  @media print { .no-print { display: none !important; } html, body { background: #fff } }
-  @media (max-width: 900px) {
-    .dash-hd { padding: 12px 16px !important; gap: 10px !important; }
+
+  /* the page fills the viewport; dvh keeps the mobile URL bar from cropping it */
+  .dash-page { min-height: 100vh; min-height: 100dvh; }
+
+  /* desktop only: header + a two-pane row that fills the rest. No hard-coded
+     header height — the flex column measures it. */
+  @media (min-width: 901px) {
+    .dash-page { height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+    .dash-app { flex: 1; min-height: 0; }
   }
+
+  @media print { .no-print { display: none !important; } html, body { background: #fff } }
+
+  @media (max-width: 900px) {
+    .dash-hd {
+      padding: 12px max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left)) !important;
+      gap: 10px !important;
+    }
+    /* on a phone the document scrolls, not the panes — this is what lets the
+       browser URL bar collapse and stops 100vh cropping the last row */
+    .list-scroll { overflow-y: visible !important; flex: none !important; contain: none !important; }
+    .dash-foot { padding-bottom: max(14px, env(safe-area-inset-bottom)) !important; }
+  }
+
+  /* Skipping offscreen sections keeps a long file cheap to scroll. Only the
+     block size is hinted — hinting the inline size too made the section refuse
+     to shrink below 320px and pushed the page sideways on small phones. */
+  .kv-sec { content-visibility: auto; contain-intrinsic-height: auto 320px; }
+
+  /* grid and flex children default to min-content, which a long email or a
+     phone number can push past a narrow screen — let them shrink and wrap */
+  .kv-sec, .kv-row, .flag-row { min-width: 0; }
+  .kv-row > *, .flag-row > * { min-width: 0; overflow-wrap: anywhere; }
+
+  /* intake answers: side-by-side is unreadable once the column is ~140px */
   @media (max-width: 560px) {
     .dash-status { display: none !important; }
+    .dash-eyebrow { display: none !important; }
+    .kv-row { grid-template-columns: 1fr !important; gap: 6px !important; }
+    .flag-row { flex-direction: column !important; gap: 8px !important; }
   }
 </style>
 <template id="__bundler_thumbnail">
@@ -40,12 +76,12 @@
 </template>
 </helmet>
 
-<div style="{{ pageStyle }}">
+<div class="dash-page" style="{{ pageStyle }}">
 
   <div class="no-print dash-hd" style="display: flex; align-items: center; gap: 18px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,.08); background: #0E0E12; position: sticky; top: 0; z-index: 30">
-    <div style="display: flex; align-items: baseline; gap: 10px">
+    <div style="display: flex; align-items: baseline; gap: 10px; min-width: 0">
       <span style="font-family: Anton, Impact, sans-serif; font-size: 24px; letter-spacing: .14em; color: #D6FF3F; line-height: 1">FORMA</span>
-      <span style="font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A">Coach Console</span>
+      <span class="dash-eyebrow" style="font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A; white-space: nowrap">Coach Console</span>
     </div>
     <div style="flex: 1"></div>
     <span class="dash-status" style="{{ statusStyle }}">{{ statusText }}</span>
@@ -58,7 +94,7 @@
       <div style="font-family: Anton, Impact, sans-serif; font-size: 44px; line-height: 1; letter-spacing: .12em; color: #D6FF3F">FORMA</div>
       <h1 style="font: 700 22px/1.3 'DM Sans', sans-serif; margin: 22px 0 10px; color: #F4F3F0">Connect your client sheet</h1>
       <p style="font: 400 15px/1.65 'DM Sans', sans-serif; color: #8A8A96; margin: 0 0 26px">Enter your access code to open the client files. The code is kept on this device only — never in the published page.</p>
-      <label style="display: block; margin-bottom: 24px"><span style="{{ labStyle }}">Access code</span><input ref="{{ codeRef }}" type="password" defaultValue="{{ codeDraft }}" onInput="{{ onCode }}" onKeyDown="{{ onCodeKey }}" autoComplete="current-password" style="{{ inStyle }}" /></label>
+      <label style="display: block; margin-bottom: 24px"><span style="{{ labStyle }}">Access code</span><input ref="{{ codeRef }}" type="password" onInput="{{ onCode }}" onKeyDown="{{ onCodeKey }}" autoComplete="current-password" style="{{ inStyle }}" /></label>
       <div style="{{ gateErrStyle }}">{{ error }}</div>
       <button type="button" onClick="{{ connect }}" style="{{ primaryBtn }}">{{ connectLabel }}</button>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px">
@@ -68,7 +104,7 @@
     </div>
   </div>
 
-  <div style="{{ appStyle }}">
+  <div class="dash-app" style="{{ appStyle }}">
 
     <div class="no-print" style="{{ listPaneStyle }}">
       <div style="padding: 18px 18px 12px; border-bottom: 1px solid rgba(255,255,255,.07)">
@@ -80,7 +116,7 @@
           <button type="button" onClick="{{ toggleSort }}" style="{{ sortBtn }}">{{ sortLabel }}</button>
         </div>
       </div>
-      <div ref="{{ listRef }}" style="overflow-y: auto; flex: 1; contain: content">
+      <div ref="{{ listRef }}" class="list-scroll" style="overflow-y: auto; flex: 1; contain: content">
         <sc-for list="{{ rows }}" as="c" hint-placeholder-count="5">
           <button type="button" onClick="{{ c.onClick }}" data-sel="{{ c.selFlag }}" style="{{ c.style }}">
             <span style="display: flex; align-items: baseline; gap: 8px">
@@ -94,7 +130,7 @@
         <button type="button" onClick="{{ showMore }}" style="{{ moreStyle }}">{{ moreLabel }}</button>
         <div style="{{ emptyListStyle }}">No clients match that search.</div>
       </div>
-      <div style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.07); display: flex; gap: 10px">
+      <div class="dash-foot" style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.07); display: flex; gap: 10px">
         <button type="button" onClick="{{ exportCsv }}" style="{{ ghostBtn }}">Export CSV</button>
         <button type="button" onClick="{{ printPage }}" style="{{ ghostBtn }}">Print</button>
       </div>
@@ -121,6 +157,13 @@
             </div>
           </div>
 
+          <div class="no-print" style="display: flex; gap: 8px; margin: 22px 0 4px; overflow-x: auto; padding-bottom: 4px">
+            <button type="button" onClick="{{ tabIntake }}" style="{{ tabIntakeStyle }}">Intake</button>
+            <button type="button" onClick="{{ tabDiet }}" style="{{ tabDietStyle }}">Diet plan</button>
+            <button type="button" onClick="{{ tabTraining }}" style="{{ tabTrainStyle }}">Training plan</button>
+          </div>
+
+          <div style="{{ intakeShow }}">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin: 26px 0 34px">
             <sc-for list="{{ sel.stats }}" as="s" hint-placeholder-count="5">
               <div style="background: #15151A; border: 1px solid rgba(255,255,255,.07); border-radius: 16px; padding: 18px">
@@ -131,7 +174,7 @@
           </div>
 
           <sc-for list="{{ sel.flags }}" as="f" hint-placeholder-count="0">
-            <div style="display: flex; gap: 14px; background: rgba(255,138,91,.08); border: 1px solid rgba(255,138,91,.34); border-radius: 16px; padding: 18px 20px; margin-bottom: 14px">
+            <div class="flag-row" style="display: flex; gap: 14px; background: rgba(255,138,91,.08); border: 1px solid rgba(255,138,91,.34); border-radius: 16px; padding: 18px 20px; margin-bottom: 14px">
               <span style="font: 700 11px/1.6 'DM Sans', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #FF8A5B; white-space: nowrap">{{ f.label }}</span>
               <span style="font: 400 15px/1.6 'DM Sans', sans-serif; color: #EDD8CC">{{ f.value }}</span>
             </div>
@@ -139,11 +182,11 @@
 
           <div style="display: grid; gap: 18px; margin-top: 24px">
             <sc-for list="{{ sel.groups }}" as="grp" hint-placeholder-count="6">
-              <section style="background: #131318; border: 1px solid rgba(255,255,255,.07); border-radius: 20px; padding: clamp(20px, 3vw, 32px); content-visibility: auto; contain-intrinsic-size: auto 320px">
+              <section class="kv-sec" style="background: #131318; border: 1px solid rgba(255,255,255,.07); border-radius: 20px; padding: clamp(20px, 3vw, 32px)">
                 <h2 style="font: 400 20px/1 Anton, Impact, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #F4F3F0; margin: 0 0 22px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.08)">{{ grp.title }}</h2>
                 <div style="display: grid; gap: 18px">
                   <sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="4">
-                    <div style="display: grid; grid-template-columns: minmax(140px, 210px) 1fr; gap: 20px; align-items: start">
+                    <div class="kv-row" style="display: grid; grid-template-columns: minmax(140px, 210px) 1fr; gap: 20px; align-items: start">
                       <span style="font: 600 12px/1.5 'DM Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #6E6E7A">{{ it.label }}</span>
                       <span style="{{ it.valueStyle }}">{{ it.value }}</span>
                     </div>
@@ -152,6 +195,152 @@
               </section>
             </sc-for>
           </div>
+          </div>
+
+          <!-- ===================== PLAN EDITORS =====================
+               One container, one delegated onInput and one delegated onClick.
+               Every field carries data-path + data-field; every button carries
+               data-act (+ data-list / data-i). No per-row closures are built. -->
+          <div ref="{{ editorRef }}" onInput="{{ onEditorInput }}" onClick="{{ onEditorClick }}" style="{{ editorShow }}">
+
+            <div class="no-print" style="{{ pStyles.bar }}">
+              <button type="button" data-act="lang" data-v="en" style="{{ langEnStyle }}">EN</button>
+              <button type="button" data-act="lang" data-v="ar" style="{{ langArStyle }}">ع</button>
+              <button type="button" data-act="prefill" style="{{ ghostBtn }}">Start from intake</button>
+              <button type="button" data-act="undo" style="{{ undoStyle }}">Removed · Undo</button>
+              <div style="flex: 1"></div>
+              <span style="{{ savedStyle }}">{{ savedText }}</span>
+              <button type="button" data-act="pdf" style="{{ ghostBtn }}">Export PDF</button>
+              <button type="button" data-act="wa" style="{{ sendBtn }}">Send on WhatsApp</button>
+            </div>
+
+            <div style="{{ pStyles.fieldGrid }}">
+              <input data-field="title" placeholder="Plan title" style="{{ pIn }}" />
+              <input data-field="startDate" placeholder="Start date" style="{{ pIn }}" />
+            </div>
+
+            <!-- ---------- DIET ---------- -->
+            <div style="{{ dietShow }}">
+              <div style="{{ pStyles.ctxRow }}">
+                <sc-for list="{{ dietCtx }}" as="x" hint-placeholder-count="0">
+                  <span style="{{ x.style }}">{{ x.text }}</span>
+                </sc-for>
+              </div>
+
+              <div style="{{ pStyles.tileGrid }}">
+                <sc-for list="{{ dietTargets }}" as="t" hint-placeholder-count="5">
+                  <label style="{{ pStyles.tile }}">
+                    <span style="{{ pStyles.tileLab }}">{{ t.label }}</span>
+                    <input data-path="targets" data-field="{{ t.key }}" data-live="1" inputmode="decimal" style="{{ pInNum }}" />
+                    <span style="{{ t.deltaStyle }}">{{ t.delta }}</span>
+                  </label>
+                </sc-for>
+              </div>
+
+              <sc-for list="{{ dietMeals }}" as="m" hint-placeholder-count="3">
+                <section style="{{ pStyles.card }}">
+                  <div style="{{ pStyles.cardHead }}">
+                    <input data-path="{{ m.path }}" data-field="name" placeholder="Meal name" style="{{ pHeadName }}" />
+                    <input data-path="{{ m.path }}" data-field="time" placeholder="Time" style="{{ pHeadSmall }}" />
+                    <span style="{{ pStyles.pill }}">{{ m.totalText }}</span>
+                    <button type="button" data-act="up" data-list="meals" data-i="{{ m.i }}" title="Move up" style="{{ pStyles.icon }}">↑</button>
+                    <button type="button" data-act="down" data-list="meals" data-i="{{ m.i }}" title="Move down" style="{{ pStyles.icon }}">↓</button>
+                    <button type="button" data-act="dup" data-list="meals" data-i="{{ m.i }}" title="Duplicate" style="{{ pStyles.icon }}">⧉</button>
+                    <button type="button" data-act="del" data-list="meals" data-i="{{ m.i }}" title="Remove meal" style="{{ pStyles.icon }}">✕</button>
+                  </div>
+
+                  <div style="{{ pStyles.colHead }}">
+                    <sc-for list="{{ itemCols }}" as="col" hint-placeholder-count="6">
+                      <span style="{{ pStyles.colLab }}">{{ col.label }}</span>
+                    </sc-for>
+                    <span></span>
+                  </div>
+
+                  <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="3">
+                    <div style="{{ pStyles.itemRow }}">
+                      <input data-path="{{ it.path }}" data-field="food" placeholder="Food" style="{{ pFood }}" />
+                      <input data-path="{{ it.path }}" data-field="qty" placeholder="150 g" style="{{ pIn }}" />
+                      <input data-path="{{ it.path }}" data-field="kcal" data-live="1" inputmode="decimal" placeholder="kcal" style="{{ pInNum }}" />
+                      <input data-path="{{ it.path }}" data-field="protein" data-live="1" inputmode="decimal" placeholder="P" style="{{ pInNum }}" />
+                      <input data-path="{{ it.path }}" data-field="carbs" data-live="1" inputmode="decimal" placeholder="C" style="{{ pInNum }}" />
+                      <input data-path="{{ it.path }}" data-field="fat" data-live="1" inputmode="decimal" placeholder="F" style="{{ pInNum }}" />
+                      <button type="button" data-act="del" data-list="{{ it.list }}" data-i="{{ it.i }}" title="Remove food" style="{{ pStyles.icon }}">✕</button>
+                    </div>
+                  </sc-for>
+
+                  <button type="button" data-act="add" data-list="{{ m.itemsList }}" style="{{ pStyles.add }}">+ Add food</button>
+                  <input data-path="{{ m.path }}" data-field="notes" placeholder="Meal note (optional)" style="{{ pIn }}" />
+                </section>
+              </sc-for>
+
+              <button type="button" data-act="add" data-list="meals" style="{{ pStyles.addBig }}">+ Add meal</button>
+
+              <div style="{{ pStyles.sub }}">Day total</div>
+              <span style="{{ pStyles.pill }}">{{ dietTotal }}</span>
+
+              <div style="{{ pStyles.sub }}">Notes &amp; rules for the client</div>
+              <textarea data-field="rules" placeholder="Water, cooking method, what to do on a cheat day…" style="{{ pNote }}"></textarea>
+            </div>
+
+            <!-- ---------- TRAINING ---------- -->
+            <div style="{{ trainShow }}">
+              <div style="{{ pStyles.ctxRow }}">
+                <sc-for list="{{ trainCtx }}" as="x" hint-placeholder-count="0">
+                  <span style="{{ x.style }}">{{ x.text }}</span>
+                </sc-for>
+              </div>
+
+              <input data-field="split" placeholder="Split — e.g. Push / Pull / Legs" style="{{ pIn }}" />
+
+              <sc-for list="{{ trainDays }}" as="d" hint-placeholder-count="3">
+                <section style="{{ pStyles.card }}">
+                  <div style="{{ pStyles.cardHead }}">
+                    <input data-path="{{ d.path }}" data-field="name" placeholder="Day name" style="{{ pHeadName }}" />
+                    <input data-path="{{ d.path }}" data-field="focus" placeholder="Focus" style="{{ pHeadSmall }}" />
+                    <span style="{{ pStyles.pill }}">{{ d.countText }}</span>
+                    <button type="button" data-act="up" data-list="days" data-i="{{ d.i }}" title="Move up" style="{{ pStyles.icon }}">↑</button>
+                    <button type="button" data-act="down" data-list="days" data-i="{{ d.i }}" title="Move down" style="{{ pStyles.icon }}">↓</button>
+                    <button type="button" data-act="dup" data-list="days" data-i="{{ d.i }}" title="Duplicate day" style="{{ pStyles.icon }}">⧉</button>
+                    <button type="button" data-act="del" data-list="days" data-i="{{ d.i }}" title="Remove day" style="{{ pStyles.icon }}">✕</button>
+                  </div>
+
+                  <div style="{{ pStyles.exColHead }}">
+                    <sc-for list="{{ exCols }}" as="col" hint-placeholder-count="5">
+                      <span style="{{ pStyles.colLab }}">{{ col.label }}</span>
+                    </sc-for>
+                    <span></span>
+                  </div>
+
+                  <sc-for list="{{ d.exercises }}" as="x" hint-placeholder-count="4">
+                    <div style="{{ pStyles.exBlock }}">
+                      <div style="{{ pStyles.exRow }}">
+                        <input data-path="{{ x.path }}" data-field="name" placeholder="Exercise" style="{{ pExName }}" />
+                        <input data-path="{{ x.path }}" data-field="sets" inputmode="decimal" placeholder="4" style="{{ pInNum }}" />
+                        <input data-path="{{ x.path }}" data-field="reps" placeholder="8-10" style="{{ pInNum }}" />
+                        <input data-path="{{ x.path }}" data-field="rest" placeholder="90s" style="{{ pInNum }}" />
+                        <input data-path="{{ x.path }}" data-field="tempo" placeholder="2-0-1" style="{{ pInNum }}" />
+                        <button type="button" data-act="del" data-list="{{ x.list }}" data-i="{{ x.i }}" title="Remove exercise" style="{{ pStyles.icon }}">✕</button>
+                      </div>
+                      <div style="{{ pStyles.exSub }}">
+                        <input data-path="{{ x.path }}" data-field="video" data-live="1" placeholder="Video link — https://…" style="{{ pIn }}" />
+                        <a href="{{ x.videoHref }}" target="_blank" rel="noreferrer" title="Open video" style="{{ x.videoStyle }}">▶</a>
+                        <input data-path="{{ x.path }}" data-field="notes" placeholder="Cues / notes" style="{{ pIn }}" />
+                      </div>
+                    </div>
+                  </sc-for>
+
+                  <button type="button" data-act="add" data-list="{{ d.exList }}" style="{{ pStyles.add }}">+ Add exercise</button>
+                  <input data-path="{{ d.path }}" data-field="notes" placeholder="Day note (optional)" style="{{ pIn }}" />
+                </section>
+              </sc-for>
+
+              <button type="button" data-act="add" data-list="days" style="{{ pStyles.addBig }}">+ Add day</button>
+
+              <div style="{{ pStyles.sub }}">Notes &amp; rules for the client</div>
+              <textarea data-field="rules" placeholder="Warm-up, cardio, progression, when to add weight…" style="{{ pNote }}"></textarea>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -174,6 +363,9 @@ const PAGE = 60;
 const CACHE_KEY = "forma:cache";
 const SEEN_KEY = "forma:seen";
 const REFRESH_MS = 60000;
+/* Apps Script can take a minute to wake a cold script; 15s used to give up on a
+   perfectly good deployment and blame the coach's setup */
+const LOAD_TIMEOUT_MS = 30000;
 
 const GROUPS = [
   { title: "Contact", keys: [["phone", "WhatsApp"], ["email", "Email"], ["city", "City"], ["age", "Age"], ["gender", "Gender"], ["job", "Job"], ["activity", "Work activity"]] },
@@ -225,20 +417,106 @@ function prepare(list) {
   return out;
 }
 
+/* ============================================================
+   PLANS
+   The coach writes a diet plan and a training plan per client.
+   Stored on this device under forma:plans, keyed by the same _key
+   the client list uses. The Apps Script stays read-only — nothing
+   here asks the coach to re-deploy anything.
+   ============================================================ */
+const PLANS_KEY = "forma:plans";
+const SAVE_DEBOUNCE_MS = 600;
+const TOTALS_DEBOUNCE_MS = 200;
+
+/* [key, label] tuples drive the editor grid, the PDF table and the text
+   digest from one place, the way GROUPS does for the intake file */
+const ITEM_COLS = [["food", "Food"], ["qty", "Qty"], ["kcal", "Kcal"], ["protein", "P"], ["carbs", "C"], ["fat", "F"]];
+const EX_COLS = [["name", "Exercise"], ["sets", "Sets"], ["reps", "Reps"], ["rest", "Rest"], ["tempo", "Tempo"]];
+const MACROS = [["kcal", "Kcal"], ["protein", "Protein"], ["carbs", "Carbs"], ["fat", "Fat"], ["water", "Water"]];
+
+/* the console stays English; this is for the client-facing PDF only */
+const PT = {
+  en: {
+    diet: "Diet Plan", training: "Training Plan", prepared: "Prepared for", coach: "Coach",
+    targets: "Daily targets", total: "Total", dayTotal: "Daily total", rules: "Notes & rules",
+    split: "Split", focus: "Focus", video: "Watch", notes: "Notes", start: "Start",
+    food: "Food", qty: "Qty", kcal: "Kcal", protein: "Protein", carbs: "Carbs", fat: "Fat", water: "Water",
+    exercise: "Exercise", sets: "Sets", reps: "Reps", rest: "Rest", tempo: "Tempo", empty: "—"
+  },
+  ar: {
+    diet: "الخطة الغذائية", training: "خطة التمرين", prepared: "خاصة بـ", coach: "الكابتن",
+    targets: "الأهداف اليومية", total: "الإجمالي", dayTotal: "إجمالي اليوم", rules: "ملاحظات وقواعد",
+    split: "التقسيم", focus: "التركيز", video: "شاهد", notes: "ملاحظات", start: "البداية",
+    food: "الطعام", qty: "الكمية", kcal: "سعرات", protein: "بروتين", carbs: "كارب", fat: "دهون", water: "ماء",
+    exercise: "التمرين", sets: "مجموعات", reps: "تكرار", rest: "راحة", tempo: "الإيقاع", empty: "—"
+  }
+};
+
+/* "3 meals" -> 3, "94 kg" -> 94, Arabic-Indic digits included */
+function numOf(v) {
+  let s = String(v == null ? "" : v);
+  s = s.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+       .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06F0));
+  const n = parseFloat(s.replace(/[^\d.\-]/g, ""));
+  return isFinite(n) ? n : 0;
+}
+
+function blankItem() { return { food: "", qty: "", kcal: "", protein: "", carbs: "", fat: "" }; }
+function blankMeal(n) { return { name: "Meal " + n, time: "", notes: "", items: [blankItem()] }; }
+function blankEx() { return { name: "", sets: "", reps: "", rest: "", tempo: "", notes: "", video: "" }; }
+function blankDay(n) { return { name: "Day " + n, focus: "", notes: "", exercises: [blankEx()] }; }
+
+/* a new plan opens already shaped like this client: their meal count, their
+   training days, a protein target from their goal weight. The coach edits a
+   skeleton instead of an empty page. */
+function seedDiet(c) {
+  const meals = Math.max(2, Math.min(6, Math.round(numOf(c.meals)) || 3));
+  const list = [];
+  for (let i = 1; i <= meals; i++) list.push(blankMeal(i));
+  const w = numOf(c.targetWeight) || numOf(c.weight);
+  return {
+    lang: c.lang === "ar" ? "ar" : "en", title: "", startDate: "", notes: "",
+    targets: { kcal: "", protein: w ? String(Math.round(w * 2)) : "", carbs: "", fat: "", water: "" },
+    meals: list, rules: "", updatedAt: 0
+  };
+}
+function seedTraining(c) {
+  const days = Math.max(2, Math.min(7, Math.round(numOf(c.days)) || 4));
+  const list = [];
+  for (let i = 1; i <= days; i++) list.push(blankDay(i));
+  return {
+    lang: c.lang === "ar" ? "ar" : "en", title: "", startDate: "", notes: "",
+    split: "", days: list, rules: "", updatedAt: 0
+  };
+}
+
+function readPlans() {
+  try {
+    const o = JSON.parse(localStorage.getItem(PLANS_KEY) || "{}");
+    return o && typeof o === "object" ? o : {};
+  } catch (e) { return {}; }
+}
+
+function isUrl(v) { return /^https?:\/\/\S+$/i.test(String(v || "").trim()); }
+
 class Component extends DCLogic {
   state = {
     code: "", codeDraft: "",
     clients: [], loading: false, error: "", selKey: "", query: "", copied: false,
     connected: false, demo: false, cached: false, limit: PAGE, sort: "new",
-    narrow: false
+    narrow: false,
+    tab: "intake", planRev: 0, savedAt: 0, undoAt: 0
   };
 
   componentDidMount() {
     let code = "";
+    this.plans = readPlans();
     try { code = localStorage.getItem("forma:code") || ""; } catch (e) {}
     try { this.seen = Number(localStorage.getItem(SEEN_KEY) || 0); } catch (e) { this.seen = 0; }
 
     this.setState({ code: code, codeDraft: code, narrow: this.isNarrow() });
+    this.codeDraft = code;
+    this.fillCode(code);
 
     if (API_URL && code) {
       const cached = this.readCache();
@@ -264,7 +542,7 @@ class Component extends DCLogic {
     window.removeEventListener("resize", this.onResize);
     clearTimeout(this.qTimer);
     clearTimeout(this.rTimer);
-    this.killJsonp();
+    this.abortLoad();
   }
 
   isNarrow() {
@@ -288,43 +566,117 @@ class Component extends DCLogic {
     this.jScript = null;
   }
 
-  load(code) {
-    const api = API_URL;
-    if (!api || this.state.loading) return;
+  abortLoad() {
+    if (this.ctrl) { try { this.ctrl.abort(); } catch (e) {} this.ctrl = null; }
     this.killJsonp();
+  }
+
+  srcFor(code, cb) {
+    const api = API_URL;
+    return api + (api.indexOf("?") > -1 ? "&" : "?") + "code=" + encodeURIComponent(code) +
+      (cb ? "&callback=" + cb : "") + "&t=" + Date.now();
+  }
+
+  /* fetch first. It reports a real status and body, so a wrong code, a script
+     that was never shared publicly and a dead URL can finally be told apart —
+     JSONP reports all three as the same silent failure. JSONP is kept as a
+     fallback for a deployment that does not answer with CORS headers.
+
+     Apps Script cold-starts: one call can take well over a minute while the
+     next takes two seconds, so the budget is generous and one retry is free. */
+  load(code, attempt) {
+    if (!API_URL) return;
+    this.abortLoad();
+    const tries = attempt || 1;
     this.setState({ loading: true, error: "" });
     this.lastLoad = Date.now();
 
+    if (typeof fetch !== "function" || typeof AbortController === "undefined") {
+      this.loadJsonp(code, tries);
+      return;
+    }
+
+    const ctrl = new AbortController();
+    this.ctrl = ctrl;
+    const timer = setTimeout(() => { try { ctrl.abort(); } catch (e) {} }, LOAD_TIMEOUT_MS);
+
+    fetch(this.srcFor(code, ""), { signal: ctrl.signal, credentials: "omit" })
+      .then((r) => r.text().then((body) => ({ status: r.status, body: body })))
+      .then((res) => {
+        clearTimeout(timer);
+        if (this.ctrl !== ctrl) return;          /* a newer load replaced this one */
+        this.ctrl = null;
+        let data = null;
+        try { data = JSON.parse(res.body); } catch (e) {}
+        if (data) { this.accept(data); return; }
+
+        if (res.status === 404) {
+          this.fail("That Web App URL does not exist. Check API_URL at the top of dashboard.html.");
+        } else if (/<html|<!doctype/i.test(res.body)) {
+          /* Google answered with a sign-in or permission page instead of JSON */
+          this.fail("The script is not shared publicly. In Apps Script: Deploy → Manage deployments → edit → Who has access: Anyone.");
+        } else {
+          this.loadJsonp(code, tries);           /* not JSON, not HTML — let JSONP try */
+        }
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        if (this.ctrl !== ctrl) return;
+        this.ctrl = null;
+        /* a CORS rejection is indistinguishable from a network drop here, so
+           fall back to JSONP once before believing the connection is down */
+        if (tries < 2) { this.loadJsonp(code, tries + 1); return; }
+        this.fail((err && err.name === "AbortError")
+          ? "Google took too long to wake the script. Press Refresh to try again."
+          : this.unreachable());
+      });
+  }
+
+  loadJsonp(code, tries) {
+    this.killJsonp();
     const cb = "formaCb" + Date.now().toString(36);
     this.cbName = cb;
-
-    window[cb] = (data) => {
-      this.killJsonp();
-      if (!data || data.ok === false) {
-        this.setState({ loading: false, connected: false, error: (data && data.error) || "Wrong access code." });
-        return;
-      }
-      const list = this.sorted(prepare(data.clients || []));
-      this.writeCache(data.clients || []);
-      const keep = list.some((c) => c._key === this.state.selKey) ? this.state.selKey : (list.length ? list[0]._key : "");
-      this.setState({ clients: list, loading: false, connected: true, demo: false, cached: false, error: "", selKey: keep });
-    };
+    window[cb] = (data) => { this.killJsonp(); this.accept(data); };
 
     const s = document.createElement("script");
     s.async = true;
-    s.src = api + (api.indexOf("?") > -1 ? "&" : "?") + "code=" + encodeURIComponent(code) + "&callback=" + cb + "&t=" + Date.now();
+    s.src = this.srcFor(code, cb);
     s.onerror = () => {
       this.killJsonp();
-      this.setState({ loading: false, error: "Could not reach the sheet. Check your connection and try Refresh." });
+      this.fail(this.unreachable());
     };
     this.jScript = s;
     this.jTimer = setTimeout(() => {
-      if (this.cbName === cb) {
-        this.killJsonp();
-        this.setState({ loading: false, error: "Timed out. Re-deploy the script and paste the new URL." });
-      }
-    }, 15000);
+      if (this.cbName !== cb) return;
+      this.killJsonp();
+      if (tries < 2) { this.load(code, tries + 1); return; }
+      this.fail("Google took too long to wake the script. Press Refresh to try again.");
+    }, LOAD_TIMEOUT_MS);
     document.body.appendChild(s);
+  }
+
+  accept(data) {
+    if (!data || data.ok === false) {
+      this.setState({ loading: false, connected: false, error: (data && data.error) || "Wrong access code." });
+      return;
+    }
+    const list = this.sorted(prepare(data.clients || []));
+    this.writeCache(data.clients || []);
+    const keep = list.some((c) => c._key === this.state.selKey) ? this.state.selKey : (list.length ? list[0]._key : "");
+    this.setState({ clients: list, loading: false, connected: true, demo: false, cached: false, error: "", selKey: keep });
+  }
+
+  /* a failed refresh must not throw away a working cached view */
+  fail(msg) { this.setState({ loading: false, error: msg }); }
+
+  /* When the browser blocks the response for CORS it hides the status too, so a
+     wrong URL and a dead connection genuinely look identical from here. Say so
+     honestly instead of guessing, and use onLine to put the likelier cause first. */
+  unreachable() {
+    const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+    return offline
+      ? "This device is offline. Reconnect, then press Refresh."
+      : "Could not reach the script. Check the Web App URL in dashboard.html, and that Deploy → Manage deployments → Who has access is set to Anyone.";
   }
 
   readCache() {
@@ -385,17 +737,30 @@ class Component extends DCLogic {
   onCode = (e) => { this.codeDraft = e.target.value; };
   onCodeKey = (e) => { if (e.key === "Enter") { e.preventDefault(); this.connect(); } };
 
+  /* the field is the source of truth, not the keystrokes. A password manager
+     filling it fires no input event, which used to leave the draft empty and
+     answer "Enter your access code" while the code sat visible in the box. */
+  readCode() {
+    if (this.codeEl && this.codeEl.value) return this.codeEl.value;
+    if (this.codeDraft) return this.codeDraft;
+    return this.state.codeDraft || "";
+  }
+
+  /* show the saved code when the gate reopens, so it can be read and confirmed */
+  fillCode(v) { if (this.codeEl) this.codeEl.value = v || ""; }
+
   connect = () => {
-    const code = (this.codeDraft != null ? this.codeDraft : this.state.codeDraft).trim();
+    const code = String(this.readCode()).trim();
     if (!API_URL) { this.setState({ error: "No Web App URL is set in dashboard.html yet." }); return; }
     if (!code) { this.setState({ error: "Enter your access code." }); return; }
     try { localStorage.setItem("forma:code", code); } catch (e) {}
+    this.codeDraft = code;
     this.setState({ code: code, codeDraft: code });
     this.load(code);
   };
 
   refresh = () => { if (this.state.code) this.load(this.state.code); else this.setState({ connected: false }); };
-  openSettings = () => this.setState({ connected: false, error: "" });
+  openSettings = () => { this.fillCode(this.state.code); this.setState({ connected: false, error: "" }); };
   goBack = () => this.setState({ selKey: "", copied: false });
   printPage = () => window.print();
   toggleSort = () => this.setState({ sort: this.state.sort === "new" ? "az" : "new", clients: this.sorted(this.state.clients, this.state.sort === "new" ? "az" : "new") });
@@ -410,6 +775,495 @@ class Component extends DCLogic {
     if (this.codeEl) this.codeEl.value = "";
     this.setState({ code: "", codeDraft: "", clients: list, demo: true, connected: false, cached: false, error: "", selKey: list[0]._key });
   };
+
+  /* ---------------- plans ----------------
+     The live plan lives on the instance, not in state, and the inputs are
+     uncontrolled. Typing therefore causes no React work at all — the same
+     reason codeDraft and the index.html form are written this way. State is
+     touched only when a total has to move or a row is added or removed. */
+  planOf(c, kind) {
+    if (!c) return null;
+    if (!this.plans[c._key]) this.plans[c._key] = {};
+    const b = this.plans[c._key];
+    if (!b[kind]) b[kind] = kind === "diet" ? seedDiet(c) : seedTraining(c);
+    return b[kind];
+  }
+
+  atPath(plan, path) {
+    if (!path) return plan;
+    const parts = path.split(".");
+    let o = plan;
+    for (let i = 0; i < parts.length && o != null; i++) o = o[parts[i]];
+    return o;
+  }
+
+  blankFor(listPath, n) {
+    if (/items$/.test(listPath)) return blankItem();
+    if (/exercises$/.test(listPath)) return blankEx();
+    if (listPath === "meals") return blankMeal(n + 1);
+    return blankDay(n + 1);
+  }
+
+  editorRef = (el) => { this.editorEl = el; };
+
+  /* one handler for every field in the editor. No closure is built per row,
+     so a 200-input plan costs the same to render as an empty one. */
+  onEditorInput = (e) => {
+    const el = e.target;
+    if (!el || !el.getAttribute) return;
+    const field = el.getAttribute("data-field");
+    if (!field) return;
+    const kind = this.state.tab;
+    const c = this.current();
+    if (!c || (kind !== "diet" && kind !== "training")) return;
+    const plan = this.planOf(c, kind);
+    const node = this.atPath(plan, el.getAttribute("data-path") || "");
+    if (!node || typeof node !== "object") return;
+    node[field] = el.value;
+    plan.updatedAt = Date.now();
+    this.queueSave();
+    /* only fields that feed a total or a link state are worth a repaint */
+    if (el.getAttribute("data-live") === "1") this.queueTotals();
+  };
+
+  onEditorClick = (e) => {
+    let el = e.target;
+    while (el && el !== e.currentTarget && (!el.getAttribute || !el.getAttribute("data-act"))) el = el.parentNode;
+    if (!el || el === e.currentTarget || !el.getAttribute) return;
+    const act = el.getAttribute("data-act");
+    if (!act) return;
+    const kind = this.state.tab;
+    const c = this.current();
+    if (!c || (kind !== "diet" && kind !== "training")) return;
+    const plan = this.planOf(c, kind);
+
+    if (act === "lang") { plan.lang = el.getAttribute("data-v") === "ar" ? "ar" : "en"; this.afterStructural(plan); return; }
+    if (act === "prefill") {
+      this.plans[c._key][kind] = kind === "diet" ? seedDiet(c) : seedTraining(c);
+      this.afterStructural(this.plans[c._key][kind]);
+      return;
+    }
+    if (act === "undo") {
+      const u = this.undoRow;
+      if (u) { u.arr.splice(u.i, 0, u.row); this.undoRow = null; this.afterStructural(plan); }
+      return;
+    }
+    if (act === "pdf") { this.exportPlan(c, kind); return; }
+    if (act === "wa") { this.sendPlan(c, kind); return; }
+
+    const listPath = el.getAttribute("data-list") || "";
+    const arr = listPath ? this.atPath(plan, listPath) : null;
+    if (!Array.isArray(arr)) return;
+    const i = parseInt(el.getAttribute("data-i") || "-1", 10);
+
+    if (act === "add") arr.push(this.blankFor(listPath, arr.length));
+    else if (act === "del" && i >= 0 && i < arr.length) {
+      /* keep the row so a misclick costs one tap, not a rewritten meal */
+      this.undoRow = { arr: arr, i: i, row: arr[i] };
+      arr.splice(i, 1);
+      if (!arr.length) arr.push(this.blankFor(listPath, 0));
+      clearTimeout(this.undoTimer);
+      this.undoTimer = setTimeout(() => { this.undoRow = null; this.setState({ undoAt: 0 }); }, 9000);
+      this.afterStructural(plan, true);
+      return;
+    }
+    else if (act === "dup" && i >= 0) arr.splice(i + 1, 0, JSON.parse(JSON.stringify(arr[i])));
+    else if (act === "up" && i > 0) { const t = arr[i - 1]; arr[i - 1] = arr[i]; arr[i] = t; }
+    else if (act === "down" && i >= 0 && i < arr.length - 1) { const t = arr[i + 1]; arr[i + 1] = arr[i]; arr[i] = t; }
+    else return;
+    this.afterStructural(plan);
+  };
+
+  afterStructural(plan, undo) {
+    plan.updatedAt = Date.now();
+    /* rows are keyed by index, so after a splice the DOM inputs hold the
+       previous row's text until they are rewritten from the model */
+    this.syncPending = true;
+    this.queueSave();
+    this.setState({ planRev: this.state.planRev + 1, undoAt: undo ? Date.now() : 0 });
+  }
+
+  queueSave() {
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => {
+      const write = () => {
+        try { localStorage.setItem(PLANS_KEY, JSON.stringify(this.plans)); } catch (e) {}
+        this.setState({ savedAt: Date.now() });
+        clearTimeout(this.savedTimer);
+        this.savedTimer = setTimeout(() => this.setState({ savedAt: 0 }), 1600);
+      };
+      if (typeof requestIdleCallback === "function") requestIdleCallback(write, { timeout: 1000 });
+      else write();
+    }, SAVE_DEBOUNCE_MS);
+  }
+
+  queueTotals() {
+    clearTimeout(this.totalTimer);
+    this.totalTimer = setTimeout(() => this.setState({ planRev: this.state.planRev + 1 }), TOTALS_DEBOUNCE_MS);
+  }
+
+  /* uncontrolled inputs never receive their value from React, so it is written
+     here — once after a structural edit or a tab/client switch, never while
+     typing, which is what keeps the caret where the coach put it */
+  syncInputs() {
+    const kind = this.state.tab;
+    const c = this.current();
+    if (!this.editorEl || !c || (kind !== "diet" && kind !== "training")) return;
+    const plan = this.planOf(c, kind);
+    const els = this.editorEl.querySelectorAll("[data-field]");
+    for (let i = 0; i < els.length; i++) {
+      const el = els[i];
+      const node = this.atPath(plan, el.getAttribute("data-path") || "");
+      if (!node || typeof node !== "object") continue;
+      const v = node[el.getAttribute("data-field")];
+      const s = v == null ? "" : String(v);
+      if (el.value !== s) el.value = s;
+    }
+  }
+
+  setTab(tab) {
+    if (this.state.tab === tab) return;
+    this.syncPending = true;
+    this.setState({ tab: tab });
+  }
+
+  /* ---------------- plan export ----------------
+     One builder, three destinations: the print dialog (vector text, correct
+     Arabic shaping, tiny file), a real .pdf for the share sheet, and the text
+     digest that goes in the WhatsApp message. */
+
+  planFileName(c, kind) {
+    return "FORMA-" + String(c.fullName || "client").replace(/\s+/g, "-") + "-" + kind + ".pdf";
+  }
+
+  planBody(c, kind) {
+    const plan = this.planOf(c, kind);
+    const ar = plan.lang === "ar";
+    const t = PT[ar ? "ar" : "en"];
+    const e = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+    const has = (v) => String(v == null ? "" : v).trim() !== "";
+    const kindName = kind === "diet" ? t.diet : t.training;
+    const title = has(plan.title) ? plan.title : kindName;
+    const fam = ar ? "'Cairo','DM Sans',sans-serif" : "'DM Sans','Cairo',sans-serif";
+    const out = [];
+
+    out.push('<style>' +
+      '@page{margin:14mm}' +
+      '*{box-sizing:border-box}' +
+      'body{margin:0;background:#fff}' +
+      '.wrap{font:400 11.5pt/1.55 ' + fam + ';color:#16161C;background:#fff;padding:0}' +
+      '.hd{display:flex;align-items:flex-end;gap:8mm;border-bottom:2px solid #16161C;padding-bottom:4mm;margin-bottom:6mm}' +
+      '.mark{font:400 15pt/1 Anton,Impact,sans-serif;letter-spacing:.16em;color:#16161C}' +
+      '.kind{font:600 8pt/1 ' + fam + ';letter-spacing:.18em;text-transform:uppercase;color:#75757F;margin-top:2mm}' +
+      'h1{font:400 26pt/1.05 Anton,Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em;margin:0}' +
+      '.meta{font:400 9.5pt/1.5 ' + fam + ';color:#5A5A66;text-align:end;white-space:nowrap}' +
+      '.tg{display:flex;flex-wrap:wrap;gap:3mm;margin-bottom:6mm}' +
+      '.tgi{border:1px solid #DEDEE6;border-radius:3mm;padding:3mm 4mm;min-width:24mm}' +
+      '.tgl{font:600 7.5pt/1 ' + fam + ';letter-spacing:.14em;text-transform:uppercase;color:#75757F}' +
+      '.tgv{font:400 15pt/1 Anton,Impact,sans-serif;margin-top:1.5mm}' +
+      '.card{border:1px solid #DEDEE6;border-radius:4mm;padding:5mm;margin-bottom:4mm;break-inside:avoid;page-break-inside:avoid}' +
+      '.ch{display:flex;align-items:baseline;gap:3mm;margin-bottom:3mm}' +
+      '.cn{font:400 14pt/1 Anton,Impact,sans-serif;text-transform:uppercase;letter-spacing:.03em}' +
+      '.ct{font:500 9pt/1 ' + fam + ';color:#75757F}' +
+      '.cs{margin-inline-start:auto;font:600 9pt/1 ' + fam + ';color:#4A7C00;white-space:nowrap}' +
+      'table{width:100%;border-collapse:collapse}' +
+      'th{font:600 7.5pt/1 ' + fam + ';letter-spacing:.12em;text-transform:uppercase;color:#75757F;text-align:start;padding:0 2mm 2mm 0;border-bottom:1px solid #DEDEE6}' +
+      'td{font:400 10.5pt/1.45 ' + fam + ';padding:2.2mm 2mm 2.2mm 0;border-bottom:1px solid #F0F0F4;vertical-align:top}' +
+      '.n{text-align:center;white-space:nowrap;color:#3C3C46}' +
+      '.note{font:400 9.5pt/1.5 ' + fam + ';color:#5A5A66;margin-top:3mm}' +
+      '.vid{font:600 9pt/1.4 ' + fam + ';color:#3B6E00;word-break:break-all}' +
+      '.sec{font:600 8pt/1 ' + fam + ';letter-spacing:.16em;text-transform:uppercase;color:#75757F;margin:7mm 0 3mm}' +
+      '.rules{border:1px solid #DEDEE6;background:#FAFAFB;border-radius:3mm;padding:4mm 5mm;white-space:pre-wrap;font:400 10.5pt/1.6 ' + fam + '}' +
+      '.ft{margin-top:8mm;padding-top:3mm;border-top:1px solid #DEDEE6;font:400 8.5pt/1.5 ' + fam + ';color:#8A8A96;display:flex;justify-content:space-between}' +
+      '</style>');
+
+    out.push('<div class="wrap"' + (ar ? ' dir="rtl"' : ' dir="ltr"') + '>');
+    out.push('<div class="hd"><div style="flex:1">' +
+      '<div class="mark">FORMA</div>' +
+      '<h1>' + e(title) + '</h1>' +
+      '<div class="kind">' + e(kindName) + '</div></div>' +
+      '<div class="meta">' + e(t.prepared) + ' <b>' + e(c.fullName || "") + '</b>' +
+      (has(plan.startDate) ? '<br>' + e(t.start) + ': ' + e(plan.startDate) : '') + '</div></div>');
+
+    if (kind === "diet") {
+      const tiles = MACROS.filter((m) => has(plan.targets[m[0]]))
+        .map((m) => '<div class="tgi"><div class="tgl">' + e(t[m[0]] || m[1]) + '</div><div class="tgv">' + e(plan.targets[m[0]]) + '</div></div>');
+      if (tiles.length) out.push('<div class="sec">' + e(t.targets) + '</div><div class="tg">' + tiles.join("") + '</div>');
+
+      const tot = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+      plan.meals.forEach((m) => {
+        const rows = m.items.filter((it) => has(it.food));
+        if (!rows.length && !has(m.notes)) return;   /* an untouched meal is not printed */
+        const mt = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+        rows.forEach((it) => {
+          mt.kcal += numOf(it.kcal); mt.protein += numOf(it.protein);
+          mt.carbs += numOf(it.carbs); mt.fat += numOf(it.fat);
+        });
+        tot.kcal += mt.kcal; tot.protein += mt.protein; tot.carbs += mt.carbs; tot.fat += mt.fat;
+        out.push('<div class="card"><div class="ch"><div class="cn">' + e(m.name || "") + '</div>' +
+          (has(m.time) ? '<div class="ct">' + e(m.time) + '</div>' : '') +
+          (mt.kcal ? '<div class="cs">' + Math.round(mt.kcal) + ' ' + e(t.kcal) + '</div>' : '') + '</div>');
+        if (rows.length) {
+          out.push('<table><tr><th>' + e(t.food) + '</th><th>' + e(t.qty) + '</th>' +
+            '<th class="n">' + e(t.kcal) + '</th><th class="n">' + e(t.protein) + '</th>' +
+            '<th class="n">' + e(t.carbs) + '</th><th class="n">' + e(t.fat) + '</th></tr>');
+          rows.forEach((it) => {
+            out.push('<tr><td>' + e(it.food) + '</td><td>' + e(it.qty) + '</td>' +
+              '<td class="n">' + e(it.kcal) + '</td><td class="n">' + e(it.protein) + '</td>' +
+              '<td class="n">' + e(it.carbs) + '</td><td class="n">' + e(it.fat) + '</td></tr>');
+          });
+          out.push('</table>');
+        }
+        if (has(m.notes)) out.push('<div class="note">' + e(m.notes) + '</div>');
+        out.push('</div>');
+      });
+      if (tot.kcal) {
+        out.push('<div class="sec">' + e(t.dayTotal) + '</div><div class="tg">' +
+          '<div class="tgi"><div class="tgl">' + e(t.kcal) + '</div><div class="tgv">' + Math.round(tot.kcal) + '</div></div>' +
+          '<div class="tgi"><div class="tgl">' + e(t.protein) + '</div><div class="tgv">' + Math.round(tot.protein) + '</div></div>' +
+          '<div class="tgi"><div class="tgl">' + e(t.carbs) + '</div><div class="tgv">' + Math.round(tot.carbs) + '</div></div>' +
+          '<div class="tgi"><div class="tgl">' + e(t.fat) + '</div><div class="tgv">' + Math.round(tot.fat) + '</div></div></div>');
+      }
+    } else {
+      if (has(plan.split)) out.push('<div class="sec">' + e(t.split) + '</div><div class="rules">' + e(plan.split) + '</div>');
+      plan.days.forEach((d) => {
+        const rows = d.exercises.filter((x) => has(x.name));
+        if (!rows.length && !has(d.notes)) return;   /* an untouched day is not printed */
+        out.push('<div class="card"><div class="ch"><div class="cn">' + e(d.name || "") + '</div>' +
+          (has(d.focus) ? '<div class="ct">' + e(d.focus) + '</div>' : '') + '</div>');
+        if (rows.length) {
+          out.push('<table><tr><th>' + e(t.exercise) + '</th><th class="n">' + e(t.sets) + '</th>' +
+            '<th class="n">' + e(t.reps) + '</th><th class="n">' + e(t.rest) + '</th><th class="n">' + e(t.tempo) + '</th></tr>');
+          rows.forEach((x) => {
+            const extra = [];
+            if (has(x.notes)) extra.push('<div class="note">' + e(x.notes) + '</div>');
+            if (isUrl(x.video)) extra.push('<div class="vid">' + e(t.video) + ': <a href="' + e(String(x.video).trim()) + '">' + e(String(x.video).trim()) + '</a></div>');
+            out.push('<tr><td>' + e(x.name) + extra.join("") + '</td>' +
+              '<td class="n">' + e(x.sets) + '</td><td class="n">' + e(x.reps) + '</td>' +
+              '<td class="n">' + e(x.rest) + '</td><td class="n">' + e(x.tempo) + '</td></tr>');
+          });
+          out.push('</table>');
+        }
+        if (has(d.notes)) out.push('<div class="note">' + e(d.notes) + '</div>');
+        out.push('</div>');
+      });
+    }
+
+    if (has(plan.rules)) out.push('<div class="sec">' + e(t.rules) + '</div><div class="rules">' + e(plan.rules) + '</div>');
+    if (has(plan.notes)) out.push('<div class="rules" style="margin-top:4mm">' + e(plan.notes) + '</div>');
+    out.push('<div class="ft"><span>FORMA</span><span>' + e(c.fullName || "") + '</span></div>');
+    out.push('</div>');
+    return out.join("");
+  }
+
+  planDocHtml(c, kind) {
+    const plan = this.planOf(c, kind);
+    const ar = plan.lang === "ar";
+    return '<!DOCTYPE html><html lang="' + (ar ? "ar" : "en") + '" dir="' + (ar ? "rtl" : "ltr") + '"><head>' +
+      '<meta charset="utf-8"><title>' + String(c.fullName || "FORMA") + '</title>' +
+      '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;600;700&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">' +
+      '</head><body>' + this.planBody(c, kind) + '</body></html>';
+  }
+
+  /* Printing from a detached iframe keeps the console's dark theme out of the
+     PDF and means no .no-print class has to be threaded through the editor. */
+  exportPlan(c, kind) {
+    const f = document.createElement("iframe");
+    f.setAttribute("aria-hidden", "true");
+    f.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0";
+    document.body.appendChild(f);
+    const d = f.contentDocument;
+    d.open(); d.write(this.planDocHtml(c, kind)); d.close();
+    const go = () => {
+      try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {}
+      setTimeout(() => { if (f.parentNode) f.parentNode.removeChild(f); }, 60000);
+    };
+    /* wait for the webfont, otherwise Arabic prints in a fallback face */
+    const fonts = d.fonts;
+    if (fonts && fonts.ready && fonts.ready.then) fonts.ready.then(() => setTimeout(go, 150), () => setTimeout(go, 600));
+    else setTimeout(go, 600);
+  }
+
+  /* ---------------- a real .pdf for the share sheet ----------------
+     WhatsApp can only be handed a file through navigator.share, and that
+     needs actual PDF bytes. The page is drawn through an SVG foreignObject
+     so the browser does the text rendering — which is the only way Arabic
+     keeps its joined letterforms — then each page-sized slice is wrapped as
+     a JPEG in a minimal PDF. The print route above stays the quality path;
+     this one exists so the client receives a file, not a screenshot. */
+  A4 = { w: 794, h: 1123, scale: 2 };   /* A4 at 96dpi, drawn at 2x */
+
+  rasterPages(html) {
+    return new Promise((resolve, reject) => {
+      const A = this.A4;
+      const host = document.createElement("div");
+      host.setAttribute("aria-hidden", "true");
+      host.style.cssText = "position:fixed;left:-99999px;top:0;z-index:-1;pointer-events:none";
+      const page = document.createElement("div");
+      page.style.cssText = "width:" + A.w + "px;padding:38px;background:#fff";
+      page.innerHTML = html;
+      host.appendChild(page);
+      document.body.appendChild(host);
+
+      const clean = () => { if (host.parentNode) host.parentNode.removeChild(host); };
+      let xml;
+      try { xml = new XMLSerializer().serializeToString(page); }
+      catch (e) { clean(); reject(e); return; }
+
+      const count = Math.max(1, Math.ceil(page.scrollHeight / A.h));
+      const full = count * A.h;
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + A.w + '" height="' + full + '">' +
+        '<foreignObject x="0" y="0" width="' + A.w + '" height="' + full + '">' +
+        '<div xmlns="http://www.w3.org/1999/xhtml" style="width:' + A.w + 'px;background:#fff">' + xml + '</div>' +
+        '</foreignObject></svg>';
+
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const pages = [];
+          for (let p = 0; p < count; p++) {
+            const cv = document.createElement("canvas");
+            cv.width = A.w * A.scale; cv.height = A.h * A.scale;
+            const cx = cv.getContext("2d");
+            cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height);
+            cx.drawImage(img, 0, -p * A.h * A.scale, A.w * A.scale, full * A.scale);
+            const b64 = cv.toDataURL("image/jpeg", 0.92).split(",")[1];
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            pages.push({ bytes: bytes, w: cv.width, h: cv.height });
+          }
+          clean();
+          resolve(pages);
+        } catch (e) { clean(); reject(e); }
+      };
+      img.onerror = () => { clean(); reject(new Error("raster failed")); };
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    });
+  }
+
+  /* Wrapping JPEGs in a PDF is a small, fully specified job — not worth half a
+     megabyte of library, and it keeps the promise the vendor/ folder makes. */
+  pagesToPdf(pages) {
+    const chunks = [];
+    let len = 0;
+    const push = (u8) => { chunks.push(u8); len += u8.length; };
+    const put = (s) => {
+      const a = new Uint8Array(s.length);
+      for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i) & 0xFF;
+      push(a);
+    };
+    const PW = 595.28, PH = 841.89;              /* A4 in points */
+    const total = 2 + pages.length * 3;
+    const off = new Array(total + 1).fill(0);
+    const open = (n) => { off[n] = len; put(n + " 0 obj\n"); };
+    const close = () => put("endobj\n");
+
+    put("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+    open(1); put("<< /Type /Catalog /Pages 2 0 R >>\n"); close();
+    const kids = [];
+    for (let i = 0; i < pages.length; i++) kids.push((3 + i * 3) + " 0 R");
+    open(2); put("<< /Type /Pages /Kids [" + kids.join(" ") + "] /Count " + pages.length + " >>\n"); close();
+
+    for (let i = 0; i < pages.length; i++) {
+      const pg = 3 + i * 3, cont = pg + 1, im = pg + 2;
+      open(pg);
+      put("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + PW.toFixed(2) + " " + PH.toFixed(2) + "]" +
+        " /Resources << /XObject << /Im0 " + im + " 0 R >> >> /Contents " + cont + " 0 R >>\n");
+      close();
+      const stream = "q " + PW.toFixed(2) + " 0 0 " + PH.toFixed(2) + " 0 0 cm /Im0 Do Q\n";
+      open(cont);
+      put("<< /Length " + stream.length + " >>\nstream\n" + stream + "endstream\n");
+      close();
+      open(im);
+      put("<< /Type /XObject /Subtype /Image /Width " + pages[i].w + " /Height " + pages[i].h +
+        " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + pages[i].bytes.length + " >>\nstream\n");
+      push(pages[i].bytes);
+      put("\nendstream\n");
+      close();
+    }
+
+    const xref = len;
+    let x = "xref\n0 " + (total + 1) + "\n0000000000 65535 f \n";
+    for (let n = 1; n <= total; n++) {
+      let s = String(off[n]);
+      while (s.length < 10) s = "0" + s;
+      x += s + " 00000 n \n";
+    }
+    put(x);
+    put("trailer\n<< /Size " + (total + 1) + " /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
+
+    const all = new Uint8Array(len);
+    let at = 0;
+    for (let i = 0; i < chunks.length; i++) { all.set(chunks[i], at); at += chunks[i].length; }
+    return new Blob([all], { type: "application/pdf" });
+  }
+
+  planText(c, kind) {
+    const plan = this.planOf(c, kind);
+    const t = PT[plan.lang === "ar" ? "ar" : "en"];
+    const has = (v) => String(v == null ? "" : v).trim() !== "";
+    const L = [];
+    L.push("FORMA — " + (has(plan.title) ? plan.title : (kind === "diet" ? t.diet : t.training)));
+    if (c.fullName) L.push(t.prepared + ": " + c.fullName);
+    L.push("");
+    if (kind === "diet") {
+      plan.meals.forEach((m) => {
+        const rows = m.items.filter((it) => has(it.food));
+        if (!rows.length) return;
+        L.push("— " + String(m.name || "").toUpperCase() + (has(m.time) ? " (" + m.time + ")" : "") + " —");
+        rows.forEach((it) => L.push("• " + it.food + (has(it.qty) ? " — " + it.qty : "") + (has(it.kcal) ? " · " + it.kcal + " " + t.kcal : "")));
+        L.push("");
+      });
+    } else {
+      plan.days.forEach((d) => {
+        const rows = d.exercises.filter((x) => has(x.name));
+        if (!rows.length) return;
+        L.push("— " + String(d.name || "").toUpperCase() + (has(d.focus) ? " (" + d.focus + ")" : "") + " —");
+        rows.forEach((x) => {
+          let s = "• " + x.name;
+          if (has(x.sets) || has(x.reps)) s += " — " + (x.sets || "?") + "x" + (x.reps || "?");
+          if (has(x.rest)) s += " · " + t.rest + " " + x.rest;
+          L.push(s);
+          if (isUrl(x.video)) L.push("  " + t.video + ": " + String(x.video).trim());
+        });
+        L.push("");
+      });
+    }
+    if (has(plan.rules)) { L.push("— " + t.rules.toUpperCase() + " —"); L.push(plan.rules); }
+    return L.join("\n").trim();
+  }
+
+  /* On a phone the share sheet carries the real PDF into WhatsApp. Everywhere
+     else the browser simply will not attach a file to a chat, so the PDF is
+     saved and the chat opens with the plan written out — and the button says
+     which of the two it is going to do before it is pressed. */
+  sendPlan(c, kind) {
+    const text = this.planText(c, kind);
+    const digits = c.phone ? String(c.phone).replace(/[^0-9]/g, "") : "";
+    const openChat = () => {
+      const url = "https://wa.me/" + digits + "?text=" + encodeURIComponent(text);
+      window.open(url, "_blank", "noopener");
+    };
+    const name = this.planFileName(c, kind);
+
+    this.rasterPages(this.planBody(c, kind)).then((pages) => {
+      const blob = this.pagesToPdf(pages);
+      let file = null;
+      try { file = new File([blob], name, { type: "application/pdf" }); } catch (e) {}
+      if (file && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+        navigator.share({ files: [file], title: name, text: text }).catch(() => {});
+        return;
+      }
+      this.save(blob, name);
+      openChat();
+    }, () => {
+      /* rasterising is the only step that can fail on an old browser —
+         never leave the coach with a dead button */
+      openChat();
+    });
+  }
 
   /* ---------------- derived data ---------------- */
   sorted(list, mode) {
@@ -523,6 +1377,183 @@ class Component extends DCLogic {
     return val;
   }
 
+  /* built once per breakpoint, not once per row */
+  planStyles(narrow) {
+    if (this._ps && this._psN === narrow) return this._ps;
+    const inBase = {
+      width: "100%", minWidth: 0, padding: "10px 12px", background: "#0E0E12",
+      border: "1px solid " + LINE, borderRadius: "10px", color: INK,
+      font: "400 16px/1.3 'DM Sans', 'Cairo', sans-serif"
+    };
+    const icon = {
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      width: "34px", height: "34px", flex: "0 0 auto", padding: 0, borderRadius: "999px",
+      border: "1px solid " + LINE, background: "transparent", color: "#8A8A96",
+      font: "600 13px/1 'DM Sans', sans-serif", cursor: "pointer"
+    };
+    const chip = {
+      display: "inline-flex", alignItems: "center", padding: "7px 12px", borderRadius: "999px",
+      border: "1px solid " + LINE, background: "#15151A", color: "#A8A8B4",
+      font: "500 12px/1.3 'DM Sans', 'Cairo', sans-serif"
+    };
+    const add = {
+      width: "100%", padding: "10px", marginTop: "10px", borderRadius: "10px",
+      border: "1px dashed rgba(255,255,255,.16)", background: "transparent", color: "#8A8A96",
+      font: "600 13px/1 'DM Sans', sans-serif", cursor: "pointer"
+    };
+    const s = {
+      in: inBase,
+      /* five number cells plus a delete button have ~50px each on a 390px
+         phone, so the padding gives way before the 16px font does */
+      inNum: Object.assign({}, inBase, { textAlign: "center", padding: narrow ? "10px 4px" : "10px 12px" }),
+      headName: Object.assign({}, inBase, { flex: "2 1 150px", width: "auto", minWidth: "120px" }),
+      headSmall: Object.assign({}, inBase, { flex: "1 1 90px", width: "auto", minWidth: "80px" }),
+      icon: icon,
+      chip: chip,
+      chipWarn: Object.assign({}, chip, { border: "1px solid rgba(255,138,91,.34)", background: "rgba(255,138,91,.08)", color: "#EDD8CC" }),
+      add: add,
+      addBig: Object.assign({}, add, { padding: "14px", color: LIME, borderColor: "rgba(214,255,63,.32)" }),
+      card: { background: "#131318", border: "1px solid rgba(255,255,255,.07)", borderRadius: "18px", padding: narrow ? "14px" : "20px", marginBottom: "14px" },
+      cardHead: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px", marginBottom: "12px" },
+      ctxRow: { display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "18px" },
+      bar: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px", marginBottom: "18px" },
+      /* the food row: six columns on a desktop, name-on-top on a phone */
+      itemRow: narrow
+        ? { display: "grid", gridTemplateColumns: "repeat(5, 1fr) 34px", gap: "6px", marginBottom: "8px", alignItems: "center" }
+        : { display: "grid", gridTemplateColumns: "2.2fr 1fr .8fr .7fr .7fr .7fr 34px", gap: "8px", marginBottom: "8px", alignItems: "center" },
+      foodCell: narrow ? Object.assign({}, inBase, { gridColumn: "1 / -1" }) : inBase,
+      exRow: narrow
+        ? { display: "grid", gridTemplateColumns: "repeat(4, 1fr) 34px", gap: "6px", alignItems: "center" }
+        : { display: "grid", gridTemplateColumns: "2.4fr .7fr .9fr .9fr .9fr 34px", gap: "8px", alignItems: "center" },
+      exName: narrow ? Object.assign({}, inBase, { gridColumn: "1 / -1" }) : inBase,
+      exSub: { display: "grid", gridTemplateColumns: narrow ? "1fr 40px" : "1.4fr 40px 2fr", gap: "8px", margin: "8px 0 16px", alignItems: "center" },
+      exBlock: { paddingBottom: "6px", borderBottom: "1px solid rgba(255,255,255,.05)", marginBottom: "12px" },
+      colHead: narrow
+        ? { display: "none" }
+        : { display: "grid", gridTemplateColumns: "2.2fr 1fr .8fr .7fr .7fr .7fr 34px", gap: "8px", marginBottom: "6px" },
+      exColHead: narrow
+        ? { display: "none" }
+        : { display: "grid", gridTemplateColumns: "2.4fr .7fr .9fr .9fr .9fr 34px", gap: "8px", marginBottom: "6px" },
+      colLab: { font: "600 10px/1 'DM Sans', sans-serif", letterSpacing: ".12em", textTransform: "uppercase", color: "#6E6E7A" },
+      tile: { display: "block", background: "#15151A", border: "1px solid rgba(255,255,255,.07)", borderRadius: "14px", padding: "12px" },
+      tileLab: { display: "block", font: "600 10px/1 'DM Sans', sans-serif", letterSpacing: ".14em", textTransform: "uppercase", color: "#6E6E7A", marginBottom: "8px" },
+      tileGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(96px, 1fr))", gap: "10px", marginBottom: "18px" },
+      pill: { display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", borderRadius: "999px", background: "rgba(214,255,63,.12)", border: "1px solid rgba(214,255,63,.3)", color: LIME, font: "600 12px/1.3 'DM Sans', sans-serif", whiteSpace: "nowrap" },
+      videoOn: Object.assign({}, icon, { color: LIME, borderColor: "rgba(214,255,63,.4)", textDecoration: "none" }),
+      videoOff: Object.assign({}, icon, { color: "#3E3E48", pointerEvents: "none", textDecoration: "none" }),
+      fieldGrid: { display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: "10px", marginBottom: "14px" },
+      note: Object.assign({}, inBase, { minHeight: "72px", resize: "vertical", lineHeight: 1.6 }),
+      sub: { font: "600 11px/1 'DM Sans', sans-serif", letterSpacing: ".1em", textTransform: "uppercase", color: "#6E6E7A", margin: "22px 0 10px" }
+    };
+    this._ps = s; this._psN = narrow;
+    return s;
+  }
+
+  tabStyle(on) {
+    return {
+      padding: "9px 16px", minHeight: "40px", borderRadius: "999px", cursor: "pointer",
+      border: on ? "1px solid " + LIME : "1px solid " + LINE,
+      background: on ? LIME : "transparent",
+      color: on ? "#0B0B0E" : "#C9C9D2",
+      font: (on ? "700 " : "500 ") + "13px/1 'DM Sans', sans-serif", whiteSpace: "nowrap"
+    };
+  }
+
+  tabIntake = () => this.setTab("intake");
+  tabDiet = () => this.setTab("diet");
+  tabTraining = () => this.setTab("training");
+
+  /* Only the open tab is built. The other plan renders as zero rows, so an
+     unopened editor costs nothing. */
+  planVals(c, st) {
+    const S = this.planStyles(st.narrow);
+    const isDiet = st.tab === "diet", isTrain = st.tab === "training";
+    const plan = c && (isDiet || isTrain) ? this.planOf(c, st.tab) : null;
+    const lang = plan ? plan.lang : "en";
+    const rtl = lang === "ar";
+    const dirIn = rtl ? Object.assign({}, S.in, { direction: "rtl", textAlign: "right" }) : S.in;
+    const dirNote = rtl ? Object.assign({}, S.note, { direction: "rtl", textAlign: "right" }) : S.note;
+    const rtlize = (base) => rtl ? Object.assign({}, base, { direction: "rtl", textAlign: "right" }) : base;
+
+    const ctxOf = (pairs) => !c ? [] : pairs
+      .filter((p) => { const v = String(c[p[0]] || "").trim(); return v && NEG.indexOf(v.toLowerCase()) === -1; })
+      .map((p) => ({ text: p[1] + ": " + c[p[0]], style: p[2] ? S.chipWarn : S.chip }));
+
+    const out = {
+      pStyles: S,
+      pIn: dirIn, pInNum: S.inNum, pNote: dirNote,
+      pHeadName: rtlize(S.headName), pHeadSmall: rtlize(S.headSmall),
+      pFood: rtl && !st.narrow ? Object.assign({}, S.foodCell, { direction: "rtl", textAlign: "right" }) : S.foodCell,
+      pExName: rtl && !st.narrow ? Object.assign({}, S.exName, { direction: "rtl", textAlign: "right" }) : S.exName,
+      tabIntakeStyle: this.tabStyle(st.tab === "intake"),
+      tabDietStyle: this.tabStyle(isDiet),
+      tabTrainStyle: this.tabStyle(isTrain),
+      tabIntake: this.tabIntake, tabDiet: this.tabDiet, tabTraining: this.tabTraining,
+      editorRef: this.editorRef, onEditorInput: this.onEditorInput, onEditorClick: this.onEditorClick,
+      intakeShow: { display: st.tab === "intake" ? "block" : "none" },
+      editorShow: { display: (isDiet || isTrain) ? "block" : "none" },
+      dietShow: { display: isDiet ? "block" : "none" },
+      trainShow: { display: isTrain ? "block" : "none" },
+      langEnStyle: this.tabStyle(lang === "en"),
+      langArStyle: this.tabStyle(lang === "ar"),
+      savedText: st.savedAt ? "Saved ✓" : "",
+      savedStyle: { font: "600 12px/1 'DM Sans', sans-serif", color: LIME, opacity: st.savedAt ? 1 : 0, transition: "opacity .2s" },
+      undoStyle: st.undoAt ? Object.assign({}, S.chip, { color: LIME, cursor: "pointer", borderColor: "rgba(214,255,63,.32)" }) : { display: "none" },
+      itemCols: ITEM_COLS.map((k) => ({ label: k[1] })),
+      exCols: EX_COLS.map((k) => ({ label: k[1] })),
+      dietCtx: isDiet ? ctxOf([["allergy", "Allergy", 1], ["neverEat", "Never eat", 1], ["dislikes", "Dislikes", 0], ["diet", "Diet", 0], ["meals", "Meals/day", 0], ["cook", "Cooks", 0], ["likes", "Likes", 0]]) : [],
+      trainCtx: isTrain ? ctxOf([["injuries", "Injuries", 1], ["injuryDetails", "Injury", 1], ["equip", "Equipment", 0], ["exp", "Experience", 0], ["days", "Days/wk", 0], ["sessionLength", "Session", 0], ["hatedExercises", "Hates", 0]]) : [],
+      dietTargets: [], dietMeals: [], dietTotal: "", trainDays: [],
+      planKindLabel: isDiet ? "Diet plan" : "Training plan"
+    };
+
+    if (isDiet && plan) {
+      const tot = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+      out.dietMeals = plan.meals.map((m, mi) => {
+        const mt = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+        const items = m.items.map((it, ii) => {
+          mt.kcal += numOf(it.kcal); mt.protein += numOf(it.protein);
+          mt.carbs += numOf(it.carbs); mt.fat += numOf(it.fat);
+          return { path: "meals." + mi + ".items." + ii, list: "meals." + mi + ".items", i: String(ii) };
+        });
+        tot.kcal += mt.kcal; tot.protein += mt.protein; tot.carbs += mt.carbs; tot.fat += mt.fat;
+        return {
+          path: "meals." + mi, i: String(mi), items: items, itemsList: "meals." + mi + ".items",
+          totalText: Math.round(mt.kcal) + " kcal · " + Math.round(mt.protein) + "P " + Math.round(mt.carbs) + "C " + Math.round(mt.fat) + "F"
+        };
+      });
+      out.dietTargets = MACROS.map((mk) => {
+        const key = mk[0], target = numOf(plan.targets[key]);
+        let delta = "", dStyle = { display: "none" };
+        if (key !== "water" && target > 0) {
+          const diff = Math.round(tot[key] - target);
+          const within = Math.abs(diff) <= Math.max(2, target * 0.05);
+          delta = (diff > 0 ? "+" : "") + diff + " vs target";
+          dStyle = { display: "block", marginTop: "6px", font: "600 11px/1 'DM Sans', sans-serif", color: within ? LIME : "#FF8A5B" };
+        }
+        return { key: key, label: mk[1], delta: delta, deltaStyle: dStyle };
+      });
+      out.dietTotal = Math.round(tot.kcal) + " kcal · " + Math.round(tot.protein) + "P " + Math.round(tot.carbs) + "C " + Math.round(tot.fat) + "F";
+    }
+
+    if (isTrain && plan) {
+      out.trainDays = plan.days.map((d, di) => ({
+        path: "days." + di, i: String(di), exList: "days." + di + ".exercises",
+        countText: d.exercises.length + (d.exercises.length === 1 ? " exercise" : " exercises"),
+        exercises: d.exercises.map((x, xi) => {
+          const ok = isUrl(x.video);
+          return {
+            path: "days." + di + ".exercises." + xi,
+            list: "days." + di + ".exercises", i: String(xi),
+            videoHref: ok ? String(x.video).trim() : "#",
+            videoStyle: ok ? S.videoOn : S.videoOff
+          };
+        })
+      }));
+    }
+    return out;
+  }
+
   renderVals() {
     const st = this.state;
     const list = this.filtered();
@@ -548,7 +1579,7 @@ class Component extends DCLogic {
         meta: [x.city, x.weight ? x.weight + " kg" : "", this.when(x.submittedAt)].filter(Boolean).join(" · "),
         badge: isNew ? "new" : "",
         badgeStyle: isNew ? badgeOn : badgeOff,
-        onClick: () => this.setState({ selKey: x._key, copied: false }, () => {
+        onClick: () => this.setState({ selKey: x._key, copied: false, tab: "intake" }, () => {
           if (this.state.narrow) window.scrollTo(0, 0);
         }),
         style: on ? rowOn : rowBase,
@@ -557,13 +1588,14 @@ class Component extends DCLogic {
     });
 
     const sel = this.detail(c) || { name: "", subline: "", received: "", stats: [], flags: [], groups: [], waLink: "" };
-    const inStyle = { width: "100%", padding: "14px 16px", background: "#0E0E12", border: "1px solid " + LINE, borderRadius: "12px", color: INK, font: "400 15px/1.4 'DM Sans', sans-serif" };
+    /* 16px, not 15 — anything smaller makes iOS Safari zoom the page on focus */
+    const inStyle = { width: "100%", padding: "14px 16px", background: "#0E0E12", border: "1px solid " + LINE, borderRadius: "12px", color: INK, font: "400 16px/1.4 'DM Sans', sans-serif" };
     const ghostBtn = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 16px", minHeight: "40px", borderRadius: "999px", border: "1px solid " + LINE, background: "transparent", color: INK, font: "600 13px/1 'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" };
     const gateOpen = !st.connected;
     const more = list.length - shown.length;
     const narrow = st.narrow;
 
-    return {
+    return Object.assign(this.planVals(c, st), {
       rows: rows, sel: sel, queryInit: st.query, codeDraft: st.codeDraft, error: st.error,
       countText: String(list.length),
       countLabel: st.query ? "matches" : "clients",
@@ -581,19 +1613,23 @@ class Component extends DCLogic {
       onCode: this.onCode, onCodeKey: this.onCodeKey, onQuery: this.onQuery, toggleSort: this.toggleSort, showMore: this.showMore,
       copyFile: this.copyFile, downloadFile: this.downloadFile, exportCsv: this.exportCsv, printPage: this.printPage,
       searchRef: this.searchRef, listRef: this.listRef, codeRef: this.codeRef, goBack: this.goBack,
-      pageStyle: { minHeight: "100vh", background: "#0B0B0E", color: INK, fontFamily: "'DM Sans', sans-serif" },
+      /* min-height lives in .dash-page so it can use 100dvh with a 100vh fallback */
+      pageStyle: { background: "#0B0B0E", color: INK, fontFamily: "'DM Sans', sans-serif" },
       gateStyle: { position: "fixed", inset: 0, zIndex: 50, display: gateOpen ? "grid" : "none", placeItems: "center", padding: "24px", background: "rgba(11,11,14,.95)", backdropFilter: "blur(10px)", overflowY: "auto" },
       gateCardStyle: { width: "100%", maxWidth: "520px", background: "#15151A", border: "1px solid rgba(255,255,255,.09)", borderRadius: "24px", padding: "clamp(26px, 4vw, 44px)" },
       gateErrStyle: { font: "500 14px/1.5 'DM Sans', sans-serif", color: "#FF8A5B", minHeight: "22px", marginBottom: "6px" },
       forgetStyle: { border: "none", background: "transparent", color: "#63636E", font: "500 13px/1.6 'DM Sans', sans-serif", cursor: "pointer", padding: 0 },
+      /* On a phone nothing here scrolls on its own — the document does, so the
+         URL bar can collapse and no calc() has to guess the header height.
+         Desktop keeps the fixed two-pane layout, sized by .dash-app in CSS. */
       appStyle: narrow
-        ? { display: "block", height: "auto" }
-        : { display: "grid", gridTemplateColumns: "minmax(260px, 340px) 1fr", height: "calc(100vh - 65px)" },
+        ? { display: "block" }
+        : { display: "grid", gridTemplateColumns: "minmax(260px, 340px) 1fr" },
       listPaneStyle: narrow
-        ? { display: c ? "none" : "flex", flexDirection: "column", background: "#0E0E12", height: "calc(100vh - 62px)", minHeight: 0 }
+        ? { display: c ? "none" : "flex", flexDirection: "column", background: "#0E0E12" }
         : { display: "flex", flexDirection: "column", borderInlineEnd: "1px solid rgba(255,255,255,.08)", background: "#0E0E12", minHeight: 0 },
       detailPaneStyle: narrow
-        ? { display: c ? "block" : "none", overflowY: "auto", height: "calc(100vh - 62px)", minHeight: 0 }
+        ? { display: c ? "block" : "none" }
         : { overflowY: "auto", minHeight: 0 },
       noSelStyle: { display: !c && !narrow ? "grid" : "none", placeItems: "center", height: "100%", padding: "40px" },
       detailStyle: { display: c ? "block" : "none" },
@@ -605,8 +1641,9 @@ class Component extends DCLogic {
       ghostBtn: ghostBtn,
       waBtn: sel.waLink ? ghostBtn : Object.assign({}, ghostBtn, { display: "none" }),
       sortBtn: { border: "1px solid " + LINE, background: "transparent", color: "#8A8A96", font: "600 11px/1 'DM Sans', sans-serif", letterSpacing: ".1em", textTransform: "uppercase", borderRadius: "999px", padding: "0 14px", minHeight: "34px", cursor: "pointer" },
-      primaryBtn: { width: "100%", padding: "18px 24px", border: "none", borderRadius: "999px", background: LIME, color: "#0B0B0E", font: "700 16px/1 'DM Sans', sans-serif", cursor: "pointer" }
-    };
+      primaryBtn: { width: "100%", padding: "18px 24px", border: "none", borderRadius: "999px", background: LIME, color: "#0B0B0E", font: "700 16px/1 'DM Sans', sans-serif", cursor: "pointer" },
+      sendBtn: { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 18px", minHeight: "40px", borderRadius: "999px", border: "none", background: LIME, color: "#0B0B0E", font: "700 13px/1 'DM Sans', sans-serif", cursor: "pointer", whiteSpace: "nowrap" }
+    });
   }
 
   componentDidUpdate() {
@@ -614,6 +1651,13 @@ class Component extends DCLogic {
     if (this.state.connected && !this.state.demo && !this.seenWritten && this.state.clients.length) {
       this.seenWritten = true;
       try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch (e) {}
+    }
+    /* refill the editor whenever the rows moved or a different plan is on screen */
+    const key = this.state.selKey + "|" + this.state.tab;
+    if (this.syncPending || key !== this._syncKey) {
+      this.syncPending = false;
+      this._syncKey = key;
+      this.syncInputs();
     }
   }
 }

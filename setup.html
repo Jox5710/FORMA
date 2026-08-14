@@ -69,6 +69,8 @@
         </div>
         <p style="{{ p }}">Google will ask you to authorise — click Advanced → Go to project (unsafe). It is your own script; that warning is normal. Copy the <strong style="color:#F4F3F0">Web app URL</strong> ending in <code>/exec</code>.</p>
         <p style="{{ pWarn }}">Every time you edit the script you must Deploy again — pick <em>Manage deployments</em> and edit the existing one, so the URL stays the same.</p>
+        <p style="{{ p }}"><strong style="color:#F4F3F0">If the console works on one device but not another,</strong> this step is almost always why. <em>Who has access</em> must be <strong style="color:#F4F3F0">Anyone</strong> — not <em>Only myself</em> and not <em>Anyone with a Google account</em>, both of which let you in and lock everyone else out. There is no per-person or per-device limit in the code: the access code is a single shared password, so the same code works on as many phones and computers as you like. Each device asks for it once, then remembers it.</p>
+        <p style="{{ p }}">The other cause is Google being slow to wake a script it has not run in a while — the first load after a quiet spell can take most of a minute. The console now waits 30 seconds and retries once on its own, and it will tell you which of these two it hit instead of blaming your setup.</p>
       </section>
 
       <section style="{{ card }}">
