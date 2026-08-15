@@ -31,6 +31,11 @@
     .forma-wrap { padding-left: 16px !important; padding-right: 16px !important; padding-bottom: 72px !important; }
     .forma-hd { padding: 12px 16px !important; gap: 12px !important; }
     .forma-hero { padding: 44px 0 34px !important; }
+    /* the headline needs the whole width on a phone; the portrait is decorative */
+    .forma-shot { display: none !important; }
+  }
+  @media (max-width: 900px) {
+    .forma-shot { width: 190px !important; }
   }
   @media (max-width: 380px) {
     .forma-wrap { padding-left: 12px !important; padding-right: 12px !important; }
@@ -48,7 +53,9 @@
 
   <div class="no-print" style="position: sticky; top: 0; z-index: 20; background: rgba(11,11,14,.86); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,.08)">
     <div class="forma-hd" style="max-width: 980px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 20px">
-      <div style="display: flex; align-items: baseline; gap: 10px; flex: 1; min-width: 0">
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0">
+        <img src="assets/coach-avatar.webp" alt="" width="30" height="30" loading="lazy" decoding="async"
+             style="width: 30px; height: 30px; border-radius: 999px; border: 1.5px solid rgba(214,255,63,.55); object-fit: cover; object-position: top center; flex: 0 0 auto" />
         <span style="font-family: Anton, Impact, sans-serif; font-size: 26px; letter-spacing: .14em; color: #D6FF3F; line-height: 1">FORMA</span>
         <span class="forma-coach" style="font: 500 12px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Mahmoud Radwan</span>
       </div>
@@ -64,14 +71,21 @@
 
   <div class="forma-wrap" style="max-width: 980px; margin: 0 auto; padding: 0 24px 120px">
 
-    <div class="forma-hero" style="padding: 72px 0 56px; border-bottom: 1px solid rgba(255,255,255,.08)">
-      <div style="font: 600 12px/1 'DM Sans', sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #D6FF3F; margin-bottom: 22px">{{ t.kicker }}</div>
-      <h1 style="{{ h1Style }}">{{ t.heroTitle }}</h1>
-      <p style="{{ leadStyle }}">{{ t.heroLead }}</p>
-      <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px">
-        <span style="{{ pillStyle }}">{{ t.pillTime }}</span>
-        <span style="{{ pillStyle }}">{{ t.pillSave }}</span>
-        <span style="{{ pillStyle }}">{{ t.pillPrivate }}</span>
+    <div class="forma-hero" style="padding: 72px 0 56px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: flex-end; gap: 32px">
+      <div style="flex: 1; min-width: 0">
+        <div style="font: 600 12px/1 'DM Sans', sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #D6FF3F; margin-bottom: 22px">{{ t.kicker }}</div>
+        <h1 style="{{ h1Style }}">{{ t.heroTitle }}</h1>
+        <p style="{{ leadStyle }}">{{ t.heroLead }}</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px">
+          <span style="{{ pillStyle }}">{{ t.pillTime }}</span>
+          <span style="{{ pillStyle }}">{{ t.pillSave }}</span>
+          <span style="{{ pillStyle }}">{{ t.pillPrivate }}</span>
+        </div>
+      </div>
+      <div class="forma-shot" style="position: relative; flex: 0 0 auto; width: 250px; align-self: flex-end">
+        <div style="position: absolute; inset: auto 0 6% 0; height: 62%; background: radial-gradient(60% 70% at 50% 100%, rgba(214,255,63,.22), transparent 70%); pointer-events: none"></div>
+        <img src="assets/coach-hero.webp" alt="" width="250" height="330" loading="lazy" decoding="async"
+             style="position: relative; display: block; width: 100%; height: auto; filter: drop-shadow(0 24px 40px rgba(0,0,0,.6))" />
       </div>
     </div>
 

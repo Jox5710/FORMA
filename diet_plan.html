@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORMA - Diet Plan</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        apex: {
+                            500: '#ccff00', 
+                            600: '#b3e600',
+                            900: '#1a2000'
+                        },
+                        protein: '#ff4d4d',
+                        carbs: '#3b82f6',
+                        fats: '#eab308',
+                        zinc: {
+                            850: '#202022',
+                            900: '#18181b',
+                            950: '#0f0f11'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f0f11;
+            background-image: 
+                linear-gradient(to bottom, rgba(15, 15, 17, 0.85), rgba(15, 15, 17, 1)),
+                url('20260721_033530.jpg');
+            background-size: cover;
+            background-position: center top;
+            background-attachment: fixed;
+            color: #ffffff;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f0f11; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ccff00; }
+        
+        .glass-card {
+            background: rgba(39, 39, 42, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Custom progress ring styles */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 1s ease-in-out;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="antialiased font-sans min-h-screen flex flex-col selection:bg-apex-500 selection:text-zinc-900">
+
+    <nav class="sticky top-0 z-50 glass-card border-b border-zinc-800">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="ph-fill ph-fork-knife text-3xl text-apex-500"></i>
+                <span class="text-xl font-black tracking-wider uppercase">FOR<span class="text-apex-500">MA</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Client Profile</p>
+                    <p class="text-sm font-bold">John Doe</p>
+                </div>
+                <img src="https://placehold.co/100x100/27272a/ffffff?text=JD" alt="Client" class="w-10 h-10 rounded-full border-2 border-apex-500">
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex flex-col gap-10">
+        
+        <section>
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-black leading-tight">Daily <span class="text-transparent bg-clip-text bg-gradient-to-r from-apex-500 to-emerald-400">Targets</span></h1>
+                    <p class="text-zinc-400 mt-1">Phase 1: Lean Muscle Accrual</p>
+                </div>
+                <div class="hidden md:flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-full border border-zinc-700">
+                    <i class="ph-fill ph-drop text-blue-400"></i>
+                    <span class="text-sm font-bold">Goal: 3.5 Liters / Day</span>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Calories -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden group hover:border-apex-500/50 transition-colors">
+                    <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform">
+                        <i class="ph-fill ph-fire text-8xl text-apex-500"></i>
+                    </div>
+                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-1">Calories</p>
+                    <p class="text-4xl font-black text-white">2,850</p>
+                    <p class="text-xs text-apex-500 mt-2 font-semibold">+300 Surplus</p>
+                </div>
+
+                <!-- Protein -->
+                <div class="glass-card rounded-2xl p-6 border-t-4 border-t-protein relative overflow-hidden hover:bg-zinc-800/80 transition-colors">
+                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-1">Protein</p>
+                    <p class="text-3xl font-black text-white">180<span class="text-lg text-zinc-500">g</span></p>
+                    <p class="text-xs text-zinc-400 mt-2">25% of intake</p>
+                </div>
+
+                <!-- Carbs -->
+                <div class="glass-card rounded-2xl p-6 border-t-4 border-t-carbs relative overflow-hidden hover:bg-zinc-800/80 transition-colors">
+                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-1">Carbs</p>
+                    <p class="text-3xl font-black text-white">350<span class="text-lg text-zinc-500">g</span></p>
+                    <p class="text-xs text-zinc-400 mt-2">50% of intake</p>
+                </div>
+
+                <!-- Fats -->
+                <div class="glass-card rounded-2xl p-6 border-t-4 border-t-fats relative overflow-hidden hover:bg-zinc-800/80 transition-colors">
+                    <p class="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-1">Fats</p>
+                    <p class="text-3xl font-black text-white">80<span class="text-lg text-zinc-500">g</span></p>
+                    <p class="text-xs text-zinc-400 mt-2">25% of intake</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex items-center gap-4 mb-6 mt-4">
+                <h2 class="text-2xl font-black uppercase tracking-wide">Meal <span class="text-zinc-400">Schedule</span></h2>
+                <div class="h-[1px] flex-grow bg-gradient-to-r from-zinc-800 to-transparent"></div>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                
+                <!-- Meal 1 -->
+                <article class="bg-zinc-900 rounded-3xl border border-zinc-800 overflow-hidden shadow-lg">
+                    <!-- Header -->
+                    <div class="bg-zinc-800/50 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-apex-500/20 text-apex-500 flex items-center justify-center text-2xl">
+                                <i class="ph-fill ph-sun"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Meal 1: Power Oats</h3>
+                                <p class="text-sm text-zinc-400"><i class="ph-regular ph-clock mr-1"></i>08:00 AM - Pre-workout</p>
+                            </div>
+                        </div>
+                        <!-- Meal Macros -->
+                        <div class="flex gap-4 text-sm font-semibold">
+                            <div class="text-center"><span class="block text-protein">40g</span><span class="text-[10px] text-zinc-500 uppercase">Pro</span></div>
+                            <div class="text-center"><span class="block text-carbs">75g</span><span class="text-[10px] text-zinc-500 uppercase">Carb</span></div>
+                            <div class="text-center"><span class="block text-fats">15g</span><span class="text-[10px] text-zinc-500 uppercase">Fat</span></div>
+                            <div class="text-center pl-4 border-l border-zinc-700"><span class="block text-white">595</span><span class="text-[10px] text-zinc-500 uppercase">Kcal</span></div>
+                        </div>
+                    </div>
+                    <!-- Body -->
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-sm font-bold text-apex-500 uppercase tracking-wider mb-3">Ingredients</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 80g Rolled Oats (dry weight)</li>
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 1 Scoop Whey Protein (Vanilla)</li>
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 15g Peanut Butter</li>
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 100g Blueberries</li>
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 150ml Almond Milk</li>
+                            </ul>
+                        </div>
+                        <div class="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50">
+                            <h4 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2">Instructions</h4>
+                            <p class="text-sm text-zinc-400 leading-relaxed">Cook oats with almond milk and water. Once cooked, let it cool slightly before stirring in whey protein (to prevent clumping). Top with peanut butter and berries.</p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Meal 2 -->
+                <article class="bg-zinc-900 rounded-3xl border border-zinc-800 overflow-hidden shadow-lg">
+                    <!-- Header -->
+                    <div class="bg-zinc-800/50 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-apex-500/20 text-apex-500 flex items-center justify-center text-2xl">
+                                <i class="ph-fill ph-bowl-food"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Meal 2: Chicken & Rice Bowl</h3>
+                                <p class="text-sm text-zinc-400"><i class="ph-regular ph-clock mr-1"></i>01:30 PM - Post-workout</p>
+                            </div>
+                        </div>
+                        <!-- Meal Macros -->
+                        <div class="flex gap-4 text-sm font-semibold">
+                            <div class="text-center"><span class="block text-protein">55g</span><span class="text-[10px] text-zinc-500 uppercase">Pro</span></div>
+                            <div class="text-center"><span class="block text-carbs">90g</span><span class="text-[10px] text-zinc-500 uppercase">Carb</span></div>
+                            <div class="text-center"><span class="block text-fats">10g</span><span class="text-[10px] text-zinc-500 uppercase">Fat</span></div>
+                            <div class="text-center pl-4 border-l border-zinc-700"><span class="block text-white">670</span><span class="text-[10px] text-zinc-500 uppercase">Kcal</span></div>
+                        </div>
+                    </div>
+                    <!-- Body -->
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-sm font-bold text-apex-500 uppercase tracking-wider mb-3">Ingredients</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 200g Chicken Breast (raw weight)</li>
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 120g Basmati Rice (dry weight)</li>
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 100g Broccoli</li>
+                                <li class="flex items-center gap-3 text-zinc-300"><div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div> 1 tsp Olive Oil (for cooking)</li>
+                            </ul>
+                        </div>
+                        <div class="bg-zinc-800/30 rounded-xl p-4 border border-zinc-800/50">
+                            <h4 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2">Instructions</h4>
+                            <p class="text-sm text-zinc-400 leading-relaxed">Dice chicken and season with salt, pepper, and paprika. Pan-fry in olive oil. Steam broccoli. Serve everything over cooked rice. Use zero-calorie hot sauce if desired.</p>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <i class="ph-fill ph-pill text-2xl text-apex-500"></i>
+                    <h3 class="text-lg font-bold">Daily Supplements</h3>
+                </div>
+                <ul class="space-y-3">
+                    <li class="flex justify-between items-center bg-zinc-900 px-4 py-2 rounded-lg">
+                        <span class="text-sm font-medium">Creatine Monohydrate</span>
+                        <span class="text-xs text-apex-500 font-bold bg-apex-500/10 px-2 py-1 rounded">5g Post-workout</span>
+                    </li>
+                    <li class="flex justify-between items-center bg-zinc-900 px-4 py-2 rounded-lg">
+                        <span class="text-sm font-medium">Omega 3 Fish Oil</span>
+                        <span class="text-xs text-apex-500 font-bold bg-apex-500/10 px-2 py-1 rounded">2000mg with Meal 1</span>
+                    </li>
+                    <li class="flex justify-between items-center bg-zinc-900 px-4 py-2 rounded-lg">
+                        <span class="text-sm font-medium">Vitamin D3 + K2</span>
+                        <span class="text-xs text-apex-500 font-bold bg-apex-500/10 px-2 py-1 rounded">1 Tab with Meal 1</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-apex-500 rounded-2xl p-6 text-zinc-950 relative overflow-hidden">
+                <i class="ph-duotone ph-info absolute -right-6 -bottom-6 text-9xl opacity-10 text-zinc-900"></i>
+                <h3 class="text-lg font-black mb-2 relative z-10">Coach Notes</h3>
+                <p class="text-sm font-medium leading-relaxed relative z-10">
+                    Weigh all foods RAW/UNCOOKED unless specified otherwise. Consistency is key here. If you need to swap a carb source, ensure the macro totals match the plan. Drink at least 3-4 liters of water daily.
+                </p>
+                <div class="mt-4 pt-4 border-t border-zinc-900/10 flex items-center gap-3 relative z-10">
+                     <img src="20260729_131101.jpg" onerror="this.src='https://placehold.co/150x150/18181b/ccff00?text=MR'" alt="Coach Mahmoud Radwan" class="w-10 h-10 rounded-full border border-zinc-900 object-cover object-top">
+                     <div>
+                         <p class="font-bold text-xs">Mahmoud Radwan</p>
+                         <p class="text-[10px] opacity-70">Head Coach</p>
+                     </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-zinc-800 bg-zinc-950 mt-10">
+        <div class="max-w-5xl mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-zinc-500 text-sm">© 2026 FORMA. All rights reserved.</p>
+            <div class="flex gap-4">
+                <a href="#" class="text-zinc-400 hover:text-apex-500 transition"><i class="ph-fill ph-instagram-logo text-2xl"></i></a>
+                <a href="#" class="text-zinc-400 hover:text-apex-500 transition"><i class="ph-fill ph-youtube-logo text-2xl"></i></a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

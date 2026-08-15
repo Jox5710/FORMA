@@ -15,6 +15,9 @@ plan to them as a PDF — without leaving the page.
 | `setup.html` | The 6-minute Google Drive setup guide, including the Apps Script to paste. |
 | `support.js` | Required runtime. Upload it too. |
 | `vendor/` | React, served from your own site instead of a CDN. Upload it too. |
+| `assets/` | Your photos, cut out and optimised. Upload it too. |
+| `tools/build-assets.py` | Rebuilds `assets/` from your originals. Never needs to run on the server. |
+| `images/` | The full-size originals. **Not** uploaded, and gitignored — 172MB of 4000×3000 phone shots. |
 
 ## The only thing to edit
 

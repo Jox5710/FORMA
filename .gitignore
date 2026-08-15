@@ -1,0 +1,8 @@
+# Source photography — the originals are 4000x3000 phone shots, ~172MB in total.
+# Only the optimised derivatives in assets/ are published; rebuild them with
+# tools/build-assets.py whenever you add or swap a photo.
+images/
+
+# Python cruft from tools/
+__pycache__/
+*.pyc

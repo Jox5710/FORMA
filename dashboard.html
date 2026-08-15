@@ -79,7 +79,9 @@
 <div class="dash-page" style="{{ pageStyle }}">
 
   <div class="no-print dash-hd" style="display: flex; align-items: center; gap: 18px; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,.08); background: #0E0E12; position: sticky; top: 0; z-index: 30">
-    <div style="display: flex; align-items: baseline; gap: 10px; min-width: 0">
+    <div style="display: flex; align-items: center; gap: 10px; min-width: 0">
+      <img src="assets/coach-avatar.webp" alt="" width="28" height="28" loading="lazy" decoding="async"
+           style="width: 28px; height: 28px; border-radius: 999px; border: 1.5px solid rgba(214,255,63,.55); object-fit: cover; object-position: top center; flex: 0 0 auto" />
       <span style="font-family: Anton, Impact, sans-serif; font-size: 24px; letter-spacing: .14em; color: #D6FF3F; line-height: 1">FORMA</span>
       <span class="dash-eyebrow" style="font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #6E6E7A; white-space: nowrap">Coach Console</span>
     </div>
@@ -138,7 +140,11 @@
 
     <div style="{{ detailPaneStyle }}">
       <div style="{{ noSelStyle }}">
-        <p style="font: 400 16px/1.6 'DM Sans', sans-serif; color: #5A5A66; max-width: 34ch; text-align: center">Select a client to read their intake file. Use ↑ ↓ to move, / to search.</p>
+        <div style="display: grid; justify-items: center; gap: 4px">
+          <img src="assets/coach-alt.webp" alt="" width="200" height="264" loading="lazy" decoding="async"
+               style="width: 200px; height: auto; opacity: .5; filter: drop-shadow(0 20px 34px rgba(0,0,0,.6))" />
+          <p style="font: 400 16px/1.6 'DM Sans', sans-serif; color: #5A5A66; max-width: 34ch; text-align: center">Select a client to read their intake file. Use ↑ ↓ to move, / to search.</p>
+        </div>
       </div>
 
       <div style="{{ detailStyle }}">
@@ -210,12 +216,22 @@
               <button type="button" data-act="undo" style="{{ undoStyle }}">Removed · Undo</button>
               <div style="flex: 1"></div>
               <span style="{{ savedStyle }}">{{ savedText }}</span>
-              <button type="button" data-act="pdf" style="{{ ghostBtn }}">Export PDF</button>
+              <div style="position: relative">
+                <button type="button" data-act="menu" style="{{ ghostBtn }}">{{ exportLabel }}</button>
+                <div style="{{ menuStyle }}">
+                  <button type="button" data-act="pdf" style="{{ menuItem }}">PDF — print / save</button>
+                  <button type="button" data-act="pdffile" style="{{ menuItem }}">PDF file — download</button>
+                  <button type="button" data-act="html" style="{{ menuItem }}">HTML page — one file</button>
+                  <button type="button" data-act="png" style="{{ menuItem }}">Image — JPG</button>
+                  <div style="{{ menuHint }}">Print keeps text selectable. The file formats embed the images.</div>
+                </div>
+              </div>
               <button type="button" data-act="wa" style="{{ sendBtn }}">Send on WhatsApp</button>
             </div>
 
             <div style="{{ pStyles.fieldGrid }}">
               <input data-field="title" placeholder="Plan title" style="{{ pIn }}" />
+              <input data-field="phase" placeholder="Phase — e.g. Phase 1: Hypertrophy" style="{{ pIn }}" />
               <input data-field="startDate" placeholder="Start date" style="{{ pIn }}" />
             </div>
 
@@ -277,6 +293,16 @@
 
               <div style="{{ pStyles.sub }}">Day total</div>
               <span style="{{ pStyles.pill }}">{{ dietTotal }}</span>
+
+              <div style="{{ pStyles.sub }}">Daily supplements</div>
+              <sc-for list="{{ dietSupps }}" as="s" hint-placeholder-count="2">
+                <div style="{{ pStyles.suppRow }}">
+                  <input data-path="{{ s.path }}" data-field="name" placeholder="Creatine monohydrate" style="{{ pIn }}" />
+                  <input data-path="{{ s.path }}" data-field="dose" placeholder="5g post-workout" style="{{ pIn }}" />
+                  <button type="button" data-act="del" data-list="supplements" data-i="{{ s.i }}" title="Remove" style="{{ pStyles.icon }}">✕</button>
+                </div>
+              </sc-for>
+              <button type="button" data-act="add" data-list="supplements" style="{{ pStyles.add }}">+ Add supplement</button>
 
               <div style="{{ pStyles.sub }}">Notes &amp; rules for the client</div>
               <textarea data-field="rules" placeholder="Water, cooking method, what to do on a cheat day…" style="{{ pNote }}"></textarea>
@@ -428,6 +454,14 @@ const PLANS_KEY = "forma:plans";
 const SAVE_DEBOUNCE_MS = 600;
 const TOTALS_DEBOUNCE_MS = 200;
 
+/* Whose name and face go on the plan the client receives. */
+const COACH_NAME = "Mahmoud Radwan";
+const ASSETS = {
+  avatar: "assets/coach-avatar.webp",
+  hero: "assets/coach-hero.webp",
+  texture: "assets/texture.webp"
+};
+
 /* [key, label] tuples drive the editor grid, the PDF table and the text
    digest from one place, the way GROUPS does for the intake file */
 const ITEM_COLS = [["food", "Food"], ["qty", "Qty"], ["kcal", "Kcal"], ["protein", "P"], ["carbs", "C"], ["fat", "F"]];
@@ -441,14 +475,16 @@ const PT = {
     targets: "Daily targets", total: "Total", dayTotal: "Daily total", rules: "Notes & rules",
     split: "Split", focus: "Focus", video: "Watch", notes: "Notes", start: "Start",
     food: "Food", qty: "Qty", kcal: "Kcal", protein: "Protein", carbs: "Carbs", fat: "Fat", water: "Water",
-    exercise: "Exercise", sets: "Sets", reps: "Reps", rest: "Rest", tempo: "Tempo", empty: "—"
+    exercise: "Exercise", sets: "Sets", reps: "Reps", rest: "Rest", tempo: "Tempo", empty: "—",
+    supps: "Daily supplements", meals: "Meal schedule"
   },
   ar: {
     diet: "الخطة الغذائية", training: "خطة التمرين", prepared: "خاصة بـ", coach: "الكابتن",
     targets: "الأهداف اليومية", total: "الإجمالي", dayTotal: "إجمالي اليوم", rules: "ملاحظات وقواعد",
     split: "التقسيم", focus: "التركيز", video: "شاهد", notes: "ملاحظات", start: "البداية",
     food: "الطعام", qty: "الكمية", kcal: "سعرات", protein: "بروتين", carbs: "كارب", fat: "دهون", water: "ماء",
-    exercise: "التمرين", sets: "مجموعات", reps: "تكرار", rest: "راحة", tempo: "الإيقاع", empty: "—"
+    exercise: "التمرين", sets: "مجموعات", reps: "تكرار", rest: "راحة", tempo: "الإيقاع", empty: "—",
+    supps: "المكملات اليومية", meals: "جدول الوجبات"
   }
 };
 
@@ -462,6 +498,7 @@ function numOf(v) {
 }
 
 function blankItem() { return { food: "", qty: "", kcal: "", protein: "", carbs: "", fat: "" }; }
+function blankSupp() { return { name: "", dose: "" }; }
 function blankMeal(n) { return { name: "Meal " + n, time: "", notes: "", items: [blankItem()] }; }
 function blankEx() { return { name: "", sets: "", reps: "", rest: "", tempo: "", notes: "", video: "" }; }
 function blankDay(n) { return { name: "Day " + n, focus: "", notes: "", exercises: [blankEx()] }; }
@@ -475,9 +512,9 @@ function seedDiet(c) {
   for (let i = 1; i <= meals; i++) list.push(blankMeal(i));
   const w = numOf(c.targetWeight) || numOf(c.weight);
   return {
-    lang: c.lang === "ar" ? "ar" : "en", title: "", startDate: "", notes: "",
+    lang: c.lang === "ar" ? "ar" : "en", title: "", phase: "", startDate: "", notes: "",
     targets: { kcal: "", protein: w ? String(Math.round(w * 2)) : "", carbs: "", fat: "", water: "" },
-    meals: list, rules: "", updatedAt: 0
+    meals: list, supplements: [blankSupp()], rules: "", updatedAt: 0
   };
 }
 function seedTraining(c) {
@@ -485,7 +522,7 @@ function seedTraining(c) {
   const list = [];
   for (let i = 1; i <= days; i++) list.push(blankDay(i));
   return {
-    lang: c.lang === "ar" ? "ar" : "en", title: "", startDate: "", notes: "",
+    lang: c.lang === "ar" ? "ar" : "en", title: "", phase: "", startDate: "", notes: "",
     split: "", days: list, rules: "", updatedAt: 0
   };
 }
@@ -505,7 +542,7 @@ class Component extends DCLogic {
     clients: [], loading: false, error: "", selKey: "", query: "", copied: false,
     connected: false, demo: false, cached: false, limit: PAGE, sort: "new",
     narrow: false,
-    tab: "intake", planRev: 0, savedAt: 0, undoAt: 0
+    tab: "intake", planRev: 0, savedAt: 0, undoAt: 0, menu: false, exporting: false
   };
 
   componentDidMount() {
@@ -786,7 +823,11 @@ class Component extends DCLogic {
     if (!this.plans[c._key]) this.plans[c._key] = {};
     const b = this.plans[c._key];
     if (!b[kind]) b[kind] = kind === "diet" ? seedDiet(c) : seedTraining(c);
-    return b[kind];
+    /* plans written before these fields existed must still open */
+    const p = b[kind];
+    if (typeof p.phase !== "string") p.phase = "";
+    if (kind === "diet" && !Array.isArray(p.supplements)) p.supplements = [blankSupp()];
+    return p;
   }
 
   atPath(plan, path) {
@@ -800,6 +841,7 @@ class Component extends DCLogic {
   blankFor(listPath, n) {
     if (/items$/.test(listPath)) return blankItem();
     if (/exercises$/.test(listPath)) return blankEx();
+    if (listPath === "supplements") return blankSupp();
     if (listPath === "meals") return blankMeal(n + 1);
     return blankDay(n + 1);
   }
@@ -848,8 +890,16 @@ class Component extends DCLogic {
       if (u) { u.arr.splice(u.i, 0, u.row); this.undoRow = null; this.afterStructural(plan); }
       return;
     }
-    if (act === "pdf") { this.exportPlan(c, kind); return; }
-    if (act === "wa") { this.sendPlan(c, kind); return; }
+    if (act === "menu") { this.setState({ menu: !this.state.menu }); return; }
+    if (act === "pdf") { this.closeMenu(); this.exportPlan(c, kind); return; }
+    if (act === "pdffile") {
+      this.closeMenu();
+      this.exportPdfFile(c, kind).then((b) => this.save(b, this.planFileName(c, kind, "pdf")), () => {});
+      return;
+    }
+    if (act === "html") { this.closeMenu(); this.exportHtml(c, kind); return; }
+    if (act === "png") { this.closeMenu(); this.exportPng(c, kind); return; }
+    if (act === "wa") { this.closeMenu(); this.sendPlan(c, kind); return; }
 
     const listPath = el.getAttribute("data-list") || "";
     const arr = listPath ? this.atPath(plan, listPath) : null;
@@ -924,165 +974,440 @@ class Component extends DCLogic {
   setTab(tab) {
     if (this.state.tab === tab) return;
     this.syncPending = true;
-    this.setState({ tab: tab });
+    this.setState({ tab: tab, menu: false });
   }
+
+  closeMenu() { if (this.state.menu) this.setState({ menu: false }); }
 
   /* ---------------- plan export ----------------
      One builder, three destinations: the print dialog (vector text, correct
      Arabic shaping, tiny file), a real .pdf for the share sheet, and the text
      digest that goes in the WhatsApp message. */
 
-  planFileName(c, kind) {
-    return "FORMA-" + String(c.fullName || "client").replace(/\s+/g, "-") + "-" + kind + ".pdf";
+  /* Stroke icons, drawn inline. The templates used a Phosphor webfont from a CDN;
+     nothing external can be used here because the rasteriser that builds the
+     shareable PDF runs no scripts and fetches no resources. */
+  planIcon(name, size, color) {
+    const P = {
+      fork: 'M7 3v6a2 2 0 0 0 4 0V3M9 9v12M17 3c-1.2 1.8-1.8 3.6-1.8 5.4 0 1.6.8 2.6 1.8 2.6s1.8-1 1.8-2.6C18.8 6.6 18.2 4.8 17 3zM17 11v10',
+      barbell: 'M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11',
+      sun: 'M12 4.5v2M12 17.5v2M4.5 12h2M17.5 12h2M6.8 6.8l1.4 1.4M15.8 15.8l1.4 1.4M17.2 6.8l-1.4 1.4M8.2 15.8l-1.4 1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z',
+      bowl: 'M3 11h18a9 9 0 0 1-18 0zM8 8c0-1.2.9-2 2-2M13 7.5c0-1.2.9-2 2-2',
+      clock: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM12 7v5l3 2',
+      drop: 'M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3z',
+      flame: 'M12 22a6 6 0 0 0 6-6c0-4.5-6-11-6-11S6 11.5 6 16a6 6 0 0 0 6 6z',
+      play: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM10.2 8.4l5.6 3.6-5.6 3.6z',
+      pill: 'M13.8 3.9a4.4 4.4 0 0 1 6.3 6.3l-6.2 6.2a4.4 4.4 0 0 1-6.3-6.3zM8.6 9.1l6.3 6.3',
+      info: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM12 11.2V16M12 8.2h.01',
+      sets: 'M4 9h12a4 4 0 0 1 0 8H8M7 6L4 9l3 3',
+      reps: 'M9.5 4L7.5 20M16.5 4l-2 16M4 9.2h16M3.4 14.8h16',
+      rest: 'M7 3h10M7 21h10M8.2 3c0 4 3.8 5 3.8 9s-3.8 5-3.8 9M15.8 3c0 4-3.8 5-3.8 9s3.8 5 3.8 9',
+      note: 'M5 4.5h14v15l-3.5-2.5-3.5 2.5-3.5-2.5L5 19.5zM9 9h6M9 12.5h4'
+    };
+    const s = size || 20;
+    return '<svg class="ic" viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="' +
+      (color || 'currentColor') + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="' + P[name] + '"/></svg>';
   }
 
-  planBody(c, kind) {
+  /* The two design files use Tailwind compiled in the browser, which cannot run
+     in either export path. This is the same design written as plain CSS. */
+  planCss(ar) {
+    const fam = ar
+      ? "'Cairo','Outfit',system-ui,-apple-system,'Segoe UI',sans-serif"
+      : "'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
+    return '@page{margin:0;size:A4}' +
+      '*{box-sizing:border-box;margin:0;padding:0}' +
+      ':root{--bg:#0f0f11;--card:#18181b;--card2:#202022;--line:#27272a;--ac:#ccff00;' +
+      '--pro:#ff4d4d;--car:#3b82f6;--fat:#eab308;--mut:#a1a1aa;--dim:#71717a}' +
+      'html,body{background:#0f0f11}' +
+      /* the print baseline in support.js strips backdrop-filter, and the
+         rasteriser ignores it too, so every glass panel needs a real fill */
+      'body{font-family:' + fam + ';color:#fff;line-height:1.5;' +
+      '-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+      '.pg{padding:34px 34px 28px;background:var(--bg)}' +
+      '.ic{vertical-align:middle;flex:0 0 auto}' +
+      '.nav{display:flex;justify-content:space-between;align-items:center;gap:16px;' +
+      'padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:26px}' +
+      '.brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:19px;' +
+      'letter-spacing:.08em;text-transform:uppercase}' +
+      '.brand b{color:var(--ac);font-weight:900}' +
+      '.who{display:flex;align-items:center;gap:10px}' +
+      '.who .lab{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}' +
+      '.who .nm{font-size:13px;font-weight:700}' +
+      '.av{width:38px;height:38px;border-radius:999px;border:2px solid var(--ac);object-fit:cover;' +
+      'object-position:top center;background:var(--card2);flex:0 0 auto}' +
+      '.hero{position:relative;overflow:hidden;border-radius:22px;background:var(--card);' +
+      'border:1px solid var(--line);padding:26px 28px;margin-bottom:26px;display:flex;gap:20px;align-items:center}' +
+      '.hero .txt{flex:1;min-width:0;position:relative;z-index:2}' +
+      '.hero .shot{width:172px;flex:0 0 auto;align-self:stretch;border-radius:16px;overflow:hidden;' +
+      'position:relative;background:linear-gradient(160deg,#26261f,#141416)}' +
+      '.hero .shot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}' +
+      '.glow{position:absolute;width:280px;height:280px;border-radius:999px;background:var(--ac);' +
+      'opacity:.12;filter:blur(60px);top:-130px;right:-90px;z-index:1}' +
+      '.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;' +
+      'background:rgba(204,255,0,.1);border:1px solid rgba(204,255,0,.22);color:var(--ac);' +
+      'font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;margin-bottom:13px}' +
+      'h1{font-size:35px;font-weight:900;line-height:1.06;letter-spacing:-.01em}' +
+      'h1 .gr{color:var(--ac)}' +
+      '.lead{color:var(--mut);font-size:13.5px;margin-top:10px;max-width:52ch}' +
+      '.by{display:flex;align-items:center;gap:11px;margin-top:16px}' +
+      '.by .nm{font-size:13px;font-weight:800}.by .rl{font-size:11px;color:var(--dim)}' +
+      '.sect{display:flex;align-items:center;gap:14px;margin:0 0 15px}' +
+      '.sect h2{font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}' +
+      '.sect h2 span{color:var(--mut)}' +
+      '.sect .rule{height:1px;flex:1;background:linear-gradient(90deg,var(--line),transparent)}' +
+      '.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:26px}' +
+      '.tile{background:rgba(39,39,42,.55);border:1px solid rgba(255,255,255,.06);border-radius:15px;' +
+      'padding:15px 16px;position:relative;overflow:hidden}' +
+      '.tile.k{border-top:3px solid var(--ac)}.tile.p{border-top:3px solid var(--pro)}' +
+      '.tile.c{border-top:3px solid var(--car)}.tile.f{border-top:3px solid var(--fat)}' +
+      '.tile .lab{font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--dim)}' +
+      '.tile .val{font-size:27px;font-weight:900;margin-top:5px;line-height:1}' +
+      '.tile .val u{font-size:14px;color:var(--dim);text-decoration:none;font-weight:700}' +
+      '.tile .sub{font-size:10px;color:var(--mut);margin-top:6px}' +
+      '.tile .sub.ok{color:var(--ac)}' +
+      '.card{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;' +
+      'margin-bottom:14px;break-inside:avoid;page-break-inside:avoid}' +
+      '.card .hd{background:rgba(39,39,42,.5);padding:14px 18px;display:flex;align-items:center;gap:13px;' +
+      'border-bottom:1px solid var(--line);flex-wrap:wrap}' +
+      '.dot{width:38px;height:38px;border-radius:999px;background:rgba(204,255,0,.14);color:var(--ac);' +
+      'display:flex;align-items:center;justify-content:center;flex:0 0 auto}' +
+      '.card .hd h3{font-size:16px;font-weight:800}' +
+      '.card .hd .tm{font-size:11.5px;color:var(--mut);display:flex;align-items:center;gap:5px;margin-top:3px}' +
+      '.macros{margin-inline-start:auto;display:flex;gap:14px;text-align:center}' +
+      '.macros div{min-width:34px}' +
+      '.macros b{display:block;font-size:13px;font-weight:800}' +
+      '.macros s{display:block;font-size:8.5px;color:var(--dim);text-transform:uppercase;' +
+      'letter-spacing:.1em;text-decoration:none;margin-top:2px}' +
+      '.macros .kc{padding-inline-start:13px;border-inline-start:1px solid var(--line)}' +
+      '.bd{padding:16px 18px;display:grid;grid-template-columns:1.15fr .85fr;gap:18px}' +
+      '.bd.one{grid-template-columns:1fr}' +
+      '.h4{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;' +
+      'color:var(--ac);margin-bottom:9px}' +
+      '.h4.m{color:var(--dim)}' +
+      'ul{list-style:none}' +
+      'li{display:flex;align-items:flex-start;gap:9px;color:#d4d4d8;font-size:12.5px;padding:3px 0}' +
+      'li i{width:5px;height:5px;border-radius:999px;background:#52525b;flex:0 0 auto;margin-top:7px}' +
+      'li em{font-style:normal;color:var(--dim);margin-inline-start:4px}' +
+      '.instr{background:rgba(39,39,42,.35);border:1px solid rgba(255,255,255,.05);border-radius:13px;padding:13px 15px}' +
+      '.instr p{font-size:12px;color:var(--mut);line-height:1.6;white-space:pre-wrap}' +
+      '.ex{background:rgba(39,39,42,.55);border:1px solid rgba(255,255,255,.06);border-radius:16px;' +
+      'padding:14px;margin-bottom:10px;display:flex;gap:14px;align-items:center;' +
+      'break-inside:avoid;page-break-inside:avoid}' +
+      '.ord{width:52px;height:52px;flex:0 0 auto;border-radius:13px;display:flex;align-items:center;' +
+      'justify-content:center;font-size:15px;font-weight:900;color:var(--ac);' +
+      'background:linear-gradient(150deg,rgba(204,255,0,.16),rgba(204,255,0,.03));' +
+      'border:1px solid rgba(204,255,0,.16)}' +
+      '.ex .mid{flex:1;min-width:0}' +
+      '.ex h3{font-size:15.5px;font-weight:800}' +
+      '.ex .cue{font-size:11.5px;color:var(--mut);margin:3px 0 8px;white-space:pre-wrap}' +
+      '.chips{display:flex;flex-wrap:wrap;gap:6px}' +
+      '.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(24,24,27,.8);' +
+      'border:1px solid var(--line);border-radius:9px;padding:5px 9px;font-size:11.5px;font-weight:700}' +
+      '.chip .ic{color:var(--ac)}' +
+      '.tut{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#18181b;' +
+      'border-radius:11px;padding:9px 14px;font-size:12px;font-weight:800;text-decoration:none;flex:0 0 auto}' +
+      '.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}' +
+      '.panel{background:rgba(39,39,42,.55);border:1px solid rgba(255,255,255,.06);' +
+      'border-radius:18px;padding:18px;break-inside:avoid}' +
+      '.panel .ph{display:flex;align-items:center;gap:10px;margin-bottom:13px}' +
+      '.panel h3{font-size:14.5px;font-weight:800}' +
+      '.supp{display:flex;justify-content:space-between;align-items:center;gap:10px;' +
+      'background:var(--card);border-radius:10px;padding:8px 12px;margin-bottom:7px}' +
+      '.supp .n{font-size:12.5px;font-weight:600}' +
+      '.supp .d{font-size:10.5px;font-weight:800;color:var(--ac);background:rgba(204,255,0,.1);' +
+      'padding:4px 8px;border-radius:6px;white-space:nowrap}' +
+      '.notes{background:var(--ac);color:#0f0f11;border-radius:18px;padding:20px;' +
+      'position:relative;overflow:hidden;break-inside:avoid}' +
+      '.notes h3{font-size:15px;font-weight:900;margin-bottom:8px}' +
+      '.notes p{font-size:12.5px;font-weight:500;line-height:1.62;white-space:pre-wrap}' +
+      '.notes .sig{margin-top:14px;padding-top:13px;border-top:1px solid rgba(15,15,17,.14);' +
+      'display:flex;align-items:center;gap:10px}' +
+      '.notes .sig .av{border-color:rgba(15,15,17,.3)}' +
+      '.notes .sig b{font-size:11.5px;font-weight:800;display:block}' +
+      '.notes .sig s{font-size:10px;opacity:.7;text-decoration:none}' +
+      '.ft{margin-top:22px;padding-top:15px;border-top:1px solid var(--line);' +
+      'display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:var(--dim)}' +
+      /* In print the footer is taken out of flow and repeated at the foot of
+         every sheet. In flow it only had to overshoot the page by a few pixels
+         to earn a second, otherwise blank, sheet of solid dark toner. */
+      '@media print{.pg{padding-bottom:46px}' +
+      '.ft{position:fixed;left:34px;right:34px;bottom:12px;margin:0;padding-top:8px;background:var(--bg)}}' +
+      (ar ? '.macros{margin-inline-start:auto}' : '');
+  }
+
+  planFileName(c, kind, ext) {
+    return "FORMA-" + String(c.fullName || "client").replace(/\s+/g, "-") + "-" + kind + "." + (ext || "pdf");
+  }
+
+  planBody(c, kind, A) {
     const plan = this.planOf(c, kind);
     const ar = plan.lang === "ar";
     const t = PT[ar ? "ar" : "en"];
+    const a = A || {};
     const e = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
     const has = (v) => String(v == null ? "" : v).trim() !== "";
     const kindName = kind === "diet" ? t.diet : t.training;
     const title = has(plan.title) ? plan.title : kindName;
-    const fam = ar ? "'Cairo','DM Sans',sans-serif" : "'DM Sans','Cairo',sans-serif";
-    const out = [];
+    const initials = String(c.fullName || "?").trim().split(/\s+/).slice(0, 2).map((w) => w.charAt(0)).join("").toUpperCase();
+    const I = (n, s, col) => this.planIcon(n, s, col);
+    const o = [];
 
-    out.push('<style>' +
-      '@page{margin:14mm}' +
-      '*{box-sizing:border-box}' +
-      'body{margin:0;background:#fff}' +
-      '.wrap{font:400 11.5pt/1.55 ' + fam + ';color:#16161C;background:#fff;padding:0}' +
-      '.hd{display:flex;align-items:flex-end;gap:8mm;border-bottom:2px solid #16161C;padding-bottom:4mm;margin-bottom:6mm}' +
-      '.mark{font:400 15pt/1 Anton,Impact,sans-serif;letter-spacing:.16em;color:#16161C}' +
-      '.kind{font:600 8pt/1 ' + fam + ';letter-spacing:.18em;text-transform:uppercase;color:#75757F;margin-top:2mm}' +
-      'h1{font:400 26pt/1.05 Anton,Impact,sans-serif;text-transform:uppercase;letter-spacing:.01em;margin:0}' +
-      '.meta{font:400 9.5pt/1.5 ' + fam + ';color:#5A5A66;text-align:end;white-space:nowrap}' +
-      '.tg{display:flex;flex-wrap:wrap;gap:3mm;margin-bottom:6mm}' +
-      '.tgi{border:1px solid #DEDEE6;border-radius:3mm;padding:3mm 4mm;min-width:24mm}' +
-      '.tgl{font:600 7.5pt/1 ' + fam + ';letter-spacing:.14em;text-transform:uppercase;color:#75757F}' +
-      '.tgv{font:400 15pt/1 Anton,Impact,sans-serif;margin-top:1.5mm}' +
-      '.card{border:1px solid #DEDEE6;border-radius:4mm;padding:5mm;margin-bottom:4mm;break-inside:avoid;page-break-inside:avoid}' +
-      '.ch{display:flex;align-items:baseline;gap:3mm;margin-bottom:3mm}' +
-      '.cn{font:400 14pt/1 Anton,Impact,sans-serif;text-transform:uppercase;letter-spacing:.03em}' +
-      '.ct{font:500 9pt/1 ' + fam + ';color:#75757F}' +
-      '.cs{margin-inline-start:auto;font:600 9pt/1 ' + fam + ';color:#4A7C00;white-space:nowrap}' +
-      'table{width:100%;border-collapse:collapse}' +
-      'th{font:600 7.5pt/1 ' + fam + ';letter-spacing:.12em;text-transform:uppercase;color:#75757F;text-align:start;padding:0 2mm 2mm 0;border-bottom:1px solid #DEDEE6}' +
-      'td{font:400 10.5pt/1.45 ' + fam + ';padding:2.2mm 2mm 2.2mm 0;border-bottom:1px solid #F0F0F4;vertical-align:top}' +
-      '.n{text-align:center;white-space:nowrap;color:#3C3C46}' +
-      '.note{font:400 9.5pt/1.5 ' + fam + ';color:#5A5A66;margin-top:3mm}' +
-      '.vid{font:600 9pt/1.4 ' + fam + ';color:#3B6E00;word-break:break-all}' +
-      '.sec{font:600 8pt/1 ' + fam + ';letter-spacing:.16em;text-transform:uppercase;color:#75757F;margin:7mm 0 3mm}' +
-      '.rules{border:1px solid #DEDEE6;background:#FAFAFB;border-radius:3mm;padding:4mm 5mm;white-space:pre-wrap;font:400 10.5pt/1.6 ' + fam + '}' +
-      '.ft{margin-top:8mm;padding-top:3mm;border-top:1px solid #DEDEE6;font:400 8.5pt/1.5 ' + fam + ';color:#8A8A96;display:flex;justify-content:space-between}' +
-      '</style>');
+    /* the same treatment the design files use: the photo washed almost all the
+       way out under a near-solid gradient, so it reads as texture not content */
+    const wash = a.texture
+      ? ' style="background-image:linear-gradient(180deg,rgba(15,15,17,.86),rgba(15,15,17,.99) 62%,#0f0f11),url(' + a.texture + ');background-size:cover;background-position:center top"'
+      : '';
+    o.push('<div class="pg"' + (ar ? ' dir="rtl"' : '') + wash + '>');
 
-    out.push('<div class="wrap"' + (ar ? ' dir="rtl"' : ' dir="ltr"') + '>');
-    out.push('<div class="hd"><div style="flex:1">' +
-      '<div class="mark">FORMA</div>' +
-      '<h1>' + e(title) + '</h1>' +
-      '<div class="kind">' + e(kindName) + '</div></div>' +
-      '<div class="meta">' + e(t.prepared) + ' <b>' + e(c.fullName || "") + '</b>' +
-      (has(plan.startDate) ? '<br>' + e(t.start) + ': ' + e(plan.startDate) : '') + '</div></div>');
+    /* nav */
+    o.push('<div class="nav"><div class="brand">' + I(kind === "diet" ? "fork" : "barbell", 22, "#ccff00") +
+      '<span>FOR<b>MA</b></span></div><div class="who"><div>' +
+      '<div class="lab">' + e(t.prepared) + '</div><div class="nm">' + e(c.fullName || "") + '</div></div>' +
+      (a.avatar
+        ? '<img class="av" src="' + a.avatar + '" alt=""/>'
+        : '<div class="av" style="display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">' + e(initials) + '</div>') +
+      '</div></div>');
 
-    if (kind === "diet") {
-      const tiles = MACROS.filter((m) => has(plan.targets[m[0]]))
-        .map((m) => '<div class="tgi"><div class="tgl">' + e(t[m[0]] || m[1]) + '</div><div class="tgv">' + e(plan.targets[m[0]]) + '</div></div>');
-      if (tiles.length) out.push('<div class="sec">' + e(t.targets) + '</div><div class="tg">' + tiles.join("") + '</div>');
+    /* hero */
+    o.push('<div class="hero"><div class="glow"></div><div class="txt">');
+    if (has(plan.phase)) o.push('<div class="badge">' + I("note", 12) + e(plan.phase) + '</div>');
+    o.push('<h1>' + e(title) + '</h1>');
+    if (has(plan.notes)) o.push('<p class="lead">' + e(plan.notes) + '</p>');
+    else if (kind === "training" && has(plan.split)) o.push('<p class="lead">' + e(t.split) + ': ' + e(plan.split) + '</p>');
+    o.push('<div class="by">' +
+      (a.avatar ? '<img class="av" src="' + a.avatar + '" alt=""/>' : '') +
+      '<div><span class="nm">' + e(COACH_NAME) + '</span><br><span class="rl">' + e(t.coach) +
+      (has(plan.startDate) ? ' · ' + e(t.start) + ' ' + e(plan.startDate) : '') + '</span></div></div>');
+    o.push('</div>');
+    if (a.hero) o.push('<div class="shot"><img src="' + a.hero + '" alt=""/></div>');
+    o.push('</div>');
 
-      const tot = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-      plan.meals.forEach((m) => {
-        const rows = m.items.filter((it) => has(it.food));
-        if (!rows.length && !has(m.notes)) return;   /* an untouched meal is not printed */
-        const mt = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-        rows.forEach((it) => {
-          mt.kcal += numOf(it.kcal); mt.protein += numOf(it.protein);
-          mt.carbs += numOf(it.carbs); mt.fat += numOf(it.fat);
-        });
-        tot.kcal += mt.kcal; tot.protein += mt.protein; tot.carbs += mt.carbs; tot.fat += mt.fat;
-        out.push('<div class="card"><div class="ch"><div class="cn">' + e(m.name || "") + '</div>' +
-          (has(m.time) ? '<div class="ct">' + e(m.time) + '</div>' : '') +
-          (mt.kcal ? '<div class="cs">' + Math.round(mt.kcal) + ' ' + e(t.kcal) + '</div>' : '') + '</div>');
-        if (rows.length) {
-          out.push('<table><tr><th>' + e(t.food) + '</th><th>' + e(t.qty) + '</th>' +
-            '<th class="n">' + e(t.kcal) + '</th><th class="n">' + e(t.protein) + '</th>' +
-            '<th class="n">' + e(t.carbs) + '</th><th class="n">' + e(t.fat) + '</th></tr>');
-          rows.forEach((it) => {
-            out.push('<tr><td>' + e(it.food) + '</td><td>' + e(it.qty) + '</td>' +
-              '<td class="n">' + e(it.kcal) + '</td><td class="n">' + e(it.protein) + '</td>' +
-              '<td class="n">' + e(it.carbs) + '</td><td class="n">' + e(it.fat) + '</td></tr>');
-          });
-          out.push('</table>');
-        }
-        if (has(m.notes)) out.push('<div class="note">' + e(m.notes) + '</div>');
-        out.push('</div>');
+    if (kind === "diet") this.planDietBody(o, plan, t, e, has, I, a);
+    else this.planTrainBody(o, plan, t, e, has, I, a);
+
+    o.push('<div class="ft"><span>FORMA · ' + e(COACH_NAME) + '</span><span>' + e(c.fullName || "") + '</span></div>');
+    o.push('</div>');
+    return o.join("");
+  }
+
+  planDietBody(o, plan, t, e, has, I, a) {
+    const tot = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+    const meals = [];
+    plan.meals.forEach((m) => {
+      const rows = m.items.filter((it) => has(it.food));
+      if (!rows.length && !has(m.notes)) return;
+      const mt = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+      rows.forEach((it) => {
+        mt.kcal += numOf(it.kcal); mt.protein += numOf(it.protein);
+        mt.carbs += numOf(it.carbs); mt.fat += numOf(it.fat);
       });
-      if (tot.kcal) {
-        out.push('<div class="sec">' + e(t.dayTotal) + '</div><div class="tg">' +
-          '<div class="tgi"><div class="tgl">' + e(t.kcal) + '</div><div class="tgv">' + Math.round(tot.kcal) + '</div></div>' +
-          '<div class="tgi"><div class="tgl">' + e(t.protein) + '</div><div class="tgv">' + Math.round(tot.protein) + '</div></div>' +
-          '<div class="tgi"><div class="tgl">' + e(t.carbs) + '</div><div class="tgv">' + Math.round(tot.carbs) + '</div></div>' +
-          '<div class="tgi"><div class="tgl">' + e(t.fat) + '</div><div class="tgv">' + Math.round(tot.fat) + '</div></div></div>');
-      }
-    } else {
-      if (has(plan.split)) out.push('<div class="sec">' + e(t.split) + '</div><div class="rules">' + e(plan.split) + '</div>');
-      plan.days.forEach((d) => {
-        const rows = d.exercises.filter((x) => has(x.name));
-        if (!rows.length && !has(d.notes)) return;   /* an untouched day is not printed */
-        out.push('<div class="card"><div class="ch"><div class="cn">' + e(d.name || "") + '</div>' +
-          (has(d.focus) ? '<div class="ct">' + e(d.focus) + '</div>' : '') + '</div>');
-        if (rows.length) {
-          out.push('<table><tr><th>' + e(t.exercise) + '</th><th class="n">' + e(t.sets) + '</th>' +
-            '<th class="n">' + e(t.reps) + '</th><th class="n">' + e(t.rest) + '</th><th class="n">' + e(t.tempo) + '</th></tr>');
-          rows.forEach((x) => {
-            const extra = [];
-            if (has(x.notes)) extra.push('<div class="note">' + e(x.notes) + '</div>');
-            if (isUrl(x.video)) extra.push('<div class="vid">' + e(t.video) + ': <a href="' + e(String(x.video).trim()) + '">' + e(String(x.video).trim()) + '</a></div>');
-            out.push('<tr><td>' + e(x.name) + extra.join("") + '</td>' +
-              '<td class="n">' + e(x.sets) + '</td><td class="n">' + e(x.reps) + '</td>' +
-              '<td class="n">' + e(x.rest) + '</td><td class="n">' + e(x.tempo) + '</td></tr>');
-          });
-          out.push('</table>');
+      tot.kcal += mt.kcal; tot.protein += mt.protein; tot.carbs += mt.carbs; tot.fat += mt.fat;
+      meals.push({ m: m, rows: rows, mt: mt });
+    });
+
+    /* targets — fall back to what the meals actually add up to */
+    const pick = (k) => has(plan.targets[k]) ? plan.targets[k] : (tot[k] ? String(Math.round(tot[k])) : "");
+    const tiles = [
+      ["k", t.kcal, pick("kcal"), "", "flame"],
+      ["p", t.protein, pick("protein"), "g", ""],
+      ["c", t.carbs, pick("carbs"), "g", ""],
+      ["f", t.fat, pick("fat"), "g", ""]
+    ].filter((x) => has(x[2]));
+    if (tiles.length) {
+      o.push('<div class="sect"><h2>' + e(t.targets) + '</h2><div class="rule"></div>' +
+        (has(plan.targets.water) ? '<div class="chip">' + I("drop", 15, "#3b82f6") + e(t.water) + ': ' + e(plan.targets.water) + '</div>' : '') +
+        '</div>');
+      o.push('<div class="grid4">');
+      tiles.forEach((x) => {
+        o.push('<div class="tile ' + x[0] + '"><div class="lab">' + e(x[1]) + '</div>' +
+          '<div class="val">' + e(x[2]) + (x[3] ? '<u>' + x[3] + '</u>' : '') + '</div></div>');
+      });
+      o.push('</div>');
+    }
+
+    if (meals.length) {
+      o.push('<div class="sect"><h2>' + e(t.meals) + ' <span>' + meals.length + '</span></h2><div class="rule"></div></div>');
+      meals.forEach((x, i) => {
+        const m = x.m, mt = x.mt;
+        o.push('<div class="card"><div class="hd"><div class="dot">' + I(i === 0 ? "sun" : "bowl", 19) + '</div>' +
+          '<div><h3>' + e(m.name || "") + '</h3>' +
+          (has(m.time) ? '<div class="tm">' + I("clock", 13) + e(m.time) + '</div>' : '') + '</div>');
+        if (mt.kcal || mt.protein) {
+          o.push('<div class="macros">' +
+            '<div><b style="color:#ff4d4d">' + Math.round(mt.protein) + 'g</b><s>' + e(t.protein) + '</s></div>' +
+            '<div><b style="color:#3b82f6">' + Math.round(mt.carbs) + 'g</b><s>' + e(t.carbs) + '</s></div>' +
+            '<div><b style="color:#eab308">' + Math.round(mt.fat) + 'g</b><s>' + e(t.fat) + '</s></div>' +
+            '<div class="kc"><b>' + Math.round(mt.kcal) + '</b><s>' + e(t.kcal) + '</s></div></div>');
         }
-        if (has(d.notes)) out.push('<div class="note">' + e(d.notes) + '</div>');
-        out.push('</div>');
+        o.push('</div>');
+        o.push('<div class="bd' + (has(m.notes) ? '' : ' one') + '"><div><div class="h4">' + e(t.food) + '</div><ul>');
+        x.rows.forEach((it) => {
+          o.push('<li><i></i><span>' + e(it.food) + (has(it.qty) ? '<em>' + e(it.qty) + '</em>' : '') + '</span></li>');
+        });
+        o.push('</ul></div>');
+        if (has(m.notes)) o.push('<div class="instr"><div class="h4 m">' + e(t.notes) + '</div><p>' + e(m.notes) + '</p></div>');
+        o.push('</div></div>');
       });
     }
 
-    if (has(plan.rules)) out.push('<div class="sec">' + e(t.rules) + '</div><div class="rules">' + e(plan.rules) + '</div>');
-    if (has(plan.notes)) out.push('<div class="rules" style="margin-top:4mm">' + e(plan.notes) + '</div>');
-    out.push('<div class="ft"><span>FORMA</span><span>' + e(c.fullName || "") + '</span></div>');
-    out.push('</div>');
-    return out.join("");
+    const supps = (plan.supplements || []).filter((s) => has(s.name));
+    if (supps.length || has(plan.rules)) {
+      o.push('<div class="two">');
+      if (supps.length) {
+        o.push('<div class="panel"><div class="ph">' + I("pill", 20, "#ccff00") + '<h3>' + e(t.supps) + '</h3></div>');
+        supps.forEach((s) => {
+          o.push('<div class="supp"><span class="n">' + e(s.name) + '</span>' +
+            (has(s.dose) ? '<span class="d">' + e(s.dose) + '</span>' : '') + '</div>');
+        });
+        o.push('</div>');
+      }
+      if (has(plan.rules)) {
+        o.push('<div class="notes"><h3>' + e(t.rules) + '</h3><p>' + e(plan.rules) + '</p>' +
+          '<div class="sig">' + (a.avatar ? '<img class="av" src="' + a.avatar + '" alt=""/>' : '') +
+          '<div><b>' + e(COACH_NAME) + '</b><s>' + e(t.coach) + '</s></div></div></div>');
+      }
+      o.push('</div>');
+    }
   }
 
-  planDocHtml(c, kind) {
+  planTrainBody(o, plan, t, e, has, I, a) {
+    const letters = "ABCDEFGH";
+    plan.days.forEach((d, di) => {
+      const rows = d.exercises.filter((x) => has(x.name));
+      if (!rows.length && !has(d.notes)) return;
+      o.push('<div class="sect"><h2>' + e(d.name || "") +
+        (has(d.focus) ? ' <span>' + e(d.focus) + '</span>' : '') + '</h2><div class="rule"></div></div>');
+      rows.forEach((x, xi) => {
+        o.push('<div class="ex"><div class="ord">' + letters.charAt(xi % 8) + '1</div><div class="mid">' +
+          '<h3>' + e(x.name) + '</h3>' +
+          (has(x.notes) ? '<div class="cue">' + e(x.notes) + '</div>' : '') + '<div class="chips">');
+        if (has(x.sets)) o.push('<span class="chip">' + I("sets", 14) + e(x.sets) + ' ' + e(t.sets) + '</span>');
+        if (has(x.reps)) o.push('<span class="chip">' + I("reps", 14) + e(x.reps) + ' ' + e(t.reps) + '</span>');
+        if (has(x.rest)) o.push('<span class="chip">' + I("rest", 14) + e(x.rest) + ' ' + e(t.rest) + '</span>');
+        if (has(x.tempo)) o.push('<span class="chip">' + I("clock", 14) + e(x.tempo) + '</span>');
+        o.push('</div></div>');
+        if (isUrl(x.video)) {
+          o.push('<a class="tut" href="' + e(String(x.video).trim()) + '">' + I("play", 16, "#18181b") + e(t.video) + '</a>');
+        }
+        o.push('</div>');
+      });
+      if (has(d.notes)) o.push('<div class="instr" style="margin-bottom:14px"><p>' + e(d.notes) + '</p></div>');
+    });
+
+    if (has(plan.rules)) {
+      o.push('<div class="notes" style="margin-top:8px"><h3>' + e(t.rules) + '</h3><p>' + e(plan.rules) + '</p>' +
+        '<div class="sig">' + (a.avatar ? '<img class="av" src="' + a.avatar + '" alt=""/>' : '') +
+        '<div><b>' + e(COACH_NAME) + '</b><s>' + e(t.coach) + '</s></div></div></div>');
+    }
+  }
+
+  planDocHtml(c, kind, A) {
     const plan = this.planOf(c, kind);
     const ar = plan.lang === "ar";
     return '<!DOCTYPE html><html lang="' + (ar ? "ar" : "en") + '" dir="' + (ar ? "rtl" : "ltr") + '"><head>' +
-      '<meta charset="utf-8"><title>' + String(c.fullName || "FORMA") + '</title>' +
+      '<meta charset="utf-8"><title>' + String(c.fullName || "FORMA") + ' — ' + (kind === "diet" ? "Diet" : "Training") + '</title>' +
       '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
-      '<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;600;700&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">' +
-      '</head><body>' + this.planBody(c, kind) + '</body></html>';
+      '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">' +
+      '<style>' + this.planCss(ar) + '</style></head><body>' + this.planBody(c, kind, A) + '</body></html>';
   }
 
-  /* Printing from a detached iframe keeps the console's dark theme out of the
+  /* The pages link these as ordinary files so the browser can cache and lazily
+     load them. An exported plan cannot: the rasteriser fetches nothing, and a
+     saved file has to survive with no network. So they are inlined here, once,
+     at the moment of export. */
+  loadAssets() {
+    if (this._assets) return this._assets;
+    /* The type is taken from the file extension, not from the server. A host
+       that does not know .webp answers application/octet-stream, and that
+       wrong type would be baked into every plan the coach ever sends —
+       browsers mostly sniff past it, but the saved file has to outlive the
+       server it came from. */
+    const mimeOf = (u) => /\.webp$/i.test(u) ? "image/webp"
+      : /\.png$/i.test(u) ? "image/png"
+      : /\.jpe?g$/i.test(u) ? "image/jpeg" : "application/octet-stream";
+
+    const one = (url) => fetch(url).then((r) => {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.blob();
+    }).then((b) => new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(String(fr.result).replace(/^data:[^;,]*/, "data:" + mimeOf(url)));
+      fr.onerror = rej;
+      fr.readAsDataURL(b);
+    })).catch(() => "");     /* a missing image must never block an export */
+
+    this._assets = Promise.all([one(ASSETS.avatar), one(ASSETS.hero), one(ASSETS.texture)])
+      .then((v) => ({ avatar: v[0], hero: v[1], texture: v[2] }));
+    return this._assets;
+  }
+
+  busy(on) {
+    if (this._busy === on) return;
+    this._busy = on;
+    this.setState({ exporting: on });
+  }
+
+  /* Printing from a detached iframe keeps the console's own theme out of the
      PDF and means no .no-print class has to be threaded through the editor. */
   exportPlan(c, kind) {
-    const f = document.createElement("iframe");
-    f.setAttribute("aria-hidden", "true");
-    f.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0";
-    document.body.appendChild(f);
-    const d = f.contentDocument;
-    d.open(); d.write(this.planDocHtml(c, kind)); d.close();
-    const go = () => {
-      try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {}
-      setTimeout(() => { if (f.parentNode) f.parentNode.removeChild(f); }, 60000);
-    };
-    /* wait for the webfont, otherwise Arabic prints in a fallback face */
-    const fonts = d.fonts;
-    if (fonts && fonts.ready && fonts.ready.then) fonts.ready.then(() => setTimeout(go, 150), () => setTimeout(go, 600));
-    else setTimeout(go, 600);
+    this.busy(true);
+    this.loadAssets().then((A) => {
+      const f = document.createElement("iframe");
+      f.setAttribute("aria-hidden", "true");
+      f.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0";
+      document.body.appendChild(f);
+      const d = f.contentDocument;
+      d.open(); d.write(this.planDocHtml(c, kind, A)); d.close();
+      const go = () => {
+        this.busy(false);
+        try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {}
+        setTimeout(() => { if (f.parentNode) f.parentNode.removeChild(f); }, 60000);
+      };
+      /* wait for the webfont, otherwise Arabic prints in a fallback face */
+      const fonts = d.fonts;
+      if (fonts && fonts.ready && fonts.ready.then) fonts.ready.then(() => setTimeout(go, 200), () => setTimeout(go, 700));
+      else setTimeout(go, 700);
+    });
+  }
+
+  /* A single self-contained file: images inlined, styles inlined, no network.
+     Opens in any browser and keeps the hover states the PDF cannot. */
+  exportHtml(c, kind) {
+    this.busy(true);
+    this.loadAssets().then((A) => {
+      const html = this.planDocHtml(c, kind, A);
+      this.save(new Blob([html], { type: "text/html;charset=utf-8" }), this.planFileName(c, kind, "html"));
+      this.busy(false);
+    });
+  }
+
+  exportPng(c, kind) {
+    this.busy(true);
+    this.loadAssets()
+      .then((A) => this.rasterPages(this.planBody(c, kind, A)))
+      .then((pages) => {
+        /* rasterPages already drew every page; the first is the one worth sending */
+        const b = this.b64ToBlob(pages[0].jpeg, "image/jpeg");
+        this.save(b, this.planFileName(c, kind, "jpg"));
+        this.busy(false);
+      }, () => this.busy(false));
+  }
+
+  b64ToBlob(b64, type) {
+    const bin = atob(b64);
+    const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return new Blob([u8], { type: type });
+  }
+
+  exportPdfFile(c, kind) {
+    this.busy(true);
+    return this.loadAssets()
+      .then((A) => this.rasterPages(this.planBody(c, kind, A)))
+      .then((pages) => { this.busy(false); return this.pagesToPdf(pages); },
+            (e) => { this.busy(false); throw e; });
   }
 
   /* ---------------- a real .pdf for the share sheet ----------------
@@ -1132,7 +1457,7 @@ class Component extends DCLogic {
             const bin = atob(b64);
             const bytes = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-            pages.push({ bytes: bytes, w: cv.width, h: cv.height });
+            pages.push({ bytes: bytes, jpeg: b64, w: cv.width, h: cv.height });
           }
           clean();
           resolve(pages);
@@ -1248,8 +1573,7 @@ class Component extends DCLogic {
     };
     const name = this.planFileName(c, kind);
 
-    this.rasterPages(this.planBody(c, kind)).then((pages) => {
-      const blob = this.pagesToPdf(pages);
+    this.exportPdfFile(c, kind).then((blob) => {
       let file = null;
       try { file = new File([blob], name, { type: "application/pdf" }); } catch (e) {}
       if (file && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
@@ -1427,6 +1751,7 @@ class Component extends DCLogic {
         : { display: "grid", gridTemplateColumns: "2.4fr .7fr .9fr .9fr .9fr 34px", gap: "8px", alignItems: "center" },
       exName: narrow ? Object.assign({}, inBase, { gridColumn: "1 / -1" }) : inBase,
       exSub: { display: "grid", gridTemplateColumns: narrow ? "1fr 40px" : "1.4fr 40px 2fr", gap: "8px", margin: "8px 0 16px", alignItems: "center" },
+      suppRow: { display: "grid", gridTemplateColumns: narrow ? "1fr 34px" : "1.6fr 1.2fr 34px", gap: "8px", marginBottom: "8px", alignItems: "center" },
       exBlock: { paddingBottom: "6px", borderBottom: "1px solid rgba(255,255,255,.05)", marginBottom: "12px" },
       colHead: narrow
         ? { display: "none" }
@@ -1503,8 +1828,13 @@ class Component extends DCLogic {
       exCols: EX_COLS.map((k) => ({ label: k[1] })),
       dietCtx: isDiet ? ctxOf([["allergy", "Allergy", 1], ["neverEat", "Never eat", 1], ["dislikes", "Dislikes", 0], ["diet", "Diet", 0], ["meals", "Meals/day", 0], ["cook", "Cooks", 0], ["likes", "Likes", 0]]) : [],
       trainCtx: isTrain ? ctxOf([["injuries", "Injuries", 1], ["injuryDetails", "Injury", 1], ["equip", "Equipment", 0], ["exp", "Experience", 0], ["days", "Days/wk", 0], ["sessionLength", "Session", 0], ["hatedExercises", "Hates", 0]]) : [],
-      dietTargets: [], dietMeals: [], dietTotal: "", trainDays: [],
-      planKindLabel: isDiet ? "Diet plan" : "Training plan"
+      dietTargets: [], dietMeals: [], dietTotal: "", trainDays: [], dietSupps: [],
+      planKindLabel: isDiet ? "Diet plan" : "Training plan",
+      exportBusy: !!st.exporting,
+      exportLabel: st.exporting ? "Working…" : "Export",
+      menuStyle: { display: st.menu ? "flex" : "none", flexDirection: "column", gap: "4px", position: "absolute", insetInlineEnd: 0, top: "46px", zIndex: 20, background: "#15151A", border: "1px solid " + LINE, borderRadius: "14px", padding: "6px", minWidth: "210px", boxShadow: "0 18px 40px rgba(0,0,0,.5)" },
+      menuItem: { textAlign: "start", padding: "10px 12px", borderRadius: "9px", border: "none", background: "transparent", color: INK, font: "600 13px/1.3 'DM Sans', sans-serif", cursor: "pointer", width: "100%" },
+      menuHint: { font: "400 11px/1.4 'DM Sans', sans-serif", color: "#6E6E7A", padding: "2px 12px 8px" }
     };
 
     if (isDiet && plan) {
@@ -1534,6 +1864,9 @@ class Component extends DCLogic {
         return { key: key, label: mk[1], delta: delta, deltaStyle: dStyle };
       });
       out.dietTotal = Math.round(tot.kcal) + " kcal · " + Math.round(tot.protein) + "P " + Math.round(tot.carbs) + "C " + Math.round(tot.fat) + "F";
+      out.dietSupps = (plan.supplements || []).map((s, si) => ({
+        path: "supplements." + si, i: String(si)
+      }));
     }
 
     if (isTrain && plan) {
