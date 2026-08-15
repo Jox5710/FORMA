@@ -1136,12 +1136,13 @@ class Component extends DCLogic {
       '.notes .sig .av{border-color:rgba(15,15,17,.3)}' +
       '.notes .sig b{font-size:11.5px;font-weight:800;display:block}' +
       '.notes .sig s{font-size:10px;opacity:.7;text-decoration:none}' +
-      /* a photo at the head of each training day, and a closing strip */
-      '.dayshot{width:100%;height:164px;object-fit:cover;object-position:center top;' +
-      'border-radius:14px;display:block;margin-bottom:12px;filter:saturate(.92) contrast(1.04)}' +
-      '.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}' +
-      '.strip img{width:100%;height:104px;object-fit:cover;object-position:center top;' +
-      'border-radius:12px;display:block}' +
+      /* Portrait frames: these hold the coach head to foot, so a wide band
+         cannot be used — it would crop him to a torso. */
+      '.daythumb{width:84px;height:112px;flex:0 0 auto;object-fit:cover;border-radius:11px;' +
+      'display:block;border:1px solid rgba(255,255,255,.08)}' +
+      '.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}' +
+      '.strip img{width:100%;height:250px;object-fit:cover;border-radius:13px;display:block;' +
+      'border:1px solid rgba(255,255,255,.07)}' +
       '.ft{margin-top:22px;padding-top:15px;border-top:1px solid var(--line);' +
       'display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:var(--dim)}' +
       /* In print the footer is taken out of flow and repeated at the foot of
@@ -1166,7 +1167,8 @@ class Component extends DCLogic {
       '.ex .mid{flex:1 1 100%;order:2}' +
       '.ord{order:1}.tut{order:1;margin-inline-start:auto}' +
       '.two{grid-template-columns:1fr}' +
-      '.strip{grid-template-columns:1fr 1fr}' +
+      '.strip{grid-template-columns:1fr 1fr}.strip img{height:212px}' +
+      '.daythumb{width:66px;height:88px}' +
       '.nav{gap:10px}.who .lab{display:none}' +
       '}' +
       (ar ? '.macros{margin-inline-start:auto}' : '');
@@ -1323,10 +1325,11 @@ class Component extends DCLogic {
     plan.days.forEach((d, di) => {
       const rows = d.exercises.filter((x) => has(x.name));
       if (!rows.length && !has(d.notes)) return;
-      o.push('<div class="sect"><h2>' + e(d.name || "") +
-        (has(d.focus) ? ' <span>' + e(d.focus) + '</span>' : '') + '</h2><div class="rule"></div></div>');
       /* one photo per day, walking the gallery so days never repeat */
-      if (shots.length) o.push('<img class="dayshot" src="' + shots[shown++ % shots.length] + '" alt=""/>');
+      const thumb = shots.length ? '<img class="daythumb" src="' + shots[shown++ % shots.length] + '" alt=""/>' : '';
+      o.push('<div class="sect">' + thumb + '<h2>' + e(d.name || "") +
+        (has(d.focus) ? ' <span>' + e(d.focus) + '</span>' : '') + '</h2><div class="rule"></div></div>');
+
       rows.forEach((x, xi) => {
         o.push('<div class="ex"><div class="ord">' + letters.charAt(xi % 8) + '1</div><div class="mid">' +
           '<h3>' + e(x.name) + '</h3>' +

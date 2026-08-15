@@ -35,7 +35,10 @@ CUTOUTS = [
     ("file_00000000a99c81f48281a76a84a800a3.png", "coach-alt.webp", 700, "front double-biceps"),
     ("file_00000000f94481f4b3c0aa163ac2da9c.png", "coach-stand.webp", 700, "standing"),
 ]
-AVATAR_FROM = "file_00000000a99c81f48281a76a84a800a3.png"
+# The avatar comes from a clear frontal shot rather than a cutout: in a small
+# circle a lit, colour photograph of the face reads far better than a
+# silhouette. This is the same frame as shot-3.
+AVATAR_FROM = "20260729_131101.jpg"
 TEXTURE_FROM = "20260730_115759.jpg"
 
 # The gallery: rectangular crops used as day thumbnails in a training plan and
@@ -51,9 +54,9 @@ SHOTS = [
     "20260730_115759.jpg",
     "IMG-20260727-WA0022.jpg",
 ]
-# Wide enough to run full width as a day banner without upscaling, and still
-# crop well down to a thumbnail in a three-up strip.
-SHOT_W, SHOT_H = 760, 320
+# Portrait, because these frames hold the whole figure. A wide banner cannot
+# show a standing person head to foot without shrinking them to a sliver.
+SHOT_W, SHOT_H = 600, 800
 
 
 MODEL = os.path.expanduser("~/.u2net/isnet-general-use.onnx")
@@ -90,20 +93,99 @@ def load(path):
     return ImageOps.exif_transpose(Image.open(path)).convert("RGB")
 
 
+def face_of(im):
+    """
+    (cx, cy) of the largest plausible face, in source pixels.
+
+    Haar happily reports a knee or a water bottle as a face. In a standing
+    portrait the head is in the upper half and is a small fraction of the
+    frame, so anything else is discarded rather than trusted.
+    """
+    gray = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2GRAY)
+    cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    side = max(24, int(im.height * 0.025))
+    faces = cascade.detectMultiScale(gray, 1.08, 6, minSize=(side, side))
+
+    ok = [f for f in faces
+          if (f[1] + f[3] / 2.0) < im.height * 0.55         # upper half only
+          and im.height * 0.03 < f[3] < im.height * 0.28]   # head-sized
+    if not ok:
+        return None
+    x, y, w, h = sorted(ok, key=lambda f: f[2] * f[3])[-1]
+    return (x + w / 2.0, y + h / 2.0, float(h))
+
+
+def subject_top(im):
+    """Row where the subject starts, via the same matte used for the cutouts."""
+    try:
+        alpha = cutout_mask(im)
+    except Exception:
+        return None
+    ys = np.where(alpha.max(axis=1) > 60)[0]
+    return float(ys.min()) if len(ys) else None
+
+
 def cover(im, w, h):
-    """Scale-and-centre-crop to exactly w x h, like CSS object-fit: cover."""
-    r = max(w / im.width, h / im.height)
-    im = im.resize((max(1, round(im.width * r)), max(1, round(im.height * r))), Image.LANCZOS)
-    x = (im.width - w) // 2
-    y = (im.height - h) // 3          # bias up: heads matter more than floors
-    return im.crop((x, y, x + w, y + h))
+    """
+    Frame the whole subject — head to feet — inside a w x h crop.
+
+    Cropping to a fixed rectangle cut the coach off at the chest, and aiming at
+    the face only traded that for a head-and-shoulders portrait. Instead the
+    matte gives the subject's real bounding box, which is padded out to the
+    target aspect so nothing of them is lost.
+    """
+    target = w / float(h)
+    box = None
+    try:
+        alpha = cutout_mask(im)
+        ys, xs = np.where(alpha > 60)
+        if len(ys):
+            box = [xs.min(), ys.min(), xs.max(), ys.max()]
+    except Exception:
+        pass
+
+    if box is None:
+        r = max(w / im.width, h / im.height)
+        sc = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
+        print("      frame=fallback")
+        return sc.crop(((sc.width - w) // 2, 0, (sc.width - w) // 2 + w, h))
+
+    x0, y0, x1, y1 = box
+    bw, bh = x1 - x0, y1 - y0
+    pad = 0.06
+    x0 -= bw * pad; x1 += bw * pad
+    y0 -= bh * pad * 1.4; y1 += bh * pad          # a little more air above the head
+    bw, bh = x1 - x0, y1 - y0
+
+    # grow the short side until the box matches the frame's aspect
+    if bw / bh < target:
+        need = bh * target
+        cx = (x0 + x1) / 2.0
+        x0, x1 = cx - need / 2.0, cx + need / 2.0
+    else:
+        need = bw / target
+        cy = (y0 + y1) / 2.0
+        y0, y1 = cy - need / 2.0, cy + need / 2.0
+
+    # keep it inside the photo, sliding rather than squashing
+    def fit(a, b, limit):
+        if b - a > limit:
+            return 0.0, float(limit)
+        if a < 0:
+            b -= a; a = 0.0
+        if b > limit:
+            a -= (b - limit); b = float(limit)
+        return max(0.0, a), min(float(limit), b)
+
+    x0, x1 = fit(x0, x1, im.width)
+    y0, y1 = fit(y0, y1, im.height)
+    print("      frame=subject  %dx%d" % (x1 - x0, y1 - y0))
+    return im.crop((int(x0), int(y0), int(x1), int(y1))).resize((w, h), Image.LANCZOS)
 
 
-def cutout(path):
-    """Segment the subject and return an RGBA array at full resolution."""
+def cutout_mask(src):
+    """Run the matting model over a PIL image and return an alpha array."""
     s = session()
-    src = load(path)
-
     im = np.array(src.resize((1024, 1024), Image.LANCZOS)).astype(np.float32)
     im = im / max(im.max(), 1e-6)
     im = (im - 0.5) / 1.0
@@ -114,10 +196,13 @@ def cutout(path):
     pred = (pred - lo) / max(hi - lo, 1e-6)
 
     mask = Image.fromarray((np.squeeze(pred) * 255).astype(np.uint8), mode="L")
-    mask = mask.resize(src.size, Image.LANCZOS)
+    return np.array(mask.resize(src.size, Image.LANCZOS))
 
-    rgba = np.dstack([np.array(src), np.array(mask)])
-    return rgba
+
+def cutout(path):
+    """Segment the subject and return an RGBA array at full resolution."""
+    src = load(path)
+    return np.dstack([np.array(src), cutout_mask(src)])
 
 
 def clean_edges(rgba, erode=1, feather=1.0):
@@ -272,11 +357,21 @@ def main():
         total += os.path.getsize(save_webp(to_height(rgba, height), name))
 
     print("avatar")
-    if alt_rgba is not None:
-        cx, cy, side = find_head(alt_rgba)
-        av = crop_square(alt_rgba, cx, cy, side)
-        im = Image.fromarray(av).resize((320, 320), Image.LANCZOS)
-        total += os.path.getsize(save_webp(im, "coach-avatar.webp", quality=80))
+    ap = os.path.join(SRC, AVATAR_FROM)
+    if os.path.exists(ap):
+        src = load(ap)
+        f = face_of(src)
+        if f is not None:
+            cx, cy, fh = f
+            side = fh * 2.05                   # face plus hair and a little neck
+            cy += fh * 0.10                    # sit the eyes above centre
+            print("    face at (%d,%d) h=%d -> %dpx box" % (cx, cy, fh, side))
+        else:
+            print("    no face; falling back to the cutout head finder")
+            cx, cy, side = find_head(np.dstack([np.array(src), cutout_mask(src)]))
+        av = crop_square(np.dstack([np.array(src), np.full(src.size[::-1], 255, np.uint8)]), cx, cy, side)
+        im = Image.fromarray(av).convert("RGB").resize((320, 320), Image.LANCZOS)
+        total += os.path.getsize(save_webp(im, "coach-avatar.webp", quality=82))
 
     print("gallery")
     n = 0
