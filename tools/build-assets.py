@@ -18,7 +18,7 @@ import io
 
 import numpy as np
 import cv2
-from PIL import Image
+from PIL import Image, ImageOps
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -33,9 +33,27 @@ CUTOUTS = [
     # (source, output, target height, label)
     ("file_00000000ba2881f4aede039268af5b9d.png", "coach-hero.webp", 900, "overhead victory"),
     ("file_00000000a99c81f48281a76a84a800a3.png", "coach-alt.webp", 700, "front double-biceps"),
+    ("file_00000000f94481f4b3c0aa163ac2da9c.png", "coach-stand.webp", 700, "standing"),
 ]
 AVATAR_FROM = "file_00000000a99c81f48281a76a84a800a3.png"
-TEXTURE_FROM = "20260721_033530.jpg"
+TEXTURE_FROM = "20260730_115759.jpg"
+
+# The gallery: rectangular crops used as day thumbnails in a training plan and
+# as the strip on the intake form. Chosen for variety — gym, wooden backdrop,
+# cable work, free weights — so a six-day plan does not repeat itself.
+SHOTS = [
+    "20260803_214442(1).jpg",
+    "IMG-20260725-WA0013.jpg",
+    "20260729_131101.jpg",
+    "20260730_130328.jpg",
+    "20260809_145750.jpg",
+    "20260729_134055.jpg",
+    "20260730_115759.jpg",
+    "IMG-20260727-WA0022.jpg",
+]
+# Wide enough to run full width as a day banner without upscaling, and still
+# crop well down to a thumbnail in a three-up strip.
+SHOT_W, SHOT_H = 760, 320
 
 
 MODEL = os.path.expanduser("~/.u2net/isnet-general-use.onnx")
@@ -62,10 +80,29 @@ def session():
     return session.s
 
 
+def load(path):
+    """
+    Open a photo the right way up.
+
+    Every shot off the phone is stored landscape with an EXIF orientation flag
+    of 6, so anything that ignores the flag gets a subject lying on its side.
+    """
+    return ImageOps.exif_transpose(Image.open(path)).convert("RGB")
+
+
+def cover(im, w, h):
+    """Scale-and-centre-crop to exactly w x h, like CSS object-fit: cover."""
+    r = max(w / im.width, h / im.height)
+    im = im.resize((max(1, round(im.width * r)), max(1, round(im.height * r))), Image.LANCZOS)
+    x = (im.width - w) // 2
+    y = (im.height - h) // 3          # bias up: heads matter more than floors
+    return im.crop((x, y, x + w, y + h))
+
+
 def cutout(path):
     """Segment the subject and return an RGBA array at full resolution."""
     s = session()
-    src = Image.open(path).convert("RGB")
+    src = load(path)
 
     im = np.array(src.resize((1024, 1024), Image.LANCZOS)).astype(np.float32)
     im = im / max(im.max(), 1e-6)
@@ -241,16 +278,31 @@ def main():
         im = Image.fromarray(av).resize((320, 320), Image.LANCZOS)
         total += os.path.getsize(save_webp(im, "coach-avatar.webp", quality=80))
 
+    print("gallery")
+    n = 0
+    for i, src in enumerate(SHOTS):
+        p = os.path.join(SRC, src)
+        if not os.path.exists(p):
+            print("  ! missing %s — skipped" % src)
+            continue
+        im = cover(load(p), SHOT_W, SHOT_H)
+        total += os.path.getsize(save_webp(im, "shot-%d.webp" % (n + 1), quality=70))
+        n += 1
+    print("  %d gallery shots" % n)
+
     print("texture")
     tp = os.path.join(SRC, TEXTURE_FROM)
     if os.path.exists(tp):
-        im = Image.open(tp).convert("RGB")
-        im = im.resize((1600, round(im.height * 1600 / im.width)), Image.LANCZOS)
+        im = cover(load(tp), 1400, 900)
         # darken so text stays readable over it without another CSS layer
         arr = (np.array(im).astype(np.float32) * 0.38).clip(0, 255).astype(np.uint8)
-        total += os.path.getsize(save_webp(Image.fromarray(arr), "texture.webp", quality=68))
+        total += os.path.getsize(save_webp(Image.fromarray(arr), "texture.webp", quality=66))
 
-    print("\ntotal shipped: %.1f KB" % (total / 1024))
+    # a manifest so the pages know how many shots exist without hardcoding it
+    with open(os.path.join(OUT, "manifest.json"), "w") as fh:
+        fh.write('{"shots":%d}\n' % n)
+
+    print("\ntotal shipped: %.1f KB across %d files" % (total / 1024, len(os.listdir(OUT))))
 
 
 if __name__ == "__main__":

@@ -15,9 +15,31 @@ plan to them as a PDF — without leaving the page.
 | `setup.html` | The 6-minute Google Drive setup guide, including the Apps Script to paste. |
 | `support.js` | Required runtime. Upload it too. |
 | `vendor/` | React, served from your own site instead of a CDN. Upload it too. |
-| `assets/` | Your photos, cut out and optimised. Upload it too. |
+| `assets/` | Your photos, cut out and optimised — 14 files, 260KB in total. Upload it too. |
 | `tools/build-assets.py` | Rebuilds `assets/` from your originals. Never needs to run on the server. |
 | `images/` | The full-size originals. **Not** uploaded, and gitignored — 172MB of 4000×3000 phone shots. |
+
+## Your photos
+
+`tools/build-assets.py` turns the shots in `images/` into everything the site
+uses. It cuts you out of three of them with a local segmentation model, so the
+portraits sit on the dark background with no white box around them, finds your
+head for the round avatar, and crops eight more into a gallery. Every photo off
+a phone is stored sideways with an orientation flag, which the script applies —
+ignore it and everyone ends up lying down.
+
+To swap a photo, edit the lists at the top of the script and re-run it:
+
+```bash
+pip install pillow opencv-python onnxruntime
+mkdir -p ~/.u2net && curl -L -o ~/.u2net/isnet-general-use.onnx \
+  https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx
+python3 tools/build-assets.py
+```
+
+Where they show up: the cutout leads the intake form and every plan cover, your
+face is the avatar on both pages and beside your notes in each plan, a different
+gallery shot heads each training day, and three close every plan.
 
 ## The only thing to edit
 
