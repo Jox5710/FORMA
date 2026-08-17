@@ -60,6 +60,13 @@
 
   /* grid and flex children default to min-content, which a long email or a
      phone number can push past a narrow screen — let them shrink and wrap */
+  /* the pose beside the connect card: only where there is room for it, and never
+     at the cost of the card it stands next to */
+  .gate-pose { width: clamp(150px, 17vw, 250px); height: auto; align-self: flex-end;
+    filter: drop-shadow(0 26px 42px rgba(0,0,0,.7)); flex: 0 0 auto; }
+  @media (max-width: 900px) { .gate-pose { display: none; } }
+  .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 700px) { .photo-grid { grid-template-columns: 1fr 1fr; } }
   .kv-sec, .kv-row, .flag-row { min-width: 0; }
   .kv-row > *, .flag-row > * { min-width: 0; overflow-wrap: anywhere; }
 
@@ -92,6 +99,9 @@
   </div>
 
   <div style="{{ gateStyle }}">
+    <!-- A pose stands beside the connect card on a wide screen and drops out on a
+         narrow one, where the card is the whole page and nothing else fits. -->
+    <img class="gate-pose" src="assets/cut-11.webp" alt="" width="315" height="900" loading="lazy" decoding="async" />
     <div style="{{ gateCardStyle }}">
       <div style="font-family: Anton, Impact, sans-serif; font-size: 44px; line-height: 1; letter-spacing: .12em; color: #D6FF3F">FORMA</div>
       <h1 style="font: 700 22px/1.3 'DM Sans', sans-serif; margin: 22px 0 10px; color: #F4F3F0">Connect your client sheet</h1>
@@ -122,7 +132,7 @@
         <sc-for list="{{ rows }}" as="c" hint-placeholder-count="5">
           <button type="button" onClick="{{ c.onClick }}" data-sel="{{ c.selFlag }}" style="{{ c.style }}">
             <span style="display: flex; align-items: baseline; gap: 8px">
-              <span style="font: 700 15px/1.3 'DM Sans', sans-serif; color: #F4F3F0">{{ c.name }}</span>
+              <span dir="auto" style="font: 700 15px/1.3 'DM Sans', sans-serif; color: #F4F3F0">{{ c.name }}</span>
               <span style="{{ c.badgeStyle }}">{{ c.badge }}</span>
             </span>
             <span style="font: 500 12px/1.4 'DM Sans', sans-serif; color: #D6FF3F">{{ c.goal }}</span>
@@ -141,8 +151,10 @@
     <div style="{{ detailPaneStyle }}">
       <div style="{{ noSelStyle }}">
         <div style="display: grid; justify-items: center; gap: 4px">
-          <img src="assets/coach-alt.webp" alt="" width="200" height="264" loading="lazy" decoding="async"
-               style="width: 200px; height: auto; opacity: .5; filter: drop-shadow(0 20px 34px rgba(0,0,0,.6))" />
+          <!-- narrower than the old photo because a full standing figure is a
+               taller shape than a torso crop was -->
+          <img src="assets/cut-7.webp" alt="" width="155" height="309" loading="lazy" decoding="async"
+               style="width: 155px; height: auto; opacity: .5; filter: drop-shadow(0 20px 34px rgba(0,0,0,.6))" />
           <p style="font: 400 16px/1.6 'DM Sans', sans-serif; color: #5A5A66; max-width: 34ch; text-align: center">Select a client to read their intake file. Use ↑ ↓ to move, / to search.</p>
         </div>
       </div>
@@ -152,7 +164,7 @@
           <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid rgba(255,255,255,.1)">
             <div style="flex: 1; min-width: 220px">
               <div style="font: 600 11px/1 'DM Sans', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #D6FF3F; margin-bottom: 14px">{{ sel.received }}</div>
-              <h1 style="font: 400 clamp(32px, 4.6vw, 54px)/1 Anton, Impact, sans-serif; text-transform: uppercase; letter-spacing: .01em; margin: 0; color: #F4F3F0">{{ sel.name }}</h1>
+              <h1 dir="auto" style="font: 400 clamp(32px, 4.6vw, 54px)/1 Anton, Impact, sans-serif; text-transform: uppercase; letter-spacing: .01em; margin: 0; color: #F4F3F0">{{ sel.name }}</h1>
               <p style="font: 400 15px/1.6 'DM Sans', sans-serif; color: #8A8A96; margin: 12px 0 0">{{ sel.subline }}</p>
             </div>
             <div class="no-print" style="display: flex; gap: 10px; flex-wrap: wrap">
@@ -182,9 +194,28 @@
           <sc-for list="{{ sel.flags }}" as="f" hint-placeholder-count="0">
             <div class="flag-row" style="display: flex; gap: 14px; background: rgba(255,138,91,.08); border: 1px solid rgba(255,138,91,.34); border-radius: 16px; padding: 18px 20px; margin-bottom: 14px">
               <span style="font: 700 11px/1.6 'DM Sans', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #FF8A5B; white-space: nowrap">{{ f.label }}</span>
-              <span style="font: 400 15px/1.6 'DM Sans', sans-serif; color: #EDD8CC">{{ f.value }}</span>
+              <span dir="auto" style="font: 400 15px/1.6 'DM Sans', sans-serif; color: #EDD8CC">{{ f.value }}</span>
             </div>
           </sc-for>
+
+          <!-- The client's own photos. Private in Drive: the thumbnails come
+               through the script, unlocked by the access code, and a tap opens
+               the full picture in Drive where the coach is already signed in. -->
+          <section class="kv-sec" style="{{ photos.show }}">
+            <div style="{{ photoHeadStyle }}">
+              <h2 style="{{ photoTitleStyle }}">Photos</h2>
+              <a href="{{ photos.folder }}" target="_blank" rel="noreferrer" style="{{ photoFolderStyle }}">Open folder ↗</a>
+            </div>
+            <div class="photo-grid">
+              <sc-for list="{{ photos.list }}" as="ph" hint-placeholder-count="0">
+                <a href="{{ ph.href }}" target="_blank" rel="noreferrer" style="{{ photoTileStyle }}">
+                  <img src="{{ ph.src }}" alt="" style="{{ ph.imgStyle }}" />
+                  <span style="{{ ph.waitStyle }}">loading…</span>
+                  <span style="{{ photoTagStyle }}">{{ ph.label }}</span>
+                </a>
+              </sc-for>
+            </div>
+          </section>
 
           <div style="display: grid; gap: 18px; margin-top: 24px">
             <sc-for list="{{ sel.groups }}" as="grp" hint-placeholder-count="6">
@@ -194,7 +225,7 @@
                   <sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="4">
                     <div class="kv-row" style="display: grid; grid-template-columns: minmax(140px, 210px) 1fr; gap: 20px; align-items: start">
                       <span style="font: 600 12px/1.5 'DM Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #6E6E7A">{{ it.label }}</span>
-                      <span style="{{ it.valueStyle }}">{{ it.value }}</span>
+                      <span dir="auto" style="{{ it.valueStyle }}">{{ it.value }}</span>
                     </div>
                   </sc-for>
                 </div>
@@ -230,9 +261,9 @@
             </div>
 
             <div style="{{ pStyles.fieldGrid }}">
-              <input data-field="title" placeholder="Plan title" style="{{ pIn }}" />
-              <input data-field="phase" placeholder="Phase — e.g. Phase 1: Hypertrophy" style="{{ pIn }}" />
-              <input data-field="startDate" placeholder="Start date" style="{{ pIn }}" />
+              <input data-field="title" dir="auto" placeholder="Plan title" style="{{ pIn }}" />
+              <input data-field="phase" dir="auto" placeholder="Phase — e.g. Phase 1: Hypertrophy" style="{{ pIn }}" />
+              <input data-field="startDate" dir="auto" placeholder="Start date" style="{{ pIn }}" />
             </div>
 
             <!-- ---------- DIET ---------- -->
@@ -256,14 +287,26 @@
               <sc-for list="{{ dietMeals }}" as="m" hint-placeholder-count="3">
                 <section style="{{ pStyles.card }}">
                   <div style="{{ pStyles.cardHead }}">
-                    <input data-path="{{ m.path }}" data-field="name" placeholder="Meal name" style="{{ pHeadName }}" />
-                    <input data-path="{{ m.path }}" data-field="time" placeholder="Time" style="{{ pHeadSmall }}" />
+                    <input data-path="{{ m.path }}" data-field="name" dir="auto" placeholder="Meal name" style="{{ pHeadName }}" />
+                    <input data-path="{{ m.path }}" data-field="time" dir="auto" placeholder="Time" style="{{ pHeadSmall }}" />
                     <span style="{{ pStyles.pill }}">{{ m.totalText }}</span>
                     <button type="button" data-act="up" data-list="meals" data-i="{{ m.i }}" title="Move up" style="{{ pStyles.icon }}">↑</button>
                     <button type="button" data-act="down" data-list="meals" data-i="{{ m.i }}" title="Move down" style="{{ pStyles.icon }}">↓</button>
                     <button type="button" data-act="dup" data-list="meals" data-i="{{ m.i }}" title="Duplicate" style="{{ pStyles.icon }}">⧉</button>
                     <button type="button" data-act="del" data-list="meals" data-i="{{ m.i }}" title="Remove meal" style="{{ pStyles.icon }}">✕</button>
                   </div>
+
+                  <!-- The whole meal in one line, for a client who does not need
+                       every food weighed. Each box shows the figure the foods add
+                       up to as its placeholder, so typing over it is an override
+                       and clearing it goes back to adding them up. -->
+                  <div style="{{ pStyles.mealTotRow }}">
+                    <span style="{{ pStyles.mealTotLab }}">Meal total</span>
+                    <sc-for list="{{ m.macroCells }}" as="mc" hint-placeholder-count="4">
+                      <input data-path="{{ m.path }}" data-field="{{ mc.key }}" data-live="1" inputmode="decimal" placeholder="{{ mc.ph }}" style="{{ mc.style }}" />
+                    </sc-for>
+                  </div>
+                  <div style="{{ m.driftStyle }}">{{ m.driftText }}</div>
 
                   <div style="{{ pStyles.colHead }}">
                     <sc-for list="{{ itemCols }}" as="col" hint-placeholder-count="6">
@@ -274,8 +317,8 @@
 
                   <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="3">
                     <div style="{{ pStyles.itemRow }}">
-                      <input data-path="{{ it.path }}" data-field="food" placeholder="Food" style="{{ pFood }}" />
-                      <input data-path="{{ it.path }}" data-field="qty" placeholder="150 g" style="{{ pIn }}" />
+                      <input data-path="{{ it.path }}" data-field="food" dir="auto" placeholder="Food" style="{{ pFood }}" />
+                      <input data-path="{{ it.path }}" data-field="qty" dir="auto" placeholder="150 g" style="{{ pIn }}" />
                       <input data-path="{{ it.path }}" data-field="kcal" data-live="1" inputmode="decimal" placeholder="kcal" style="{{ pInNum }}" />
                       <input data-path="{{ it.path }}" data-field="protein" data-live="1" inputmode="decimal" placeholder="P" style="{{ pInNum }}" />
                       <input data-path="{{ it.path }}" data-field="carbs" data-live="1" inputmode="decimal" placeholder="C" style="{{ pInNum }}" />
@@ -285,27 +328,65 @@
                   </sc-for>
 
                   <button type="button" data-act="add" data-list="{{ m.itemsList }}" style="{{ pStyles.add }}">+ Add food</button>
-                  <input data-path="{{ m.path }}" data-field="notes" placeholder="Meal note (optional)" style="{{ pIn }}" />
+                  <input data-path="{{ m.path }}" data-field="notes" dir="auto" placeholder="Meal note (optional)" style="{{ pIn }}" />
+
+                  <!-- Alternatives: a whole meal the client may swap in, with its
+                       own foods. None to begin with; the coach adds them only for
+                       the meals that need a way out. -->
+                  <sc-for list="{{ m.alts }}" as="al" hint-placeholder-count="0">
+                    <div style="{{ pStyles.altCard }}">
+                      <div style="{{ pStyles.altHead }}">
+                        <span style="{{ pStyles.altTag }}">Or instead</span>
+                        <input data-path="{{ al.path }}" data-field="name" dir="auto" placeholder="Option name" style="{{ pHeadName }}" />
+                        <span style="{{ pStyles.altPill }}">{{ al.totalText }}</span>
+                        <button type="button" data-act="del" data-list="{{ m.altsList }}" data-i="{{ al.i }}" title="Remove alternative" style="{{ pStyles.icon }}">✕</button>
+                      </div>
+                      <div style="{{ pStyles.colHead }}">
+                        <sc-for list="{{ itemCols }}" as="col" hint-placeholder-count="6">
+                          <span style="{{ pStyles.colLab }}">{{ col.label }}</span>
+                        </sc-for>
+                        <span></span>
+                      </div>
+                      <sc-for list="{{ al.items }}" as="ait" hint-placeholder-count="0">
+                        <div style="{{ pStyles.itemRow }}">
+                          <input data-path="{{ ait.path }}" data-field="food" dir="auto" placeholder="Food" style="{{ pFood }}" />
+                          <input data-path="{{ ait.path }}" data-field="qty" dir="auto" placeholder="150 g" style="{{ pIn }}" />
+                          <input data-path="{{ ait.path }}" data-field="kcal" data-live="1" inputmode="decimal" placeholder="kcal" style="{{ pInNum }}" />
+                          <input data-path="{{ ait.path }}" data-field="protein" data-live="1" inputmode="decimal" placeholder="P" style="{{ pInNum }}" />
+                          <input data-path="{{ ait.path }}" data-field="carbs" data-live="1" inputmode="decimal" placeholder="C" style="{{ pInNum }}" />
+                          <input data-path="{{ ait.path }}" data-field="fat" data-live="1" inputmode="decimal" placeholder="F" style="{{ pInNum }}" />
+                          <button type="button" data-act="del" data-list="{{ ait.list }}" data-i="{{ ait.i }}" title="Remove food" style="{{ pStyles.icon }}">✕</button>
+                        </div>
+                      </sc-for>
+                      <button type="button" data-act="add" data-list="{{ al.itemsList }}" style="{{ pStyles.add }}">+ Add food</button>
+                      <input data-path="{{ al.path }}" data-field="notes" dir="auto" placeholder="How to prepare this option (optional)" style="{{ pIn }}" />
+                    </div>
+                  </sc-for>
+
+                  <button type="button" data-act="add" data-list="{{ m.altsList }}" style="{{ pStyles.add }}">+ Add alternative meal</button>
                 </section>
               </sc-for>
 
               <button type="button" data-act="add" data-list="meals" style="{{ pStyles.addBig }}">+ Add meal</button>
 
               <div style="{{ pStyles.sub }}">Day total</div>
-              <span style="{{ pStyles.pill }}">{{ dietTotal }}</span>
+              <div style="{{ pStyles.bar }}">
+                <span style="{{ pStyles.pill }}">{{ dietTotal }}</span>
+                <span style="{{ dietTotalDeltaStyle }}">{{ dietTotalDelta }}</span>
+              </div>
 
               <div style="{{ pStyles.sub }}">Daily supplements</div>
               <sc-for list="{{ dietSupps }}" as="s" hint-placeholder-count="2">
                 <div style="{{ pStyles.suppRow }}">
-                  <input data-path="{{ s.path }}" data-field="name" placeholder="Creatine monohydrate" style="{{ pIn }}" />
-                  <input data-path="{{ s.path }}" data-field="dose" placeholder="5g post-workout" style="{{ pIn }}" />
+                  <input data-path="{{ s.path }}" data-field="name" dir="auto" placeholder="Creatine monohydrate" style="{{ pIn }}" />
+                  <input data-path="{{ s.path }}" data-field="dose" dir="auto" placeholder="5g post-workout" style="{{ pIn }}" />
                   <button type="button" data-act="del" data-list="supplements" data-i="{{ s.i }}" title="Remove" style="{{ pStyles.icon }}">✕</button>
                 </div>
               </sc-for>
               <button type="button" data-act="add" data-list="supplements" style="{{ pStyles.add }}">+ Add supplement</button>
 
               <div style="{{ pStyles.sub }}">Notes &amp; rules for the client</div>
-              <textarea data-field="rules" placeholder="Water, cooking method, what to do on a cheat day…" style="{{ pNote }}"></textarea>
+              <textarea data-field="rules" dir="auto" placeholder="Water, cooking method, what to do on a cheat day…" style="{{ pNote }}"></textarea>
             </div>
 
             <!-- ---------- TRAINING ---------- -->
@@ -316,13 +397,13 @@
                 </sc-for>
               </div>
 
-              <input data-field="split" placeholder="Split — e.g. Push / Pull / Legs" style="{{ pIn }}" />
+              <input data-field="split" dir="auto" placeholder="Split — e.g. Push / Pull / Legs" style="{{ pIn }}" />
 
               <sc-for list="{{ trainDays }}" as="d" hint-placeholder-count="3">
                 <section style="{{ pStyles.card }}">
                   <div style="{{ pStyles.cardHead }}">
-                    <input data-path="{{ d.path }}" data-field="name" placeholder="Day name" style="{{ pHeadName }}" />
-                    <input data-path="{{ d.path }}" data-field="focus" placeholder="Focus" style="{{ pHeadSmall }}" />
+                    <input data-path="{{ d.path }}" data-field="name" dir="auto" placeholder="Day name" style="{{ pHeadName }}" />
+                    <input data-path="{{ d.path }}" data-field="focus" dir="auto" placeholder="Focus" style="{{ pHeadSmall }}" />
                     <span style="{{ pStyles.pill }}">{{ d.countText }}</span>
                     <button type="button" data-act="up" data-list="days" data-i="{{ d.i }}" title="Move up" style="{{ pStyles.icon }}">↑</button>
                     <button type="button" data-act="down" data-list="days" data-i="{{ d.i }}" title="Move down" style="{{ pStyles.icon }}">↓</button>
@@ -340,7 +421,7 @@
                   <sc-for list="{{ d.exercises }}" as="x" hint-placeholder-count="4">
                     <div style="{{ pStyles.exBlock }}">
                       <div style="{{ pStyles.exRow }}">
-                        <input data-path="{{ x.path }}" data-field="name" placeholder="Exercise" style="{{ pExName }}" />
+                        <input data-path="{{ x.path }}" data-field="name" dir="auto" placeholder="Exercise" style="{{ pExName }}" />
                         <input data-path="{{ x.path }}" data-field="sets" inputmode="decimal" placeholder="4" style="{{ pInNum }}" />
                         <input data-path="{{ x.path }}" data-field="reps" placeholder="8-10" style="{{ pInNum }}" />
                         <input data-path="{{ x.path }}" data-field="rest" placeholder="90s" style="{{ pInNum }}" />
@@ -348,22 +429,22 @@
                         <button type="button" data-act="del" data-list="{{ x.list }}" data-i="{{ x.i }}" title="Remove exercise" style="{{ pStyles.icon }}">✕</button>
                       </div>
                       <div style="{{ pStyles.exSub }}">
-                        <input data-path="{{ x.path }}" data-field="video" data-live="1" placeholder="Video link — https://…" style="{{ pIn }}" />
+                        <input data-path="{{ x.path }}" data-field="video" data-live="1" dir="ltr" placeholder="Video link — https://…" style="{{ pIn }}" />
                         <a href="{{ x.videoHref }}" target="_blank" rel="noreferrer" title="Open video" style="{{ x.videoStyle }}">▶</a>
-                        <input data-path="{{ x.path }}" data-field="notes" placeholder="Cues / notes" style="{{ pIn }}" />
+                        <input data-path="{{ x.path }}" data-field="notes" dir="auto" placeholder="Cues / notes" style="{{ pIn }}" />
                       </div>
                     </div>
                   </sc-for>
 
                   <button type="button" data-act="add" data-list="{{ d.exList }}" style="{{ pStyles.add }}">+ Add exercise</button>
-                  <input data-path="{{ d.path }}" data-field="notes" placeholder="Day note (optional)" style="{{ pIn }}" />
+                  <input data-path="{{ d.path }}" data-field="notes" dir="auto" placeholder="Day note (optional)" style="{{ pIn }}" />
                 </section>
               </sc-for>
 
               <button type="button" data-act="add" data-list="days" style="{{ pStyles.addBig }}">+ Add day</button>
 
               <div style="{{ pStyles.sub }}">Notes &amp; rules for the client</div>
-              <textarea data-field="rules" placeholder="Warm-up, cardio, progression, when to add weight…" style="{{ pNote }}"></textarea>
+              <textarea data-field="rules" dir="auto" placeholder="Warm-up, cardio, progression, when to add weight…" style="{{ pNote }}"></textarea>
             </div>
           </div>
 
@@ -404,6 +485,8 @@ const GROUPS = [
   { title: "Coaching fit", keys: [["pastIssues", "Past frustrations"], ["dislikedBefore", "In their words"], ["needFromCoach", "Needs from me"], ["comms", "Contact via"], ["notes", "Other notes"]] }
 ];
 const FLAG_KEYS = [["medications", "Medication"], ["conditions", "Medical"], ["injuries", "Injury"], ["allergy", "Allergy"], ["neverEat", "Never eat"]];
+/* the sheet column the Apps Script writes each photo's Drive id into */
+const PHOTO_SLOTS = [["photoFront", "Front"], ["photoBack", "Back"], ["photoSide", "Side"], ["photoInbody", "InBody"]];
 const NEG = ["", "none", "no", "لا يوجد", "لا", "n/a", "-"];
 const CSV_KEYS = GROUPS.reduce((a, g) => a.concat(g.keys.map((k) => k[0])), ["submittedAt", "fullName"]);
 
@@ -458,20 +541,26 @@ const TOTALS_DEBOUNCE_MS = 200;
 const COACH_NAME = "Mahmoud Radwan";
 const ASSETS = {
   avatar: "assets/coach-avatar.webp",
-  hero: "assets/coach-hero.webp",
+  hero: "assets/cut-2.webp",
   texture: "assets/texture.webp"
 };
-/* the gallery. A training plan puts one at the head of each day, so a six-day
-   plan never shows the same photo twice; both plans close on a strip of three. */
-const SHOTS = 8;
-const SHOT_SRC = [];
-for (let i = 1; i <= SHOTS; i++) SHOT_SRC.push("assets/shot-" + i + ".webp");
+/* The poses that go inside a plan: cut out, so they stand on the plan's own dark
+   ground with no photo box around them. A training plan puts one at the head of
+   each day, so a six-day plan never shows the same pose twice; both plans close
+   on a strip of three, offset so a client given both does not see repeats.
+
+   Six, not all thirteen, because every one of these is inlined as base64 into
+   each exported plan — the rest of assets/cut-*.webp are there to swap in by
+   editing this line, and cost nothing until they are named here. */
+const CUT_SRC = [6, 11, 13, 8, 9, 3].map((n) => "assets/cut-" + n + ".webp");
 
 /* [key, label] tuples drive the editor grid, the PDF table and the text
    digest from one place, the way GROUPS does for the intake file */
 const ITEM_COLS = [["food", "Food"], ["qty", "Qty"], ["kcal", "Kcal"], ["protein", "P"], ["carbs", "C"], ["fat", "F"]];
 const EX_COLS = [["name", "Exercise"], ["sets", "Sets"], ["reps", "Reps"], ["rest", "Rest"], ["tempo", "Tempo"]];
 const MACROS = [["kcal", "Kcal"], ["protein", "Protein"], ["carbs", "Carbs"], ["fat", "Fat"], ["water", "Water"]];
+/* the four that add up. Water is a target, not a sum. */
+const MACRO4 = ["kcal", "protein", "carbs", "fat"];
 
 /* the console stays English; this is for the client-facing PDF only */
 const PT = {
@@ -481,7 +570,8 @@ const PT = {
     split: "Split", focus: "Focus", video: "Watch", notes: "Notes", start: "Start",
     food: "Food", qty: "Qty", kcal: "Kcal", protein: "Protein", carbs: "Carbs", fat: "Fat", water: "Water",
     exercise: "Exercise", sets: "Sets", reps: "Reps", rest: "Rest", tempo: "Tempo", empty: "—",
-    supps: "Daily supplements", meals: "Meal schedule"
+    supps: "Daily supplements", meals: "Meal schedule",
+    orInstead: "Or instead", asWritten: "As written above", alt: "Option"
   },
   ar: {
     diet: "الخطة الغذائية", training: "خطة التمرين", prepared: "خاصة بـ", coach: "الكابتن",
@@ -489,7 +579,8 @@ const PT = {
     split: "التقسيم", focus: "التركيز", video: "شاهد", notes: "ملاحظات", start: "البداية",
     food: "الطعام", qty: "الكمية", kcal: "سعرات", protein: "بروتين", carbs: "كارب", fat: "دهون", water: "ماء",
     exercise: "التمرين", sets: "مجموعات", reps: "تكرار", rest: "راحة", tempo: "الإيقاع", empty: "—",
-    supps: "المكملات اليومية", meals: "جدول الوجبات"
+    supps: "المكملات اليومية", meals: "جدول الوجبات",
+    orInstead: "أو بديلاً", asWritten: "كما هو مكتوب أعلاه", alt: "بديل"
   }
 };
 
@@ -504,7 +595,16 @@ function numOf(v) {
 
 function blankItem() { return { food: "", qty: "", kcal: "", protein: "", carbs: "", fat: "" }; }
 function blankSupp() { return { name: "", dose: "" }; }
-function blankMeal(n) { return { name: "Meal " + n, time: "", notes: "", items: [blankItem()] }; }
+/* kcal/protein/carbs/fat here are the coach's own figure for the whole meal.
+   Left blank the foods are added up instead, which is why they are not part of
+   the totals the way an item's are — see mealTotals. */
+function blankMeal(n) {
+  return { name: "Meal " + n, time: "", notes: "", kcal: "", protein: "", carbs: "", fat: "",
+    items: [blankItem()], alts: [] };
+}
+/* an alternative is a whole meal the client may swap in: its own foods, its own
+   quantities, its own macros. Opt-in, so a meal starts with none. */
+function blankAlt(n) { return { name: "Option " + n, notes: "", items: [blankItem()] }; }
 function blankEx() { return { name: "", sets: "", reps: "", rest: "", tempo: "", notes: "", video: "" }; }
 function blankDay(n) { return { name: "Day " + n, focus: "", notes: "", exercises: [blankEx()] }; }
 
@@ -539,7 +639,61 @@ function readPlans() {
   } catch (e) { return {}; }
 }
 
-function isUrl(v) { return /^https?:\/\/\S+$/i.test(String(v || "").trim()); }
+/* Every value that reaches the exported plan goes through this. It used to live
+   inside planBody, which left planDocHtml's <title> as the one unescaped sink. */
+const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, (ch) => ESC[ch]); }
+
+/* A coach pastes what the address bar shows them, which is usually
+   "youtube.com/watch?v=…" with the scheme hidden. The old test demanded
+   https:// and silently dropped everything else — no anchor was emitted at all,
+   which is why the link was missing from the PDF. Accept a bare host and put
+   the scheme back on; still refuse anything that is not http(s), so no
+   javascript: or data: URL can ever reach an href. */
+function urlOf(v) {
+  const s = String(v == null ? "" : v).trim();
+  if (!s || /\s/.test(s)) return "";
+  if (/^https?:\/\//i.test(s)) return s;
+  if (/^[a-z][a-z0-9+.\-]*:/i.test(s)) return "";        /* some other scheme */
+  if (!/^[\w-]+(\.[\w-]+)+/.test(s)) return "";          /* not a hostname */
+  return "https://" + s;
+}
+function isUrl(v) { return urlOf(v) !== ""; }
+
+/* One meal, one answer, used by the editor, the PDF and the WhatsApp digest
+   alike — they each used to sum this themselves and had already drifted apart
+   (the editor counted every row, the document only rows with a food in them).
+   A figure the coach typed for the whole meal wins over the foods, per macro
+   independently, so "just give them 620 kcal" needs no food detail at all. */
+function mealTotals(m) {
+  const rows = (m.items || []).filter((it) => String(it.food || "").trim() !== "");
+  const sum = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+  rows.forEach((it) => {
+    sum.kcal += numOf(it.kcal); sum.protein += numOf(it.protein);
+    sum.carbs += numOf(it.carbs); sum.fat += numOf(it.fat);
+  });
+  const eff = {}, typed = {};
+  MACRO4.forEach((k) => {
+    typed[k] = String(m[k] == null ? "" : m[k]).trim() !== "";
+    eff[k] = typed[k] ? numOf(m[k]) : sum[k];
+  });
+  /* a typed figure that disagrees with the foods is nearly always a stale edit,
+     so it is worth saying so rather than silently preferring one of them */
+  const drift = typed.kcal && sum.kcal > 0 && Math.abs(eff.kcal - sum.kcal) > Math.max(30, sum.kcal * 0.1);
+  return { rows: rows, sum: sum, eff: eff, typed: typed, drift: drift ? Math.round(sum.kcal) : 0 };
+}
+
+function macroText(v) {
+  return Math.round(v.kcal) + " kcal · " + Math.round(v.protein) + "P " +
+    Math.round(v.carbs) + "C " + Math.round(v.fat) + "F";
+}
+
+/* the address as a person would read it out: no scheme, no www, short enough to
+   sit in a chip. Printed next to "Watch" so a flattened PDF still carries it. */
+function urlLabel(v) {
+  let s = urlOf(v).replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "");
+  return s.length > 34 ? s.slice(0, 33) + "…" : s;
+}
 
 class Component extends DCLogic {
   state = {
@@ -547,7 +701,7 @@ class Component extends DCLogic {
     clients: [], loading: false, error: "", selKey: "", query: "", copied: false,
     connected: false, demo: false, cached: false, limit: PAGE, sort: "new",
     narrow: false,
-    tab: "intake", planRev: 0, savedAt: 0, undoAt: 0, menu: false, exporting: false
+    tab: "intake", planRev: 0, savedAt: 0, undoAt: 0, menu: false, exporting: false, photoRev: 0
   };
 
   componentDidMount() {
@@ -617,6 +771,49 @@ class Component extends DCLogic {
     const api = API_URL;
     return api + (api.indexOf("?") > -1 ? "&" : "?") + "code=" + encodeURIComponent(code) +
       (cb ? "&callback=" + cb : "") + "&t=" + Date.now();
+  }
+
+  /* ---------------- client photos ----------------
+     The files stay private in the coach's Drive, so they cannot simply be put in
+     an <img src>. The script hands over the thumbnail bytes when it is given the
+     access code — the same key that unlocks the client list — and they are drawn
+     from a data URI. Fetched once per file, on the first look at that client. */
+  thumbFor(id) {
+    if (!id || !API_URL || !this.state.code) return "";
+    if (!this.thumbs) this.thumbs = {};
+    const got = this.thumbs[id];
+    if (typeof got === "string") return got;
+    if (got === 1) return "";                       /* already on its way */
+    this.thumbs[id] = 1;
+
+    const done = (data) => {
+      this.thumbs[id] = data && data.ok && data.data
+        ? "data:" + (data.mime || "image/jpeg") + ";base64," + data.data
+        : "";
+      this.setState({ photoRev: (this.state.photoRev || 0) + 1 });
+    };
+    const url = this.srcFor(this.state.code, "") + "&action=photo&size=thumb&id=" + encodeURIComponent(id);
+    if (typeof fetch === "function") {
+      fetch(url, { credentials: "omit" })
+        .then((r) => r.text())
+        .then((txt) => { let j = null; try { j = JSON.parse(txt); } catch (e) {} done(j); })
+        .catch(() => this.thumbJsonp(id, done));
+    } else {
+      this.thumbJsonp(id, done);
+    }
+    return "";
+  }
+
+  /* the same CORS escape hatch the client list uses */
+  thumbJsonp(id, done) {
+    const cb = "formaPh" + Date.now().toString(36) + Math.floor(id.length);
+    const s = document.createElement("script");
+    const kill = () => { delete window[cb]; if (s.parentNode) s.parentNode.removeChild(s); };
+    window[cb] = (data) => { kill(); done(data); };
+    s.async = true;
+    s.src = this.srcFor(this.state.code, cb) + "&action=photo&size=thumb&id=" + encodeURIComponent(id);
+    s.onerror = () => { kill(); done(null); };
+    document.head.appendChild(s);
   }
 
   /* fetch first. It reports a real status and body, so a wrong code, a script
@@ -831,7 +1028,14 @@ class Component extends DCLogic {
     /* plans written before these fields existed must still open */
     const p = b[kind];
     if (typeof p.phase !== "string") p.phase = "";
-    if (kind === "diet" && !Array.isArray(p.supplements)) p.supplements = [blankSupp()];
+    if (kind === "diet") {
+      if (!Array.isArray(p.supplements)) p.supplements = [blankSupp()];
+      (p.meals || []).forEach((m) => {
+        if (!Array.isArray(m.alts)) m.alts = [];
+        MACRO4.forEach((k) => { if (typeof m[k] !== "string") m[k] = ""; });
+        m.alts.forEach((al) => { if (!Array.isArray(al.items)) al.items = [blankItem()]; });
+      });
+    }
     return p;
   }
 
@@ -843,8 +1047,11 @@ class Component extends DCLogic {
     return o;
   }
 
+  /* order matters: alts must be matched before the blankDay fallthrough, or a
+     new alternative silently becomes a training day */
   blankFor(listPath, n) {
     if (/items$/.test(listPath)) return blankItem();
+    if (/alts$/.test(listPath)) return blankAlt(n + 1);
     if (/exercises$/.test(listPath)) return blankEx();
     if (listPath === "supplements") return blankSupp();
     if (listPath === "meals") return blankMeal(n + 1);
@@ -916,7 +1123,9 @@ class Component extends DCLogic {
       /* keep the row so a misclick costs one tap, not a rewritten meal */
       this.undoRow = { arr: arr, i: i, row: arr[i] };
       arr.splice(i, 1);
-      if (!arr.length) arr.push(this.blankFor(listPath, 0));
+      /* every other list needs at least one row to be editable at all;
+         alternatives are opt-in, so an empty list is the correct resting state */
+      if (!arr.length && !/alts$/.test(listPath)) arr.push(this.blankFor(listPath, 0));
       clearTimeout(this.undoTimer);
       this.undoTimer = setTimeout(() => { this.undoRow = null; this.setState({ undoAt: 0 }); }, 9000);
       this.afterStructural(plan, true);
@@ -1007,7 +1216,8 @@ class Component extends DCLogic {
       sets: 'M4 9h12a4 4 0 0 1 0 8H8M7 6L4 9l3 3',
       reps: 'M9.5 4L7.5 20M16.5 4l-2 16M4 9.2h16M3.4 14.8h16',
       rest: 'M7 3h10M7 21h10M8.2 3c0 4 3.8 5 3.8 9s-3.8 5-3.8 9M15.8 3c0 4-3.8 5-3.8 9s3.8 5 3.8 9',
-      note: 'M5 4.5h14v15l-3.5-2.5-3.5 2.5-3.5-2.5L5 19.5zM9 9h6M9 12.5h4'
+      note: 'M5 4.5h14v15l-3.5-2.5-3.5 2.5-3.5-2.5L5 19.5zM9 9h6M9 12.5h4',
+      swap: 'M4 8h13l-3-3M20 16H7l3 3'
     };
     const s = size || 20;
     return '<svg class="ic" viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="' +
@@ -1032,6 +1242,12 @@ class Component extends DCLogic {
       '-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
       '.pg{padding:34px 34px 28px;background:var(--bg)}' +
       '.ic{vertical-align:middle;flex:0 0 auto}' +
+      /* Anything a person typed can be in either script, whatever the plan's
+         language is set to. On a block, dir="auto" takes the direction from the
+         first strong character. Inside a row it must not drag the row's
+         alignment with it, so those get plaintext isolation instead — this is
+         what stops "8-10 تكرار" from reordering into nonsense. */
+      '.au{unicode-bidi:plaintext}' +
       '.nav{display:flex;justify-content:space-between;align-items:center;gap:16px;' +
       'padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:26px}' +
       '.brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:19px;' +
@@ -1051,7 +1267,10 @@ class Component extends DCLogic {
          second page in the rasterised PDF. */
       '.hero .shot{width:172px;height:232px;flex:0 0 auto;border-radius:16px;overflow:hidden;' +
       'position:relative;background:linear-gradient(160deg,#26261f,#141416)}' +
-      '.hero .shot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}' +
+      /* A cut-out figure must be contained, not covered: filling the tile would
+         crop him at the thigh, which is the whole thing these poses exist to
+         avoid. Anchored to the bottom so he stands on the tile. */
+      '.hero .shot img{width:100%;height:100%;object-fit:contain;object-position:bottom center;display:block}' +
       '.glow{position:absolute;width:280px;height:280px;border-radius:999px;background:var(--ac);' +
       'opacity:.12;filter:blur(60px);top:-130px;right:-90px;z-index:1}' +
       '.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;' +
@@ -1116,7 +1335,30 @@ class Component extends DCLogic {
       'border:1px solid var(--line);border-radius:9px;padding:5px 9px;font-size:11.5px;font-weight:700}' +
       '.chip .ic{color:var(--ac)}' +
       '.tut{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#18181b;' +
-      'border-radius:11px;padding:9px 14px;font-size:12px;font-weight:800;text-decoration:none;flex:0 0 auto}' +
+      'border-radius:11px;padding:9px 14px;font-size:12px;font-weight:800;text-decoration:none;flex:0 0 auto;' +
+      'max-width:190px}' +
+      '.tut u{font-size:10px;font-weight:700;color:#52525b;text-decoration:none;direction:ltr;' +
+      'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}' +
+      /* Alternatives sit inside the meal they replace, sharing its foods layout
+         so the client compares like with like. */
+      '.alts{border-top:1px dashed rgba(255,255,255,.1);margin:0 18px 16px;padding-top:13px}' +
+      '.altlab{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:800;' +
+      'letter-spacing:.16em;text-transform:uppercase;color:var(--ac);margin-bottom:10px}' +
+      '.alt{background:rgba(39,39,42,.4);border:1px solid rgba(255,255,255,.05);' +
+      'border-inline-start:3px solid rgba(204,255,0,.4);border-radius:12px;padding:12px 14px;' +
+      'margin-bottom:9px;break-inside:avoid;page-break-inside:avoid}' +
+      '.althd{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:7px}' +
+      '.althd h4{font-size:13.5px;font-weight:800}' +
+      '.althd .macros{gap:11px}.althd .macros b{font-size:12px}' +
+      '.altbd{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}' +
+      '.altbd > :only-child{grid-column:1/-1}' +
+      '.altbd .h4{margin-bottom:6px}' +
+      '.asis{font-size:12px;color:var(--dim);font-style:italic}' +
+      /* the day's own line, so the client is not left adding the meals up */
+      '.daytot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:rgba(204,255,0,.07);' +
+      'border:1px solid rgba(204,255,0,.22);border-radius:16px;padding:13px 18px;margin-bottom:14px;' +
+      'break-inside:avoid;page-break-inside:avoid}' +
+      '.daytot .l{font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--ac)}' +
       '.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}' +
       '.panel{background:rgba(39,39,42,.55);border:1px solid rgba(255,255,255,.06);' +
       'border-radius:18px;padding:18px;break-inside:avoid}' +
@@ -1136,15 +1378,35 @@ class Component extends DCLogic {
       '.notes .sig .av{border-color:rgba(15,15,17,.3)}' +
       '.notes .sig b{font-size:11.5px;font-weight:800;display:block}' +
       '.notes .sig s{font-size:10px;opacity:.7;text-decoration:none}' +
-      /* Portrait frames: these hold the coach head to foot, so a wide band
-         cannot be used — it would crop him to a torso. */
-      '.daythumb{width:84px;height:112px;flex:0 0 auto;object-fit:cover;border-radius:11px;' +
-      'display:block;border:1px solid rgba(255,255,255,.08)}' +
+      /* Poses stand on a branded tile rather than sitting in a photo frame: the
+         figures are cut out, so a tile with the plan's own gradient behind them
+         reads as design, and containing rather than covering keeps every one of
+         them whole from head to foot. */
+      '.daytile{width:84px;height:112px;flex:0 0 auto;border-radius:11px;overflow:hidden;' +
+      'display:flex;align-items:flex-end;justify-content:center;' +
+      'background:linear-gradient(165deg,rgba(204,255,0,.14),rgba(24,24,27,.9));' +
+      'border:1px solid rgba(255,255,255,.08)}' +
+      '.daytile img{max-width:100%;max-height:100%;object-fit:contain;' +
+      'object-position:bottom center;display:block}' +
       '.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}' +
-      '.strip img{width:100%;height:250px;object-fit:cover;border-radius:13px;display:block;' +
+      '.pose{height:250px;border-radius:13px;overflow:hidden;display:flex;align-items:flex-end;' +
+      'justify-content:center;background:linear-gradient(165deg,rgba(204,255,0,.11),rgba(24,24,27,.92));' +
       'border:1px solid rgba(255,255,255,.07)}' +
+      '.pose img{max-width:100%;max-height:100%;object-fit:contain;' +
+      'object-position:bottom center;display:block}' +
       '.ft{margin-top:22px;padding-top:15px;border-top:1px solid var(--line);' +
       'display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:var(--dim)}' +
+      /* Nothing that is a picture of a person, or one indivisible row, may be cut
+         by a page break: a 250px portrait split across two sheets showed his head
+         on one and his body on the next. break-after on .sect keeps a day heading
+         with the first exercise under it. The rasterised PDF cannot see any of
+         this — the rasteriser cuts each page at a band of background pixels
+         instead, which cannot split anything either. */
+      '.hero,.grid4,.tile,.strip,.pose,.daytile,.supp,.two,.instr,img' +
+      '{break-inside:avoid;page-break-inside:avoid}' +
+      '.sect{break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid}' +
+      'li{break-inside:avoid;page-break-inside:avoid}' +
+      'ul{orphans:2;widows:2}' +
       /* In print the footer is taken out of flow and repeated at the foot of
          every sheet. In flow it only had to overshoot the page by a few pixels
          to earn a second, otherwise blank, sheet of solid dark toner. */
@@ -1167,11 +1429,14 @@ class Component extends DCLogic {
       '.ex .mid{flex:1 1 100%;order:2}' +
       '.ord{order:1}.tut{order:1;margin-inline-start:auto}' +
       '.two{grid-template-columns:1fr}' +
-      '.strip{grid-template-columns:1fr 1fr}.strip img{height:212px}' +
-      '.daythumb{width:66px;height:88px}' +
+      '.strip{grid-template-columns:1fr 1fr}.pose{height:212px}' +
+      '.daytile{width:66px;height:88px}' +
       '.nav{gap:10px}.who .lab{display:none}' +
-      '}' +
-      (ar ? '.macros{margin-inline-start:auto}' : '');
+      '.alts{margin:0 14px 14px}.altbd{grid-template-columns:1fr}' +
+      '.althd .macros{width:100%;justify-content:space-between;padding-top:7px;' +
+      'border-top:1px solid rgba(255,255,255,.07)}' +
+      '.tut{max-width:100%}' +
+      '}';
   }
 
   planFileName(c, kind, ext) {
@@ -1183,7 +1448,7 @@ class Component extends DCLogic {
     const ar = plan.lang === "ar";
     const t = PT[ar ? "ar" : "en"];
     const a = A || {};
-    const e = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+    const e = esc;
     const has = (v) => String(v == null ? "" : v).trim() !== "";
     const kindName = kind === "diet" ? t.diet : t.training;
     const title = has(plan.title) ? plan.title : kindName;
@@ -1201,7 +1466,7 @@ class Component extends DCLogic {
     /* nav */
     o.push('<div class="nav"><div class="brand">' + I(kind === "diet" ? "fork" : "barbell", 22, "#ccff00") +
       '<span>FOR<b>MA</b></span></div><div class="who"><div>' +
-      '<div class="lab">' + e(t.prepared) + '</div><div class="nm">' + e(c.fullName || "") + '</div></div>' +
+      '<div class="lab">' + e(t.prepared) + '</div><div class="nm" dir="auto">' + e(c.fullName || "") + '</div></div>' +
       (a.avatar
         ? '<img class="av" src="' + a.avatar + '" alt=""/>'
         : '<div class="av" style="display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">' + e(initials) + '</div>') +
@@ -1209,14 +1474,14 @@ class Component extends DCLogic {
 
     /* hero */
     o.push('<div class="hero"><div class="glow"></div><div class="txt">');
-    if (has(plan.phase)) o.push('<div class="badge">' + I("note", 12) + e(plan.phase) + '</div>');
-    o.push('<h1>' + e(title) + '</h1>');
-    if (has(plan.notes)) o.push('<p class="lead">' + e(plan.notes) + '</p>');
-    else if (kind === "training" && has(plan.split)) o.push('<p class="lead">' + e(t.split) + ': ' + e(plan.split) + '</p>');
+    if (has(plan.phase)) o.push('<div class="badge">' + I("note", 12) + '<span class="au">' + e(plan.phase) + '</span></div>');
+    o.push('<h1 dir="auto">' + e(title) + '</h1>');
+    if (has(plan.notes)) o.push('<p class="lead" dir="auto">' + e(plan.notes) + '</p>');
+    else if (kind === "training" && has(plan.split)) o.push('<p class="lead">' + e(t.split) + ': <span class="au">' + e(plan.split) + '</span></p>');
     o.push('<div class="by">' +
       (a.avatar ? '<img class="av" src="' + a.avatar + '" alt=""/>' : '') +
       '<div><span class="nm">' + e(COACH_NAME) + '</span><br><span class="rl">' + e(t.coach) +
-      (has(plan.startDate) ? ' · ' + e(t.start) + ' ' + e(plan.startDate) : '') + '</span></div></div>');
+      (has(plan.startDate) ? ' · ' + e(t.start) + ' <span class="au">' + e(plan.startDate) + '</span>' : '') + '</span></div></div>');
     o.push('</div>');
     if (a.hero) o.push('<div class="shot"><img src="' + a.hero + '" alt=""/></div>');
     o.push('</div>');
@@ -1230,45 +1495,62 @@ class Component extends DCLogic {
     if (shots.length >= 3) {
       const off = kind === "diet" ? 0 : 3;
       o.push('<div class="strip">' +
-        [0, 1, 2].map((i) => '<img src="' + shots[(off + i) % shots.length] + '" alt=""/>').join("") +
+        [0, 1, 2].map((i) => '<div class="pose"><img src="' + shots[(off + i) % shots.length] + '" alt=""/></div>').join("") +
         '</div>');
     }
-    o.push('<div class="ft"><span>FORMA · ' + e(COACH_NAME) + '</span><span>' + e(c.fullName || "") + '</span></div>');
+    o.push('<div class="ft"><span>FORMA · ' + e(COACH_NAME) + '</span><span class="au">' + e(c.fullName || "") + '</span></div>');
     o.push('</div>');
     return o.join("");
+  }
+
+  /* The foods of a meal, or of one of its alternatives. Shared so a swap looks
+     exactly like the meal it replaces. */
+  planFoodList(o, rows, t, e, has, label) {
+    o.push('<div><div class="h4">' + e(label || t.food) + '</div><ul>');
+    rows.forEach((it) => {
+      o.push('<li><i></i><span class="au">' + e(it.food) +
+        (has(it.qty) ? '<em class="au">' + e(it.qty) + '</em>' : '') + '</span></li>');
+    });
+    o.push('</ul></div>');
+  }
+
+  planMacroRow(o, v, t, e) {
+    o.push('<div class="macros">' +
+      '<div><b style="color:#ff4d4d">' + Math.round(v.protein) + 'g</b><s>' + e(t.protein) + '</s></div>' +
+      '<div><b style="color:#3b82f6">' + Math.round(v.carbs) + 'g</b><s>' + e(t.carbs) + '</s></div>' +
+      '<div><b style="color:#eab308">' + Math.round(v.fat) + 'g</b><s>' + e(t.fat) + '</s></div>' +
+      '<div class="kc"><b>' + Math.round(v.kcal) + '</b><s>' + e(t.kcal) + '</s></div></div>');
   }
 
   planDietBody(o, plan, t, e, has, I, a) {
     const tot = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
     const meals = [];
     plan.meals.forEach((m) => {
-      const rows = m.items.filter((it) => has(it.food));
-      if (!rows.length && !has(m.notes)) return;
-      const mt = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-      rows.forEach((it) => {
-        mt.kcal += numOf(it.kcal); mt.protein += numOf(it.protein);
-        mt.carbs += numOf(it.carbs); mt.fat += numOf(it.fat);
-      });
-      tot.kcal += mt.kcal; tot.protein += mt.protein; tot.carbs += mt.carbs; tot.fat += mt.fat;
-      meals.push({ m: m, rows: rows, mt: mt });
+      const v = mealTotals(m);
+      const alts = (m.alts || []).map((al) => ({ al: al, v: mealTotals(al) }))
+        .filter((x) => x.v.rows.length || has(x.al.notes));
+      /* a meal with a typed total but no itemised food is still a meal */
+      if (!v.rows.length && !has(m.notes) && !v.typed.kcal && !alts.length) return;
+      MACRO4.forEach((k) => { tot[k] += v.eff[k]; });
+      meals.push({ m: m, v: v, alts: alts });
     });
 
     /* targets — fall back to what the meals actually add up to */
     const pick = (k) => has(plan.targets[k]) ? plan.targets[k] : (tot[k] ? String(Math.round(tot[k])) : "");
     const tiles = [
-      ["k", t.kcal, pick("kcal"), "", "flame"],
-      ["p", t.protein, pick("protein"), "g", ""],
-      ["c", t.carbs, pick("carbs"), "g", ""],
-      ["f", t.fat, pick("fat"), "g", ""]
+      ["k", t.kcal, pick("kcal"), ""],
+      ["p", t.protein, pick("protein"), "g"],
+      ["c", t.carbs, pick("carbs"), "g"],
+      ["f", t.fat, pick("fat"), "g"]
     ].filter((x) => has(x[2]));
     if (tiles.length) {
       o.push('<div class="sect"><h2>' + e(t.targets) + '</h2><div class="rule"></div>' +
-        (has(plan.targets.water) ? '<div class="chip">' + I("drop", 15, "#3b82f6") + e(t.water) + ': ' + e(plan.targets.water) + '</div>' : '') +
+        (has(plan.targets.water) ? '<div class="chip">' + I("drop", 15, "#3b82f6") + '<span class="au">' + e(t.water) + ': ' + e(plan.targets.water) + '</span></div>' : '') +
         '</div>');
       o.push('<div class="grid4">');
       tiles.forEach((x) => {
         o.push('<div class="tile ' + x[0] + '"><div class="lab">' + e(x[1]) + '</div>' +
-          '<div class="val">' + e(x[2]) + (x[3] ? '<u>' + x[3] + '</u>' : '') + '</div></div>');
+          '<div class="val"><span class="au">' + e(x[2]) + '</span>' + (x[3] ? '<u>' + x[3] + '</u>' : '') + '</div></div>');
       });
       o.push('</div>');
     }
@@ -1276,26 +1558,40 @@ class Component extends DCLogic {
     if (meals.length) {
       o.push('<div class="sect"><h2>' + e(t.meals) + ' <span>' + meals.length + '</span></h2><div class="rule"></div></div>');
       meals.forEach((x, i) => {
-        const m = x.m, mt = x.mt;
+        const m = x.m, v = x.v;
         o.push('<div class="card"><div class="hd"><div class="dot">' + I(i === 0 ? "sun" : "bowl", 19) + '</div>' +
-          '<div><h3>' + e(m.name || "") + '</h3>' +
-          (has(m.time) ? '<div class="tm">' + I("clock", 13) + e(m.time) + '</div>' : '') + '</div>');
-        if (mt.kcal || mt.protein) {
-          o.push('<div class="macros">' +
-            '<div><b style="color:#ff4d4d">' + Math.round(mt.protein) + 'g</b><s>' + e(t.protein) + '</s></div>' +
-            '<div><b style="color:#3b82f6">' + Math.round(mt.carbs) + 'g</b><s>' + e(t.carbs) + '</s></div>' +
-            '<div><b style="color:#eab308">' + Math.round(mt.fat) + 'g</b><s>' + e(t.fat) + '</s></div>' +
-            '<div class="kc"><b>' + Math.round(mt.kcal) + '</b><s>' + e(t.kcal) + '</s></div></div>');
+          '<div><h3 dir="auto">' + e(m.name || "") + '</h3>' +
+          (has(m.time) ? '<div class="tm">' + I("clock", 13) + '<span class="au">' + e(m.time) + '</span></div>' : '') + '</div>');
+        if (v.eff.kcal || v.eff.protein) this.planMacroRow(o, v.eff, t, e);
+        o.push('</div>');
+        o.push('<div class="bd' + (has(m.notes) ? '' : ' one') + '">');
+        if (v.rows.length) this.planFoodList(o, v.rows, t, e, has);
+        else o.push('<div><div class="h4">' + e(t.food) + '</div><p class="asis">' + e(t.asWritten) + '</p></div>');
+        if (has(m.notes)) o.push('<div class="instr"><div class="h4 m">' + e(t.notes) + '</div><p dir="auto">' + e(m.notes) + '</p></div>');
+        o.push('</div>');
+
+        /* the swaps, inside the meal they replace, each with its own foods and
+           its own macros so the client can compare them at a glance */
+        if (x.alts.length) {
+          o.push('<div class="alts"><div class="altlab">' + I("swap", 13, "#ccff00") + e(t.orInstead) + '</div>');
+          x.alts.forEach((y) => {
+            o.push('<div class="alt"><div class="althd"><h4 dir="auto">' + e(y.al.name || "") + '</h4>');
+            if (y.v.eff.kcal || y.v.eff.protein) this.planMacroRow(o, y.v.eff, t, e);
+            o.push('</div><div class="altbd">');
+            if (y.v.rows.length) this.planFoodList(o, y.v.rows, t, e, has);
+            if (has(y.al.notes)) o.push('<div class="instr"><p dir="auto">' + e(y.al.notes) + '</p></div>');
+            o.push('</div></div>');
+          });
+          o.push('</div>');
         }
         o.push('</div>');
-        o.push('<div class="bd' + (has(m.notes) ? '' : ' one') + '"><div><div class="h4">' + e(t.food) + '</div><ul>');
-        x.rows.forEach((it) => {
-          o.push('<li><i></i><span>' + e(it.food) + (has(it.qty) ? '<em>' + e(it.qty) + '</em>' : '') + '</span></li>');
-        });
-        o.push('</ul></div>');
-        if (has(m.notes)) o.push('<div class="instr"><div class="h4 m">' + e(t.notes) + '</div><p>' + e(m.notes) + '</p></div>');
-        o.push('</div></div>');
       });
+
+      /* what the whole day comes to — the figure the coach is judged on, and
+         the one PT has carried a translation for all along */
+      o.push('<div class="daytot"><span class="l">' + e(t.dayTotal) + '</span>');
+      this.planMacroRow(o, tot, t, e);
+      o.push('</div>');
     }
 
     const supps = (plan.supplements || []).filter((s) => has(s.name));
@@ -1304,13 +1600,13 @@ class Component extends DCLogic {
       if (supps.length) {
         o.push('<div class="panel"><div class="ph">' + I("pill", 20, "#ccff00") + '<h3>' + e(t.supps) + '</h3></div>');
         supps.forEach((s) => {
-          o.push('<div class="supp"><span class="n">' + e(s.name) + '</span>' +
-            (has(s.dose) ? '<span class="d">' + e(s.dose) + '</span>' : '') + '</div>');
+          o.push('<div class="supp"><span class="n au">' + e(s.name) + '</span>' +
+            (has(s.dose) ? '<span class="d au">' + e(s.dose) + '</span>' : '') + '</div>');
         });
         o.push('</div>');
       }
       if (has(plan.rules)) {
-        o.push('<div class="notes"><h3>' + e(t.rules) + '</h3><p>' + e(plan.rules) + '</p>' +
+        o.push('<div class="notes"><h3>' + e(t.rules) + '</h3><p dir="auto">' + e(plan.rules) + '</p>' +
           '<div class="sig">' + (a.avatar ? '<img class="av" src="' + a.avatar + '" alt=""/>' : '') +
           '<div><b>' + e(COACH_NAME) + '</b><s>' + e(t.coach) + '</s></div></div></div>');
       }
@@ -1326,29 +1622,37 @@ class Component extends DCLogic {
       const rows = d.exercises.filter((x) => has(x.name));
       if (!rows.length && !has(d.notes)) return;
       /* one photo per day, walking the gallery so days never repeat */
-      const thumb = shots.length ? '<img class="daythumb" src="' + shots[shown++ % shots.length] + '" alt=""/>' : '';
-      o.push('<div class="sect">' + thumb + '<h2>' + e(d.name || "") +
-        (has(d.focus) ? ' <span>' + e(d.focus) + '</span>' : '') + '</h2><div class="rule"></div></div>');
+      const thumb = shots.length
+        ? '<div class="daytile"><img src="' + shots[shown++ % shots.length] + '" alt=""/></div>'
+        : '';
+      o.push('<div class="sect">' + thumb + '<h2 dir="auto">' + e(d.name || "") +
+        (has(d.focus) ? ' <span class="au">' + e(d.focus) + '</span>' : '') + '</h2><div class="rule"></div></div>');
 
       rows.forEach((x, xi) => {
         o.push('<div class="ex"><div class="ord">' + letters.charAt(xi % 8) + '1</div><div class="mid">' +
-          '<h3>' + e(x.name) + '</h3>' +
-          (has(x.notes) ? '<div class="cue">' + e(x.notes) + '</div>' : '') + '<div class="chips">');
-        if (has(x.sets)) o.push('<span class="chip">' + I("sets", 14) + e(x.sets) + ' ' + e(t.sets) + '</span>');
-        if (has(x.reps)) o.push('<span class="chip">' + I("reps", 14) + e(x.reps) + ' ' + e(t.reps) + '</span>');
-        if (has(x.rest)) o.push('<span class="chip">' + I("rest", 14) + e(x.rest) + ' ' + e(t.rest) + '</span>');
-        if (has(x.tempo)) o.push('<span class="chip">' + I("clock", 14) + e(x.tempo) + '</span>');
+          '<h3 dir="auto">' + e(x.name) + '</h3>' +
+          (has(x.notes) ? '<div class="cue" dir="auto">' + e(x.notes) + '</div>' : '') + '<div class="chips">');
+        if (has(x.sets)) o.push('<span class="chip"><span class="au">' + I("sets", 14) + e(x.sets) + ' ' + e(t.sets) + '</span></span>');
+        if (has(x.reps)) o.push('<span class="chip"><span class="au">' + I("reps", 14) + e(x.reps) + ' ' + e(t.reps) + '</span></span>');
+        if (has(x.rest)) o.push('<span class="chip"><span class="au">' + I("rest", 14) + e(x.rest) + ' ' + e(t.rest) + '</span></span>');
+        if (has(x.tempo)) o.push('<span class="chip"><span class="au">' + I("clock", 14) + e(x.tempo) + '</span></span>');
         o.push('</div></div>');
+        /* The address is printed beside the label, not hidden behind it. In the
+           shared PDF the page is a picture with link annotations laid over it —
+           if a viewer ignores those, or the sheet is printed on paper, the
+           client can still read where the video lives. */
         if (isUrl(x.video)) {
-          o.push('<a class="tut" href="' + e(String(x.video).trim()) + '">' + I("play", 16, "#18181b") + e(t.video) + '</a>');
+          o.push('<a class="tut" href="' + e(urlOf(x.video)) + '" target="_blank" rel="noopener">' +
+            I("play", 16, "#18181b") + e(t.video) +
+            '<u class="au">' + e(urlLabel(x.video)) + '</u></a>');
         }
         o.push('</div>');
       });
-      if (has(d.notes)) o.push('<div class="instr" style="margin-bottom:14px"><p>' + e(d.notes) + '</p></div>');
+      if (has(d.notes)) o.push('<div class="instr" style="margin-bottom:14px"><p dir="auto">' + e(d.notes) + '</p></div>');
     });
 
     if (has(plan.rules)) {
-      o.push('<div class="notes" style="margin-top:8px"><h3>' + e(t.rules) + '</h3><p>' + e(plan.rules) + '</p>' +
+      o.push('<div class="notes" style="margin-top:8px"><h3>' + e(t.rules) + '</h3><p dir="auto">' + e(plan.rules) + '</p>' +
         '<div class="sig">' + (a.avatar ? '<img class="av" src="' + a.avatar + '" alt=""/>' : '') +
         '<div><b>' + e(COACH_NAME) + '</b><s>' + e(t.coach) + '</s></div></div></div>');
     }
@@ -1366,7 +1670,9 @@ class Component extends DCLogic {
     const plan = this.planOf(c, kind);
     const ar = plan.lang === "ar";
     return '<!DOCTYPE html><html lang="' + (ar ? "ar" : "en") + '" dir="' + (ar ? "rtl" : "ltr") + '"><head>' +
-      '<meta charset="utf-8"><title>' + String(c.fullName || "FORMA") + ' — ' + (kind === "diet" ? "Diet" : "Training") + '</title>' +
+      /* the one sink outside planBody, so it needs its own escape — a client
+         called "Ali <3" used to break the document open */
+      '<meta charset="utf-8"><title>' + esc(c.fullName || "FORMA") + ' — ' + (kind === "diet" ? "Diet" : "Training") + '</title>' +
       '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
       '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">' +
       '<style>' + this.planCss(ar) + '</style></head><body>' + this.planBody(c, kind, A) + '</body></html>';
@@ -1398,7 +1704,7 @@ class Component extends DCLogic {
     })).catch(() => "");     /* a missing image must never block an export */
 
     this._assets = Promise.all(
-      [one(ASSETS.avatar), one(ASSETS.hero), one(ASSETS.texture)].concat(SHOT_SRC.map(one))
+      [one(ASSETS.avatar), one(ASSETS.hero), one(ASSETS.texture)].concat(CUT_SRC.map(one))
     ).then((v) => ({
       avatar: v[0], hero: v[1], texture: v[2],
       shots: v.slice(3).filter(Boolean)
@@ -1419,7 +1725,10 @@ class Component extends DCLogic {
     this.loadAssets().then((A) => {
       const f = document.createElement("iframe");
       f.setAttribute("aria-hidden", "true");
-      f.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0";
+      /* an A4 width, not 1px: the plan's own stylesheet has a 560px screen
+         breakpoint, and a hairline iframe lays the whole thing out as a phone
+         before the print styles ever get a chance */
+      f.style.cssText = "position:fixed;left:-99999px;top:0;width:794px;height:1123px;border:0;visibility:hidden";
       document.body.appendChild(f);
       const d = f.contentDocument;
       d.open(); d.write(this.planDocHtml(c, kind, A)); d.close();
@@ -1451,9 +1760,15 @@ class Component extends DCLogic {
     this.loadAssets()
       .then((A) => this.rasterPages(this.planFragment(c, kind, A)))
       .then((pages) => {
-        /* rasterPages already drew every page; the first is the one worth sending */
-        const b = this.b64ToBlob(pages[0].jpeg, "image/jpeg");
-        this.save(b, this.planFileName(c, kind, "jpg"));
+        /* every page, not only the first — a two-page plan used to export as its
+           first half with no hint that the rest had been dropped. Saves are
+           staggered because a browser drops a burst of downloads fired at once. */
+        pages.forEach((pg, i) => {
+          const name = pages.length > 1
+            ? this.planFileName(c, kind, "jpg").replace(/\.jpg$/, "-p" + (i + 1) + ".jpg")
+            : this.planFileName(c, kind, "jpg");
+          setTimeout(() => this.save(this.b64ToBlob(pg.jpeg, "image/jpeg"), name), i * 350);
+        });
         this.busy(false);
       }, () => this.busy(false));
   }
@@ -1482,67 +1797,246 @@ class Component extends DCLogic {
      this one exists so the client receives a file, not a screenshot. */
   A4 = { w: 794, h: 1123, scale: 2 };   /* A4 at 96dpi, drawn at 2x */
 
+  /* ---- pixel pagination ----------------------------------------------
+     The first attempt at this measured the document in an offscreen iframe and
+     pushed blocks down so none straddled a 1123px line. It did not work, and
+     the reason is worth writing down: an SVG loaded through an <img> is
+     rasterised in its own isolated document with its own font environment, so
+     the same markup wraps differently there than in a real page. Measured here,
+     this plan is 2740px tall; drawn there, 2558px — six per cent shorter, and
+     no font stack closes the gap (a stack of fixed-height boxes, by contrast,
+     agrees to the pixel). Every cut chosen from the DOM therefore landed in the
+     wrong place in the drawing, which is how a portrait ended up as a head on
+     one sheet and a body on the next.
+
+     So the cuts are chosen from the drawing itself. The page is rendered once,
+     small, and each boundary is walked backwards until it finds a band of rows
+     that is nothing but background — the gap between two blocks. Cutting there
+     cannot split anything, because there is nothing there to split. The same
+     pass locates the links, by drawing that render with every anchor filled in
+     a flat colour the palette never uses. --------------------------------- */
+  PAGE_PAD = 20;        /* clear space at the top of every continued page */
+  CUT_BACK = 360;       /* how far to look back for a gap before giving up */
+  MARK = "#ff00ff";
+
   rasterPages(html) {
+    const A = this.A4;
+    return this.layout(html).then((L) => {
+      const pages = [];
+      const usable = A.h - this.PAGE_PAD;
+      const cuts = [0];
+      while (cuts[cuts.length - 1] + usable < L.height) {
+        const from = cuts[cuts.length - 1];
+        const cut = this.cutNear(L.gaps, from + usable, from + 200);
+        if (cut <= from) break;                  /* nowhere safe: stop paging */
+        cuts.push(cut);
+      }
+      const count = cuts.length;
+
+      return this.drawPages(L.xml, L.height, cuts, count).then((canvases) => {
+        canvases.forEach((cv, p) => {
+          const b64 = cv.toDataURL("image/jpeg", 0.92).split(",")[1];
+          const bin = atob(b64);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          const from = cuts[p], to = p + 1 < count ? cuts[p + 1] : L.height;
+          pages.push({
+            bytes: bytes, jpeg: b64, w: cv.width, h: cv.height,
+            /* page-local, and shifted by the same inset the drawing was */
+            links: L.links.filter((l) => l.y0 >= from && l.y0 < to).map((l) => ({
+              url: l.url, x0: l.x0, x1: l.x1,
+              y0: l.y0 - from + (p ? this.PAGE_PAD : 0),
+              y1: l.y1 - from + (p ? this.PAGE_PAD : 0)
+            }))
+          });
+        });
+        return pages;
+      });
+    });
+  }
+
+  /* the lowest gap at or above `target`, never higher than `floor` */
+  cutNear(gaps, target, floor) {
+    for (let y = Math.min(target, gaps.length - 1); y > floor && y > target - this.CUT_BACK; y--) {
+      if (gaps[y]) return y;
+    }
+    return target;      /* a solid 360px block: cut through it rather than hang */
+  }
+
+  /* Lay the fragment out in its own document only to serialise it — the numbers
+     that matter come from the drawing, not from here. */
+  serialize(html) {
     return new Promise((resolve, reject) => {
       const A = this.A4;
-      const host = document.createElement("div");
-      host.setAttribute("aria-hidden", "true");
-      host.style.cssText = "position:fixed;left:-99999px;top:0;z-index:-1;pointer-events:none";
-      const page = document.createElement("div");
-      /* no padding of its own: .pg brings the same inset the print layout uses,
-         and the ground must be the plan's dark, not white */
-      page.style.cssText = "width:" + A.w + "px;padding:0;background:#0f0f11";
-      page.innerHTML = html;
-      host.appendChild(page);
-      document.body.appendChild(host);
+      /* An iframe, not the live page: the fragment carries the plan's whole
+         stylesheet — *{margin:0}, bare h1/ul/li, .card, .av, .chip — and putting
+         that in the console restyled everything behind the export while it ran. */
+      const f = document.createElement("iframe");
+      f.setAttribute("aria-hidden", "true");
+      f.style.cssText = "position:fixed;left:-99999px;top:0;width:" + A.w +
+        "px;height:" + A.h + "px;border:0;visibility:hidden;pointer-events:none";
+      document.body.appendChild(f);
+      const clean = () => { if (f.parentNode) f.parentNode.removeChild(f); };
+      let d, page;
+      try {
+        d = f.contentDocument;
+        d.open();
+        d.write('<!DOCTYPE html><html><head><meta charset="utf-8">' +
+          '<style>html,body{margin:0;padding:0;background:#0f0f11;overflow:hidden}</style></head><body>' +
+          '<div id="pg" style="width:' + A.w + 'px;background:#0f0f11">' + html + '</div>' +
+          '</body></html>');
+        d.close();
+        page = d.getElementById("pg");
+      } catch (e) { clean(); reject(e); return; }
 
-      const clean = () => { if (host.parentNode) host.parentNode.removeChild(host); };
-
-      /* Measure only once every image has decoded. Measuring first and drawing
-         second gave a page count for a layout that did not include the photos,
-         so the document overflowed the canvas it had been given. */
+      /* wait for the photos: an <img> with no bytes yet serialises fine, but a
+         layout that does not include it is the wrong layout */
       const imgs = [].slice.call(page.querySelectorAll("img"));
       const loaded = Promise.all(imgs.map((im) => im.complete ? null : new Promise((res) => {
         im.addEventListener("load", res, { once: true });
         im.addEventListener("error", res, { once: true });
       })));
-      /* never let a stuck image hang an export — draw what we have and move on */
-      const ready = Promise.race([loaded, new Promise((res) => setTimeout(res, 4000))]);
+      Promise.race([loaded, new Promise((res) => setTimeout(res, 4000))]).then(() => {
+        let xml, guess;
+        try {
+          guess = page.scrollHeight;
+          xml = new XMLSerializer().serializeToString(page);
+        } catch (e) { clean(); reject(e); return; }
+        clean();
+        resolve({ xml: xml, guess: guess });
+      }, (e) => { clean(); reject(e); });
+    });
+  }
 
-      ready.then(() => {
-        let xml;
-        try { xml = new XMLSerializer().serializeToString(page); }
-        catch (e) { clean(); reject(e); return; }
+  svgOf(xml, height, extra) {
+    const A = this.A4;
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + A.w + '" height="' + height + '">' +
+      '<foreignObject x="0" y="0" width="' + A.w + '" height="' + height + '">' +
+      '<div xmlns="http://www.w3.org/1999/xhtml" style="width:' + A.w + 'px">' +
+      (extra || '') + xml + '</div></foreignObject></svg>';
+  }
 
-        const count = Math.max(1, Math.ceil(page.scrollHeight / A.h));
-        const full = count * A.h;
-        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + A.w + '" height="' + full + '">' +
-          '<foreignObject x="0" y="0" width="' + A.w + '" height="' + full + '">' +
-          '<div xmlns="http://www.w3.org/1999/xhtml" style="width:' + A.w + 'px;background:#0f0f11">' + xml + '</div>' +
-          '</foreignObject></svg>';
+  loadSvg(svg) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("raster failed"));
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    });
+  }
 
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const pages = [];
-            for (let p = 0; p < count; p++) {
-              const cv = document.createElement("canvas");
-              cv.width = A.w * A.scale; cv.height = A.h * A.scale;
-              const cx = cv.getContext("2d");
-              cx.fillStyle = "#0f0f11"; cx.fillRect(0, 0, cv.width, cv.height);
-              cx.drawImage(img, 0, -p * A.h * A.scale, A.w * A.scale, full * A.scale);
-              const b64 = cv.toDataURL("image/jpeg", 0.92).split(",")[1];
-              const bin = atob(b64);
-              const bytes = new Uint8Array(bin.length);
-              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-              pages.push({ bytes: bytes, jpeg: b64, w: cv.width, h: cv.height });
+  /* One cheap 1x render, read back: how tall the drawing really is, which rows
+     are pure background, and where the links landed. */
+  layout(html) {
+    const A = this.A4;
+    return this.serialize(html).then((S) => {
+      /* the DOM measurement is only used to size the scratch canvas, and the
+         drawing has come out both shorter and longer than it, so give it room */
+      const tall = Math.min(15000, Math.ceil(S.guess * 1.45) + 400);
+      /* Anchors are filled flat magenta and their contents hidden. None of those
+         properties affect layout, so this render is the same shape as the real
+         one — and magenta appears nowhere in the plan's palette. */
+      const mark = '<style>a[href]{background:' + this.MARK + ' !important;color:' + this.MARK +
+        ' !important}a[href] *{visibility:hidden !important}</style>';
+      return this.loadSvg(this.svgOf(S.xml, tall, mark)).then((img) => {
+        const cv = document.createElement("canvas");
+        cv.width = A.w; cv.height = tall;
+        const cx = cv.getContext("2d", { willReadFrequently: true });
+        /* flooded with a colour the plan never uses, so "where the page ends" is
+           simply the last row that is not that colour */
+        cx.fillStyle = "#00ff00"; cx.fillRect(0, 0, A.w, tall);
+        cx.drawImage(img, 0, 0, A.w, tall);
+
+        const W = A.w;
+        const gaps = new Uint8Array(tall);
+        const marks = [];
+        let height = 0;
+        const STRIP = 1024;
+        for (let y0 = 0; y0 < tall; y0 += STRIP) {
+          const rows = Math.min(STRIP, tall - y0);
+          const px = cx.getImageData(0, y0, W, rows).data;
+          for (let r = 0; r < rows; r++) {
+            const base = r * W * 4;
+            /* x=10 is inside .pg's 34px inset, so it is always the page ground
+               — which also absorbs the texture wash without special-casing it */
+            const gr = px[base + 40], gg = px[base + 41], gb = px[base + 42];
+            const blank = gr < 60 && gg > 200 && gb < 60;
+            let flat = !blank, any = blank, mark0 = -1, mark1 = -1;
+            for (let x = 6; x < W - 6; x += 3) {
+              const i = base + x * 4;
+              const R = px[i], G = px[i + 1], B = px[i + 2];
+              if (!(R < 60 && G > 200 && B < 60)) any = false;
+              if (R > 200 && G < 70 && B > 200) { if (mark0 < 0) mark0 = x; mark1 = x; }
+              if (flat && x >= 30 && x < W - 30 &&
+                  (Math.abs(R - gr) > 7 || Math.abs(G - gg) > 7 || Math.abs(B - gb) > 7)) flat = false;
             }
-            clean();
-            resolve(pages);
-          } catch (e) { clean(); reject(e); }
-        };
-        img.onerror = () => { clean(); reject(new Error("raster failed")); };
-        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+            const y = y0 + r;
+            if (!any) height = y + 1;
+            gaps[y] = flat ? 1 : 0;
+            if (mark0 >= 0) marks.push([y, mark0, mark1 + 3]);
+          }
+        }
+
+        /* a single flat row can be a border; require a real band of them */
+        const solid = new Uint8Array(tall);
+        for (let y = 3; y < tall; y++) {
+          solid[y] = gaps[y] && gaps[y - 1] && gaps[y - 2] && gaps[y - 3] ? 1 : 0;
+        }
+
+        return { xml: S.xml, height: height, gaps: solid, links: this.linkRects(marks, S.xml) };
+      });
+    });
+  }
+
+  /* Magenta rows back into rectangles, then paired with their href in document
+     order — which is the order they were drawn in. */
+  linkRects(marks, xml) {
+    const boxes = [];
+    marks.forEach((m) => {
+      const last = boxes[boxes.length - 1];
+      if (last && m[0] <= last.y1 + 1 && m[1] < last.x1 && m[2] > last.x0) {
+        last.y1 = m[0];
+        last.x0 = Math.min(last.x0, m[1]);
+        last.x1 = Math.max(last.x1, m[2]);
+      } else {
+        boxes.push({ x0: m[1], x1: m[2], y0: m[0], y1: m[0] });
+      }
+    });
+    const urls = [];
+    const re = /<a[^>]*\shref="([^"]*)"/g;
+    let hit;
+    while ((hit = re.exec(xml))) {
+      const u = hit[1].replace(/&amp;/g, "&");
+      if (/^https?:\/\//i.test(u)) urls.push(u);
+    }
+    /* if the two counts disagree, something about the marker pass is not what it
+       looks like — drop the annotations rather than point them at the wrong URL */
+    if (!boxes.length || boxes.length !== urls.length) return [];
+    return boxes.map((b, i) => ({ url: urls[i], x0: b.x0, x1: b.x1, y0: b.y0, y1: b.y1 + 1 }));
+  }
+
+  /* Each page is drawn straight out of the one SVG with a source rectangle, so
+     no giant intermediate canvas is ever allocated. */
+  drawPages(xml, height, cuts, count) {
+    const A = this.A4;
+    return this.loadSvg(this.svgOf(xml, height)).then((img) => {
+      return cuts.map((from, p) => {
+        const to = p + 1 < count ? cuts[p + 1] : height;
+        const pad = p ? this.PAGE_PAD : 0;
+        const take = Math.min(to - from, A.h - pad);
+        const cv = document.createElement("canvas");
+        cv.width = A.w * A.scale; cv.height = A.h * A.scale;
+        const cx = cv.getContext("2d");
+        cx.fillStyle = "#0f0f11"; cx.fillRect(0, 0, cv.width, cv.height);
+        cx.drawImage(img, 0, from, A.w, take,
+                          0, pad * A.scale, A.w * A.scale, take * A.scale);
+        if (count > 1) {
+          cx.fillStyle = "#71717a";
+          cx.font = "600 " + (10 * A.scale) + "px sans-serif";
+          cx.textAlign = "center";
+          cx.fillText((p + 1) + " / " + count, cv.width / 2, cv.height - 13 * A.scale);
+        }
+        return cv;
       });
     });
   }
@@ -1559,6 +2053,21 @@ class Component extends DCLogic {
       push(a);
     };
     const PW = 595.28, PH = 841.89;              /* A4 in points */
+    /* the page is drawn 794 CSS px wide; a point is 72/96 of one */
+    const S = PW / this.A4.w;
+    /* a PDF string ends at the first unescaped bracket, and URLs contain them */
+    const uri = (s) => String(s).replace(/([\\()])/g, "\\$1");
+    /* PDF space starts at the bottom-left, the page was measured from the top */
+    const annots = (page) => {
+      const L = page.links || [];
+      if (!L.length) return "";
+      return " /Annots [" + L.map((l) =>
+        "<< /Type /Annot /Subtype /Link /Rect [" +
+        (l.x0 * S).toFixed(2) + " " + (PH - l.y1 * S).toFixed(2) + " " +
+        (l.x1 * S).toFixed(2) + " " + (PH - l.y0 * S).toFixed(2) +
+        "] /Border [0 0 0] /F 4 /A << /S /URI /URI (" + uri(l.url) + ") >> >>"
+      ).join(" ") + "]";
+    };
     const total = 2 + pages.length * 3;
     const off = new Array(total + 1).fill(0);
     const open = (n) => { off[n] = len; put(n + " 0 obj\n"); };
@@ -1574,7 +2083,8 @@ class Component extends DCLogic {
       const pg = 3 + i * 3, cont = pg + 1, im = pg + 2;
       open(pg);
       put("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + PW.toFixed(2) + " " + PH.toFixed(2) + "]" +
-        " /Resources << /XObject << /Im0 " + im + " 0 R >> >> /Contents " + cont + " 0 R >>\n");
+        " /Resources << /XObject << /Im0 " + im + " 0 R >> >> /Contents " + cont + " 0 R" +
+        annots(pages[i]) + " >>\n");
       close();
       const stream = "q " + PW.toFixed(2) + " 0 0 " + PH.toFixed(2) + " 0 0 cm /Im0 Do Q\n";
       open(cont);
@@ -1613,13 +2123,25 @@ class Component extends DCLogic {
     if (c.fullName) L.push(t.prepared + ": " + c.fullName);
     L.push("");
     if (kind === "diet") {
+      const day = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+      const foods = (rows) => rows.forEach((it) => L.push("• " + it.food +
+        (has(it.qty) ? " — " + it.qty : "") + (has(it.kcal) ? " · " + it.kcal + " " + t.kcal : "")));
       plan.meals.forEach((m) => {
-        const rows = m.items.filter((it) => has(it.food));
-        if (!rows.length) return;
+        const v = mealTotals(m);
+        const alts = (m.alts || []).map((al) => ({ al: al, v: mealTotals(al) })).filter((x) => x.v.rows.length);
+        if (!v.rows.length && !v.typed.kcal && !alts.length) return;
+        MACRO4.forEach((k) => { day[k] += v.eff[k]; });
         L.push("— " + String(m.name || "").toUpperCase() + (has(m.time) ? " (" + m.time + ")" : "") + " —");
-        rows.forEach((it) => L.push("• " + it.food + (has(it.qty) ? " — " + it.qty : "") + (has(it.kcal) ? " · " + it.kcal + " " + t.kcal : "")));
+        if (v.rows.length) foods(v.rows);
+        if (v.eff.kcal) L.push("  " + t.total + ": " + macroText(v.eff));
+        alts.forEach((x) => {
+          L.push("  " + t.orInstead + " — " + String(x.al.name || t.alt));
+          foods(x.v.rows);
+          if (x.v.eff.kcal) L.push("  " + t.total + ": " + macroText(x.v.eff));
+        });
         L.push("");
       });
+      if (day.kcal) { L.push(t.dayTotal + ": " + macroText(day)); L.push(""); }
     } else {
       plan.days.forEach((d) => {
         const rows = d.exercises.filter((x) => has(x.name));
@@ -1630,7 +2152,7 @@ class Component extends DCLogic {
           if (has(x.sets) || has(x.reps)) s += " — " + (x.sets || "?") + "x" + (x.reps || "?");
           if (has(x.rest)) s += " · " + t.rest + " " + x.rest;
           L.push(s);
-          if (isUrl(x.video)) L.push("  " + t.video + ": " + String(x.video).trim());
+          if (isUrl(x.video)) L.push("  " + t.video + ": " + urlOf(x.video));
         });
         L.push("");
       });
@@ -1780,6 +2302,33 @@ class Component extends DCLogic {
     return val;
   }
 
+  /* Deliberately not part of detail(), which is memoised per client — these have
+     to redraw when a thumbnail finishes arriving. */
+  photosOf(c) {
+    if (!c) return { list: [], show: { display: "none" }, folder: "" };
+    const list = PHOTO_SLOTS.map((s) => {
+      const id = String(c[s[0]] || "").trim();
+      if (!id) return null;
+      const src = this.thumbFor(id);
+      return {
+        label: s[1],
+        href: "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/view",
+        src: src,
+        imgStyle: src
+          ? { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }
+          : { display: "none" },
+        waitStyle: src
+          ? { display: "none" }
+          : { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", font: "500 11px/1 'DM Sans', sans-serif", color: "#55555F" }
+      };
+    }).filter(Boolean);
+    return {
+      list: list,
+      show: { display: list.length ? "block" : "none" },
+      folder: String(c.photosFolder || "").trim()
+    };
+  }
+
   /* built once per breakpoint, not once per row */
   planStyles(narrow) {
     if (this._ps && this._psN === narrow) return this._ps;
@@ -1809,6 +2358,12 @@ class Component extends DCLogic {
       /* five number cells plus a delete button have ~50px each on a 390px
          phone, so the padding gives way before the 16px font does */
       inNum: Object.assign({}, inBase, { textAlign: "center", padding: narrow ? "10px 4px" : "10px 12px" }),
+      /* a meal figure the coach typed himself, so it is visibly his and not the
+         automatic sum showing through the placeholder */
+      numTyped: Object.assign({}, inBase, {
+        textAlign: "center", padding: narrow ? "10px 4px" : "10px 12px",
+        color: LIME, borderColor: "rgba(214,255,63,.34)", background: "rgba(214,255,63,.06)"
+      }),
       headName: Object.assign({}, inBase, { flex: "2 1 150px", width: "auto", minWidth: "120px" }),
       headSmall: Object.assign({}, inBase, { flex: "1 1 90px", width: "auto", minWidth: "80px" }),
       icon: icon,
@@ -1847,7 +2402,18 @@ class Component extends DCLogic {
       videoOff: Object.assign({}, icon, { color: "#3E3E48", pointerEvents: "none", textDecoration: "none" }),
       fieldGrid: { display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: "10px", marginBottom: "14px" },
       note: Object.assign({}, inBase, { minHeight: "72px", resize: "vertical", lineHeight: 1.6 }),
-      sub: { font: "600 11px/1 'DM Sans', sans-serif", letterSpacing: ".1em", textTransform: "uppercase", color: "#6E6E7A", margin: "22px 0 10px" }
+      sub: { font: "600 11px/1 'DM Sans', sans-serif", letterSpacing: ".1em", textTransform: "uppercase", color: "#6E6E7A", margin: "22px 0 10px" },
+      drift: { font: "500 11.5px/1.3 'DM Sans', sans-serif", color: "#FF8A5B", marginTop: "-2px", marginBottom: "8px" },
+      mealTotRow: { display: "grid", gridTemplateColumns: narrow ? "repeat(4, 1fr)" : "auto repeat(4, 78px)", gap: narrow ? "6px" : "8px", alignItems: "center", marginBottom: "10px" },
+      mealTotLab: narrow
+        ? { gridColumn: "1 / -1", font: "600 10px/1 'DM Sans', sans-serif", letterSpacing: ".12em", textTransform: "uppercase", color: "#6E6E7A" }
+        : { font: "600 10px/1 'DM Sans', sans-serif", letterSpacing: ".12em", textTransform: "uppercase", color: "#6E6E7A" },
+      /* an alternative is drawn inside its meal, so it needs to read as nested
+         rather than as another meal that happens to be indented */
+      altCard: { background: "#0E0E12", border: "1px solid rgba(255,255,255,.07)", borderInlineStartWidth: "3px", borderInlineStartColor: "rgba(214,255,63,.34)", borderRadius: "12px", padding: narrow ? "11px" : "14px", marginTop: "10px" },
+      altHead: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px", marginBottom: "10px" },
+      altTag: { font: "700 9.5px/1 'DM Sans', sans-serif", letterSpacing: ".14em", textTransform: "uppercase", color: "#8A8A96", flex: "0 0 auto" },
+      altPill: { display: "inline-flex", alignItems: "center", padding: "5px 10px", borderRadius: "999px", background: "rgba(255,255,255,.05)", color: "#A8A8B4", font: "600 11.5px/1.3 'DM Sans', sans-serif", whiteSpace: "nowrap" }
     };
     this._ps = s; this._psN = narrow;
     return s;
@@ -1908,6 +2474,7 @@ class Component extends DCLogic {
       dietCtx: isDiet ? ctxOf([["allergy", "Allergy", 1], ["neverEat", "Never eat", 1], ["dislikes", "Dislikes", 0], ["diet", "Diet", 0], ["meals", "Meals/day", 0], ["cook", "Cooks", 0], ["likes", "Likes", 0]]) : [],
       trainCtx: isTrain ? ctxOf([["injuries", "Injuries", 1], ["injuryDetails", "Injury", 1], ["equip", "Equipment", 0], ["exp", "Experience", 0], ["days", "Days/wk", 0], ["sessionLength", "Session", 0], ["hatedExercises", "Hates", 0]]) : [],
       dietTargets: [], dietMeals: [], dietTotal: "", trainDays: [], dietSupps: [],
+      dietTotalDelta: "", dietTotalDeltaStyle: { display: "none" },
       planKindLabel: isDiet ? "Diet plan" : "Training plan",
       exportBusy: !!st.exporting,
       exportLabel: st.exporting ? "Working…" : "Export",
@@ -1918,19 +2485,38 @@ class Component extends DCLogic {
 
     if (isDiet && plan) {
       const tot = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+      const rowsOf = (base) => (arr) => arr.map((it, ii) =>
+        ({ path: base + ".items." + ii, list: base + ".items", i: String(ii) }));
+      const totals = plan.meals.map((m) => mealTotals(m));
+      totals.forEach((v) => MACRO4.forEach((k) => { tot[k] += v.eff[k]; }));
+
       out.dietMeals = plan.meals.map((m, mi) => {
-        const mt = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-        const items = m.items.map((it, ii) => {
-          mt.kcal += numOf(it.kcal); mt.protein += numOf(it.protein);
-          mt.carbs += numOf(it.carbs); mt.fat += numOf(it.fat);
-          return { path: "meals." + mi + ".items." + ii, list: "meals." + mi + ".items", i: String(ii) };
-        });
-        tot.kcal += mt.kcal; tot.protein += mt.protein; tot.carbs += mt.carbs; tot.fat += mt.fat;
+        const base = "meals." + mi, v = totals[mi];
+        /* the automatic figure sits in the placeholder, so the coach reads it
+           without being told and overrides it by typing over it */
+        const macroCells = MACRO4.map((k) => ({
+          key: k,
+          ph: v.sum[k] ? String(Math.round(v.sum[k])) : (k === "kcal" ? "kcal" : k.charAt(0).toUpperCase()),
+          style: v.typed[k] ? S.numTyped : S.inNum
+        }));
+        const share = tot.kcal > 0 && v.eff.kcal > 0 ? Math.round((v.eff.kcal / tot.kcal) * 100) : 0;
         return {
-          path: "meals." + mi, i: String(mi), items: items, itemsList: "meals." + mi + ".items",
-          totalText: Math.round(mt.kcal) + " kcal · " + Math.round(mt.protein) + "P " + Math.round(mt.carbs) + "C " + Math.round(mt.fat) + "F"
+          path: base, i: String(mi), items: rowsOf(base)(m.items), itemsList: base + ".items",
+          altsList: base + ".alts",
+          macroCells: macroCells,
+          totalText: macroText(v.eff) + (share ? "  ·  " + share + "% of day" : ""),
+          driftText: v.drift ? "foods add up to " + v.drift : "",
+          driftStyle: v.drift ? S.drift : { display: "none" },
+          alts: (m.alts || []).map((al, ai) => {
+            const ab = base + ".alts." + ai, av = mealTotals(al);
+            return {
+              path: ab, i: String(ai), items: rowsOf(ab)(al.items), itemsList: ab + ".items",
+              totalText: macroText(av.eff)
+            };
+          })
         };
       });
+
       out.dietTargets = MACROS.map((mk) => {
         const key = mk[0], target = numOf(plan.targets[key]);
         let delta = "", dStyle = { display: "none" };
@@ -1942,7 +2528,19 @@ class Component extends DCLogic {
         }
         return { key: key, label: mk[1], delta: delta, deltaStyle: dStyle };
       });
-      out.dietTotal = Math.round(tot.kcal) + " kcal · " + Math.round(tot.protein) + "P " + Math.round(tot.carbs) + "C " + Math.round(tot.fat) + "F";
+      out.dietTotal = macroText(tot);
+      /* the same verdict the tiles give, on the line the coach is looking at */
+      const tk = numOf(plan.targets.kcal);
+      if (tk > 0) {
+        const diff = Math.round(tot.kcal - tk);
+        out.dietTotalDelta = (diff > 0 ? "+" : "") + diff + " kcal vs target";
+        out.dietTotalDeltaStyle = Object.assign({}, S.chip, {
+          color: Math.abs(diff) <= Math.max(2, tk * 0.05) ? LIME : "#FF8A5B"
+        });
+      } else {
+        out.dietTotalDelta = "";
+        out.dietTotalDeltaStyle = { display: "none" };
+      }
       out.dietSupps = (plan.supplements || []).map((s, si) => ({
         path: "supplements." + si, i: String(si)
       }));
@@ -1957,7 +2555,7 @@ class Component extends DCLogic {
           return {
             path: "days." + di + ".exercises." + xi,
             list: "days." + di + ".exercises", i: String(xi),
-            videoHref: ok ? String(x.video).trim() : "#",
+            videoHref: ok ? urlOf(x.video) : "#",
             videoStyle: ok ? S.videoOn : S.videoOff
           };
         })
@@ -2008,7 +2606,13 @@ class Component extends DCLogic {
     const narrow = st.narrow;
 
     return Object.assign(this.planVals(c, st), {
-      rows: rows, sel: sel, queryInit: st.query, codeDraft: st.codeDraft, error: st.error,
+      rows: rows, sel: sel, photos: this.photosOf(c),
+      photoHeadStyle: { display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "14px", margin: "0 0 20px", paddingBottom: "14px", borderBottom: "1px solid rgba(255,255,255,.08)" },
+      photoTitleStyle: { font: "400 20px/1 Anton, Impact, sans-serif", letterSpacing: ".04em", textTransform: "uppercase", color: INK, margin: 0 },
+      photoFolderStyle: { font: "500 12px/1 'DM Sans', sans-serif", color: LIME, marginInlineStart: "auto", textDecoration: "none", whiteSpace: "nowrap" },
+      photoTileStyle: { position: "relative", display: "block", aspectRatio: "3 / 4", borderRadius: "14px", overflow: "hidden", background: "#0E0E12", border: "1px solid rgba(255,255,255,.08)" },
+      photoTagStyle: { position: "absolute", insetInlineStart: "8px", bottom: "8px", zIndex: 2, font: "700 9px/1 'DM Sans', sans-serif", letterSpacing: ".12em", textTransform: "uppercase", color: "#0B0B0E", background: LIME, borderRadius: "999px", padding: "5px 8px" },
+      queryInit: st.query, codeDraft: st.codeDraft, error: st.error,
       countText: String(list.length),
       countLabel: st.query ? "matches" : "clients",
       statusText: st.loading ? "Refreshing…" : (st.error && st.connected) ? st.error : st.demo ? "Demo data — not connected" : st.cached ? "Saved copy — refreshing" : st.connected ? "Live · Google Sheet" : "",
@@ -2027,7 +2631,7 @@ class Component extends DCLogic {
       searchRef: this.searchRef, listRef: this.listRef, codeRef: this.codeRef, goBack: this.goBack,
       /* min-height lives in .dash-page so it can use 100dvh with a 100vh fallback */
       pageStyle: { background: "#0B0B0E", color: INK, fontFamily: "'DM Sans', sans-serif" },
-      gateStyle: { position: "fixed", inset: 0, zIndex: 50, display: gateOpen ? "grid" : "none", placeItems: "center", padding: "24px", background: "rgba(11,11,14,.95)", backdropFilter: "blur(10px)", overflowY: "auto" },
+      gateStyle: { position: "fixed", inset: 0, zIndex: 50, display: gateOpen ? "flex" : "none", alignItems: "center", justifyContent: "center", gap: "clamp(20px, 5vw, 70px)", padding: "24px", background: "rgba(11,11,14,.95)", backdropFilter: "blur(10px)", overflowY: "auto" },
       gateCardStyle: { width: "100%", maxWidth: "520px", background: "#15151A", border: "1px solid rgba(255,255,255,.09)", borderRadius: "24px", padding: "clamp(26px, 4vw, 44px)" },
       gateErrStyle: { font: "500 14px/1.5 'DM Sans', sans-serif", color: "#FF8A5B", minHeight: "22px", marginBottom: "6px" },
       forgetStyle: { border: "none", background: "transparent", color: "#63636E", font: "500 13px/1.6 'DM Sans', sans-serif", cursor: "pointer", padding: 0 },

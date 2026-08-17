@@ -3,6 +3,11 @@
 # tools/build-assets.py whenever you add or swap a photo.
 images/
 
+# The background-removed poses as they arrived: 1792x2390 JPEGs, ~26MB, with the
+# transparency checkerboard painted into the pixels. tools/build-cuts.py turns
+# them into the real alpha files in assets/cut-*.webp, which are what ships.
+forma_cuts/
+
 # Python cruft from tools/
 __pycache__/
 *.pyc
