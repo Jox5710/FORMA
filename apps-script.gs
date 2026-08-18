@@ -152,7 +152,15 @@ function doGet(e) {
   }
   // deliberately before the access-code check: a build stamp is not a secret,
   // and being able to ask a deployment what it is saves an hour of guessing
-  if (p.action === 'version') return out({ ok: true, build: BUILD });
+  if (p.action === 'version') {
+    // Drive is a separate hurdle from deploying: the code can be live and still
+    // unauthorised, in which case photos fail here and nowhere else. Asking in a
+    // try/catch reports it without being able to break anything.
+    var drive = false, why = '';
+    try { DriveApp.getRootFolder().getId(); drive = true; }
+    catch (err) { why = String(err); }
+    return out({ ok: true, build: BUILD, drive: drive, driveError: why });
+  }
 
   if (String(p.code) !== ACCESS_CODE) return out({ ok: false, error: 'Wrong access code.' });
 
