@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0B0E'/%3E%3Crect x='6' y='9' width='7' height='14' rx='2' fill='%23D6FF3F'/%3E%3Crect x='16' y='9' width='10' height='3' rx='1.5' fill='%236E6E7A'/%3E%3Crect x='16' y='14.5' width='10' height='3' rx='1.5' fill='%236E6E7A'/%3E%3Crect x='16' y='20' width='7' height='3' rx='1.5' fill='%236E6E7A'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="script" href="./vendor/react.production.min.js">
@@ -209,7 +210,7 @@
             <div class="photo-grid">
               <sc-for list="{{ photos.list }}" as="ph" hint-placeholder-count="0">
                 <a href="{{ ph.href }}" target="_blank" rel="noreferrer" style="{{ photoTileStyle }}">
-                  <img src="{{ ph.src }}" alt="" style="{{ ph.imgStyle }}" />
+                  <div style="{{ ph.imgStyle }}"></div>
                   <span style="{{ ph.waitStyle }}">loading…</span>
                   <span style="{{ photoTagStyle }}">{{ ph.label }}</span>
                 </a>
@@ -2313,9 +2314,13 @@ class Component extends DCLogic {
       return {
         label: s[1],
         href: "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/view",
-        src: src,
+        /* the thumbnail arrives later; until it does this is simply not drawn */
         imgStyle: src
-          ? { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }
+          ? {
+              position: "absolute", inset: 0,
+              backgroundImage: 'url("' + src + '")',
+              backgroundSize: "cover", backgroundPosition: "center"
+            }
           : { display: "none" },
         waitStyle: src
           ? { display: "none" }

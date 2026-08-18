@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0B0E'/%3E%3Crect x='6' y='9' width='7' height='14' rx='2' fill='%23D6FF3F'/%3E%3Crect x='16' y='9' width='10' height='3' rx='1.5' fill='%236E6E7A'/%3E%3Crect x='16' y='14.5' width='10' height='3' rx='1.5' fill='%236E6E7A'/%3E%3Crect x='16' y='20' width='7' height='3' rx='1.5' fill='%236E6E7A'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="script" href="./vendor/react.production.min.js">
@@ -389,7 +390,7 @@
             <div style="{{ s.box }}">
               <span style="{{ shotLabStyle }}">{{ s.label }}</span>
               <label style="{{ s.drop }}">
-                <img src="{{ s.preview }}" alt="" style="{{ s.imgStyle }}" />
+                <div style="{{ s.imgStyle }}"></div>
                 <span style="{{ s.hintStyle }}">{{ s.hint }}</span>
                 <input type="file" accept="image/*" onChange="{{ s.onPick }}" style="{{ fileInStyle }}" />
               </label>
@@ -1375,9 +1376,12 @@ class Component extends DCLogic {
           background: FIELD, borderRadius: "14px",
           border: got ? "1px solid rgba(214,255,63,.45)" : "1px dashed " + LINE
         },
-        preview: got ? got.url : "",
         imgStyle: got
-          ? { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }
+          ? {
+              position: "absolute", inset: 0,
+              backgroundImage: 'url("' + got.url + '")',
+              backgroundSize: "cover", backgroundPosition: "center"
+            }
           : { display: "none" },
         hint: got ? got.kb + " KB · " + t.shotChange : t.shotPick,
         hintStyle: {

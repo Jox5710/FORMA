@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0B0E'/%3E%3Crect x='6' y='9' width='7' height='14' rx='2' fill='%23D6FF3F'/%3E%3Crect x='16' y='9' width='10' height='3' rx='1.5' fill='%236E6E7A'/%3E%3Crect x='16' y='14.5' width='10' height='3' rx='1.5' fill='%236E6E7A'/%3E%3Crect x='16' y='20' width='7' height='3' rx='1.5' fill='%236E6E7A'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="script" href="./vendor/react.production.min.js">
@@ -64,7 +65,8 @@
 
       <section style="{{ card }}">
         <div style="{{ head }}"><span style="{{ num }}">02</span><h2 style="{{ h2 }}">Add the script</h2></div>
-        <p style="{{ p }}">In that sheet: <strong style="color:#F4F3F0">Extensions → Apps Script</strong>. Delete everything in the editor, paste the code below, then replace the two lines at the top with your sheet ID and a private access code you invent.</p>
+        <p style="{{ p }}">In that sheet: <strong style="color:#F4F3F0">Extensions &#8594; Apps Script</strong>. Select everything in the editor and delete it, paste the code below in its place, then replace the two lines at the top with your sheet ID and a private access code you invent.</p>
+        <p style="{{ pWarn }}">Paste it <em>into the file that is already there</em> &#8212; usually <code>Code.gs</code>. Adding it as a second file breaks the whole project: Apps Script joins every <code>.gs</code> file into one scope, so a second copy declares <code>SHEET_ID</code> twice and every request answers <code>SyntaxError: Identifier 'SHEET_ID' has already been declared</code>. If you see that, open the <strong style="color:#F4F3F0">Files</strong> list and delete the duplicate so only one remains.</p>
         <div style="position: relative; margin-top: 20px; min-width: 0">
           <button type="button" onClick="{{ copyCode }}" style="{{ copyBtn }}">{{ copyLabel }}</button>
           <pre style="{{ pre }}">{{ code }}</pre>
@@ -120,7 +122,13 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 const CODE = [
-  "/** FORMA — client intake backend. Paste into Apps Script. */",
+  "/** FORMA — client intake backend.",
+  " *",
+  " *  REPLACE the contents of the ONE file already in your Apps Script project",
+  " *  (normally Code.gs). Do not add this as a second file: Apps Script merges",
+  " *  every .gs file into one scope, so a second copy declares SHEET_ID twice and",
+  " *  nothing runs at all — every request answers with a syntax error instead.",
+  " */",
   "",
   "const SHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';",
   "const ACCESS_CODE = 'FORMA-2026';   // invent your own, keep it private",

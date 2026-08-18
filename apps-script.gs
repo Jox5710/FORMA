@@ -1,9 +1,9 @@
-/**
- * FORMA — client intake backend. Paste into Apps Script.
+/** FORMA — client intake backend.
  *
- * This is a copy for convenience. setup.html shows the same code with a Copy
- * button and is the version kept up to date; if the two ever disagree, that one
- * is right.
+ *  REPLACE the contents of the ONE file already in your Apps Script project
+ *  (normally Code.gs). Do not add this as a second file: Apps Script merges
+ *  every .gs file into one scope, so a second copy declares SHEET_ID twice and
+ *  nothing runs at all — every request answers with a syntax error instead.
  */
 
 const SHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';
