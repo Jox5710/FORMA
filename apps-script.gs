@@ -12,6 +12,11 @@ const MAX_ROWS = 500;               // how many recent clients the console loads
 const PHOTO_DIR = 'FORMA client photos';   // created in your Drive on the first upload
 const PHOTO_MAX = 4000000;          // base64 characters, about 3MB of image
 
+// Bump nothing here — it is a stamp, so you can prove which version is really
+// live. Editing the code changes nothing until you Deploy again, and that is
+// the single most common reason photos stop arriving.
+const BUILD = '2026-08-18-photos';
+
 function sheet_() {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   return ss.getSheetByName('Clients') || ss.insertSheet('Clients');
@@ -145,6 +150,10 @@ function doGet(e) {
     }
     return json_(o);
   }
+  // deliberately before the access-code check: a build stamp is not a secret,
+  // and being able to ask a deployment what it is saves an hour of guessing
+  if (p.action === 'version') return out({ ok: true, build: BUILD });
+
   if (String(p.code) !== ACCESS_CODE) return out({ ok: false, error: 'Wrong access code.' });
 
   // A client photo, for the console. The files stay private in your Drive —

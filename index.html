@@ -1214,6 +1214,7 @@ class Component extends DCLogic {
     const t = T[this.state.lang];
     this.setState({ upOf: list.length, upN: 0, upFail: 0 });
     const WAITS = [1200, 4000, 9000, 20000];
+    let stale = false;
 
     const attempt = (slot, n) => {
       const img = this.shots[slot];
@@ -1231,7 +1232,22 @@ class Component extends DCLogic {
         .then((txt) => {
           let j = null;
           try { j = JSON.parse(txt); } catch (e) {}
-          if (j && j.ok) return true;
+          /* A stored photo always comes back with the id of the file it became.
+             A bare {ok:true} means the script took this for an ordinary
+             submission and filed it as a new client row — which is what an older
+             deployment does, because editing the code in the Apps Script editor
+             changes nothing until it is deployed again. Retrying would add three
+             more junk rows, so the run stops and says what is wrong. */
+          if (j && j.ok && j.id) return true;
+          if (j && j.ok) {
+            stale = true;
+            if (window.console) console.warn(
+              "FORMA: the Apps Script deployment is out of date — it answered a photo " +
+              "upload as if it were a new submission, so the photo was filed as a sheet " +
+              "row instead of being stored. Re-deploy: Apps Script -> Deploy -> Manage " +
+              "deployments -> edit -> Version: New version -> Deploy.");
+            return false;
+          }
           if (j && j.retry) return again();      /* the row is not there yet */
           if (j) return false;                   /* a real refusal, stated plainly */
           return true;    /* unreadable: the POST left the browser, as with the answers */
@@ -1240,7 +1256,8 @@ class Component extends DCLogic {
 
     let i = 0, failed = 0;
     const next = () => {
-      if (i >= list.length) {
+      if (i >= list.length || stale) {
+        if (stale) failed = list.length;      /* none of them were stored */
         this.setState({ upOf: 0, upN: 0, upFail: failed });
         return Promise.resolve();
       }

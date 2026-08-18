@@ -79,8 +79,11 @@
           <div style="{{ kv }}"><span style="{{ kvK }}">Who has access</span><span style="{{ kvV }}">Anyone</span></div>
         </div>
         <p style="{{ p }}">Google will ask you to authorise — click Advanced → Go to project (unsafe). It is your own script; that warning is normal. Copy the <strong style="color:#F4F3F0">Web app URL</strong> ending in <code>/exec</code>.</p>
-        <p style="{{ pWarn }}">Every time you edit the script you must Deploy again — pick <em>Manage deployments</em> and edit the existing one, so the URL stays the same.</p>
-        <p style="{{ pWarn }}">Because the script now writes client photos into your Drive, Google will ask you to <strong style="color:#F4F3F0">authorise it again</strong> the first time — the permission list is longer than before, and it will not run until you accept. If photo uploads are the only thing not working, this is why: open the script editor, press <em>Run</em> once, and approve.</p>
+        <p style="{{ pWarn }}"><strong style="color:#F4F3F0">Editing the code changes nothing on its own.</strong> Pasting into the Apps Script editor and saving does not touch the <code>/exec</code> URL your pages call — that URL keeps serving the version you last deployed. This is the single most common reason a change appears to do nothing at all.</p>
+        <p style="{{ p }}">To publish an edit: <strong style="color:#F4F3F0">Deploy &#8594; Manage deployments</strong>, click the pencil on the existing deployment, set <strong style="color:#F4F3F0">Version</strong> to <strong style="color:#F4F3F0">New version</strong>, then <strong style="color:#F4F3F0">Deploy</strong>. Leaving Version on the old number redeploys the old code; using <em>New deployment</em> instead gives you a second, different URL and leaves the one your pages use untouched.</p>
+        <div style="{{ kv }}"><span style="{{ kvK }}">Check what is live</span><span style="{{ kvV }}">open <code>YOUR_EXEC_URL?action=version</code> &#8212; it should answer <code>build: 2026-08-18-photos</code></span></div>
+        <p style="{{ p }}">No access code is needed for that check. If the build is missing or older, the deployment did not take: repeat the step above. If photos in particular are not arriving, this is almost always the reason &#8212; an older deployment does not understand a photo upload and files it in the sheet as though it were a new client.</p>
+        <p style="{{ pWarn }}">Because the script writes client photos into your Drive, Google will also ask you to <strong style="color:#F4F3F0">authorise it again</strong> the first time &#8212; the permission list is longer than before, and it will not run until you accept. Open the script editor, press <em>Run</em> once, and approve.</p>
         <p style="{{ p }}"><strong style="color:#F4F3F0">If the console works on one device but not another,</strong> this step is almost always why. <em>Who has access</em> must be <strong style="color:#F4F3F0">Anyone</strong> — not <em>Only myself</em> and not <em>Anyone with a Google account</em>, both of which let you in and lock everyone else out. There is no per-person or per-device limit in the code: the access code is a single shared password, so the same code works on as many phones and computers as you like. Each device asks for it once, then remembers it.</p>
         <p style="{{ p }}">The other cause is Google being slow to wake a script it has not run in a while — the first load after a quiet spell can take most of a minute. The console now waits 30 seconds and retries once on its own, and it will tell you which of these two it hit instead of blaming your setup.</p>
       </section>
@@ -124,6 +127,11 @@ const CODE = [
   "const MAX_ROWS = 500;               // how many recent clients the console loads",
   "const PHOTO_DIR = 'FORMA client photos';   // created in your Drive on the first upload",
   "const PHOTO_MAX = 4000000;          // base64 characters, about 3MB of image",
+  "",
+  "// Bump nothing here — it is a stamp, so you can prove which version is really",
+  "// live. Editing the code changes nothing until you Deploy again, and that is",
+  "// the single most common reason photos stop arriving.",
+  "const BUILD = '2026-08-18-photos';",
   "",
   "function sheet_() {",
   "  const ss = SpreadsheetApp.openById(SHEET_ID);",
@@ -258,6 +266,10 @@ const CODE = [
   "    }",
   "    return json_(o);",
   "  }",
+  "  // deliberately before the access-code check: a build stamp is not a secret,",
+  "  // and being able to ask a deployment what it is saves an hour of guessing",
+  "  if (p.action === 'version') return out({ ok: true, build: BUILD });",
+  "",
   "  if (String(p.code) !== ACCESS_CODE) return out({ ok: false, error: 'Wrong access code.' });",
   "",
   "  // A client photo, for the console. The files stay private in your Drive —",
