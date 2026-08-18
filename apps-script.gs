@@ -57,37 +57,64 @@ function folder_(name) {
 // A photo from the form. doPost is deliberately unauthenticated — the form is
 // public — so a file is only accepted when its submissionId is already a row in
 // the sheet. Without that check anyone holding the URL could fill your Drive.
+//
+// The row is waited for rather than demanded. The form cannot tell when this
+// script finished appending it — Google answers the submission with a redirect
+// the browser usually refuses to let the page read — so the photos leave at the
+// same moment as the answers. Refusing them outright threw all four away.
 function photo_(obj) {
   const slots = { front: 1, back: 1, side: 1, inbody: 1 };
   const slot = String(obj.slot || '');
   if (!slots[slot]) return json_({ ok: false, error: 'Unknown slot.' });
   const data = String(obj.data || '');
   if (!data || data.length > PHOTO_MAX) return json_({ ok: false, error: 'Bad photo size.' });
+
+  // no lock while waiting: the row we are waiting for needs it to be written
   const sh = sheet_();
-  const head = head_(sh);
-  const row = rowOf_(sh, head, obj.submissionId);
-  if (!row) return json_({ ok: false, error: 'No such submission.' });
+  var head = null, row = 0;
+  for (var t = 0; t < 8 && !row; t++) {
+    if (t) Utilities.sleep(1500);
+    head = head_(sh);
+    row = rowOf_(sh, head, obj.submissionId);
+  }
+  if (!row) return json_({ ok: false, error: 'No such submission.', retry: true });
 
-  const who = String(obj.fullName || 'client').replace(/[\\/:*?"<>|]/g, ' ').trim() || 'client';
-  const dir = folder_(who + ' - ' + String(obj.submissionId).slice(0, 8));
-  const name = slot + '.jpg';
-  const old = dir.getFilesByName(name);
-  while (old.hasNext()) old.next().setTrashed(true);   // a re-send replaces
-  const blob = Utilities.newBlob(Utilities.base64Decode(data), obj.mime || 'image/jpeg', name);
-  const file = dir.createFile(blob);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const who = String(obj.fullName || 'client').replace(/[\\/:*?"<>|]/g, ' ').trim() || 'client';
+    const dir = folder_(who + ' - ' + String(obj.submissionId).slice(0, 8));
+    const name = slot + '.jpg';
+    const old = dir.getFilesByName(name);
+    while (old.hasNext()) old.next().setTrashed(true);   // a re-send replaces
+    const blob = Utilities.newBlob(Utilities.base64Decode(data), obj.mime || 'image/jpeg', name);
+    const file = dir.createFile(blob);
 
-  const key = 'photo' + slot.charAt(0).toUpperCase() + slot.slice(1);
-  sh.getRange(row, colOf_(sh, head, key)).setValue(file.getId());
-  sh.getRange(row, colOf_(sh, head, 'photosFolder')).setValue(dir.getUrl());
-  return json_({ ok: true, id: file.getId() });
+    head = head_(sh);
+    const key = 'photo' + slot.charAt(0).toUpperCase() + slot.slice(1);
+    sh.getRange(row, colOf_(sh, head, key)).setValue(file.getId());
+    sh.getRange(row, colOf_(sh, head, 'photosFolder')).setValue(dir.getUrl());
+    return json_({ ok: true, id: file.getId() });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function doPost(e) {
+  // photos do their own locking, and must not hold it while they wait
+  try {
+    const probe = JSON.parse(e.postData.contents);
+    if (probe.action === 'photo') return photo_(probe);
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  }
+
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
     const obj = JSON.parse(e.postData.contents);
-    if (obj.action === 'photo') return photo_(obj);
     const sh = sheet_();
     const head = head_(sh);
     Object.keys(obj).forEach(function (k) {

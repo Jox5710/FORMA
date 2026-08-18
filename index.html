@@ -665,7 +665,10 @@ const T2 = {
     hintSaving: "Saved on this device as you type.",
     hintSending: "Sending — do not close this page.",
     hintQueued: "Waiting for a connection…",
-    upPhoto: function (n, of) { return "Uploading photo " + n + " of " + of + "…"; }
+    upPhoto: function (n, of) { return "Uploading photo " + n + " of " + of + "…"; },
+    upFailed: function (n) { return n === 1
+      ? "One photo could not be stored. Your answers arrived — send that photo to Coach Mahmoud on WhatsApp."
+      : n + " photos could not be stored. Your answers arrived — send them to Coach Mahmoud on WhatsApp."; }
   },
   ar: {
     star: " *",
@@ -688,7 +691,10 @@ const T2 = {
     hintSaving: "يُحفظ على هذا الجهاز أثناء الكتابة.",
     hintSending: "جاري الإرسال — لا تغلق الصفحة.",
     hintQueued: "في انتظار الاتصال…",
-    upPhoto: function (n, of) { return "جاري رفع الصورة " + n + " من " + of + "…"; }
+    upPhoto: function (n, of) { return "جاري رفع الصورة " + n + " من " + of + "…"; },
+    upFailed: function (n) { return n === 1
+      ? "لم يتم حفظ صورة واحدة. إجاباتك وصلت — أرسل الصورة للكابتن محمود على واتساب."
+      : "لم يتم حفظ " + n + " صور. إجاباتك وصلت — أرسلها للكابتن محمود على واتساب."; }
   }
 };
 Object.keys(T2).forEach(function (k) { Object.assign(T[k], T2[k]); });
@@ -829,7 +835,7 @@ function shrinkImage(file) {
 }
 
 class Component extends DCLogic {
-  state = { lang: "en", sel: {}, stress: 5, sending: false, sent: false, err: "", progress: 0, errs: {}, gerrs: {}, queued: false, shots: {}, upN: 0, upOf: 0 };
+  state = { lang: "en", sel: {}, stress: 5, sending: false, sent: false, err: "", progress: 0, errs: {}, gerrs: {}, queued: false, shots: {}, upN: 0, upOf: 0, upFail: 0 };
   form = null;
   sid = uid();
   /* the bytes live here, not in state: four base64 images would be re-walked by
@@ -1191,27 +1197,56 @@ class Component extends DCLogic {
     this.setState({ shots: shots });
   }
 
-  /* One request per photo, after the answers row is safely in the sheet and
-     keyed to the same submissionId. The intake is never held hostage to an
-     upload: if these fail the client has still been told their file arrived. */
+  /* One request per photo, keyed to the same submissionId as the answers. The
+     intake is never held hostage to an upload: if these fail the client has still
+     been told their file arrived.
+
+     Each one is retried, because a photo can reach the script before the row it
+     belongs to has been written. Nothing tells the form when that happened — the
+     answers POST is answered with a redirect the browser will not let the page
+     read, so it is assumed delivered the moment it leaves. Sending the photos
+     immediately therefore filed them against a row that did not exist yet, and
+     every one was refused. The script waits for the row as well; between the two
+     the photos land even when they arrive in the same instant. */
   sendShots(sid, name) {
     const list = SLOTS.map((s) => s[0]).filter((k) => this.shots[k]);
     if (!list.length || !API_URL) return Promise.resolve();
-    this.setState({ upOf: list.length, upN: 0 });
-    let i = 0;
-    const next = () => {
-      if (i >= list.length) { this.setState({ upOf: 0, upN: 0 }); return Promise.resolve(); }
-      const slot = list[i++];
+    const t = T[this.state.lang];
+    this.setState({ upOf: list.length, upN: 0, upFail: 0 });
+    const WAITS = [1200, 4000, 9000, 20000];
+
+    const attempt = (slot, n) => {
       const img = this.shots[slot];
-      this.setState({ upN: i });
       const body = JSON.stringify({
         action: "photo", submissionId: sid, fullName: name,
         slot: slot, mime: img.mime, data: img.data
       });
-      return fetch(API_URL, {
-        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: body, redirect: "follow", cache: "no-store"
-      }).then(() => next(), () => next());     /* one bad photo must not stop the rest */
+      const again = () => n + 1 < WAITS.length ? attempt(slot, n + 1) : Promise.resolve(false);
+      return new Promise((res) => setTimeout(res, WAITS[n]))
+        .then(() => fetch(API_URL, {
+          method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: body, redirect: "follow", cache: "no-store"
+        }))
+        .then((r) => r.text().catch(() => ""))
+        .then((txt) => {
+          let j = null;
+          try { j = JSON.parse(txt); } catch (e) {}
+          if (j && j.ok) return true;
+          if (j && j.retry) return again();      /* the row is not there yet */
+          if (j) return false;                   /* a real refusal, stated plainly */
+          return true;    /* unreadable: the POST left the browser, as with the answers */
+        }, again);
+    };
+
+    let i = 0, failed = 0;
+    const next = () => {
+      if (i >= list.length) {
+        this.setState({ upOf: 0, upN: 0, upFail: failed });
+        return Promise.resolve();
+      }
+      const slot = list[i++];
+      this.setState({ upN: i });
+      return attempt(slot, 0).then((good) => { if (!good) failed++; return next(); });
     };
     return next();
   }
@@ -1408,11 +1443,14 @@ class Component extends DCLogic {
       hintStyle: { font: "400 13px/1.5 " + font, color: this.state.sending ? LIME : "#63636E", textAlign: "center", minHeight: "18px" },
       hintMsg: this.state.sending ? t.hintSending : this.state.queued ? t.hintQueued : t.hintSaving,
       /* the photos go up after the file has landed, so this appears on the
-         thank-you screen rather than holding the submit button hostage */
-      upStyle: this.state.upOf
-        ? { font: "500 13px/1.5 " + font, color: LIME, margin: "0 0 24px" }
+         thank-you screen rather than holding the submit button hostage — and it
+         says so when one of them could not be stored, rather than pretending */
+      upStyle: (this.state.upOf || this.state.upFail)
+        ? { font: "500 13px/1.5 " + font, color: this.state.upFail ? "#FF8A5B" : LIME, margin: "0 0 24px" }
         : { display: "none" },
-      upMsg: this.state.upOf ? t.upPhoto(this.state.upN, this.state.upOf) : "",
+      upMsg: this.state.upOf
+        ? t.upPhoto(this.state.upN, this.state.upOf)
+        : (this.state.upFail ? t.upFailed(this.state.upFail) : ""),
       submitLabel: this.state.sending ? t.sending : t.submit,
       submitStyle: { width: "100%", maxWidth: "460px", padding: "22px 32px", border: "none", borderRadius: "999px", background: LIME, color: "#0B0B0E", font: (ar ? "800 17px" : "700 17px") + "/1 " + font, letterSpacing: ar ? "0" : ".02em", cursor: this.state.sending ? "wait" : "pointer", opacity: this.state.sending ? .6 : 1 },
       finePrintStyle: { font: "400 13px/1.6 " + font, color: "#63636E", textAlign: "center", maxWidth: "48ch", margin: 0 },
