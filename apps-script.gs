@@ -17,7 +17,16 @@ const PHOTO_MAX = 4000000;          // base64 characters, about 3MB of image
 // change anything below it, or two different versions will claim to be the
 // same one. Editing code changes nothing until you Deploy again, which is the
 // most common reason a fix appears to do nothing.
-const BUILD = '2026-08-19-auth';
+const BUILD = '2026-08-19-cellcap';
+
+// Pasting a fresh copy of this file overwrites the two lines above, so this is
+// worth stating rather than letting Google answer with a raw exception.
+function configError_() {
+  if (String(SHEET_ID).indexOf('PASTE_YOUR') === 0) {
+    return 'SHEET_ID is still the placeholder. Put your own sheet id on that line, save, and Deploy again.';
+  }
+  return '';
+}
 
 function sheet_() {
   const ss = SpreadsheetApp.openById(SHEET_ID);
@@ -135,6 +144,9 @@ function doPost(e) {
     return json_({ ok: false, error: String(err) });
   }
 
+  const bad = configError_();
+  if (bad) return json_({ ok: false, error: bad });
+
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
@@ -169,6 +181,16 @@ function doGet(e) {
     }
     return json_(o);
   }
+  try {
+    return get_(p, out);
+  } catch (err) {
+    // without this, a script error answers with Google's own HTML page, and the
+    // console can only report it as a sharing problem, which it is not
+    return out({ ok: false, error: String(err) });
+  }
+}
+
+function get_(p, out) {
   // deliberately before the access-code check: a build stamp is not a secret,
   // and being able to ask a deployment what it is saves an hour of guessing
   if (p.action === 'version') {
@@ -178,7 +200,13 @@ function doGet(e) {
     var drive = false, why = '';
     try { DriveApp.getRootFolder().getId(); drive = true; }
     catch (err) { why = String(err); }
-    return out({ ok: true, build: BUILD, drive: drive, driveError: why });
+    var sheetOk = false, sheetWhy = configError_();
+    if (!sheetWhy) {
+      try { sheet_().getLastRow(); sheetOk = true; }
+      catch (err2) { sheetWhy = String(err2); }
+    }
+    return out({ ok: true, build: BUILD, drive: drive, driveError: why,
+      sheet: sheetOk, sheetError: sheetWhy });
   }
 
   if (String(p.code) !== ACCESS_CODE) return out({ ok: false, error: 'Wrong access code.' });
@@ -205,11 +233,18 @@ function doGet(e) {
   const head = sh.getRange(1, 1, 1, cols).getValues()[0];
   const start = Math.max(2, n - MAX_ROWS + 1);
   const values = sh.getRange(start, 1, n - start + 1, cols).getValues();
+  // A cell is never worth more than this to the console. The longest answer the
+  // form can send is 2000 characters, so real data is untouched — but an older
+  // deployment used to write whole base64 photos into the sheet, and 16 of those
+  // turned one client list into a 2.9MB download that failed intermittently.
+  const CELL_MAX = 4000;
   const clients = values.map(function (r) {
     const o = {};
     head.forEach(function (h, i) {
       const v = r[i];
-      o[h] = (v instanceof Date) ? v.toISOString() : String(v == null ? '' : v);
+      var t = (v instanceof Date) ? v.toISOString() : String(v == null ? '' : v);
+      if (t.length > CELL_MAX) t = t.slice(0, CELL_MAX) + '…';
+      o[h] = t;
     });
     return o;
   });
