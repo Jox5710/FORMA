@@ -85,7 +85,10 @@
         <p style="{{ p }}">To publish an edit: <strong style="color:#F4F3F0">Deploy &#8594; Manage deployments</strong>, click the pencil on the existing deployment, set <strong style="color:#F4F3F0">Version</strong> to <strong style="color:#F4F3F0">New version</strong>, then <strong style="color:#F4F3F0">Deploy</strong>. Leaving Version on the old number redeploys the old code; using <em>New deployment</em> instead gives you a second, different URL and leaves the one your pages use untouched.</p>
         <div style="{{ kv }}"><span style="{{ kvK }}">Check what is live</span><span style="{{ kvV }}">open <code>YOUR_EXEC_URL?action=version</code> &#8212; it should answer <code>build: 2026-08-18-photos</code></span></div>
         <p style="{{ p }}">No access code is needed for that check. If the build is missing or older, the deployment did not take: repeat the step above. If photos in particular are not arriving, this is almost always the reason &#8212; an older deployment does not understand a photo upload and files it in the sheet as though it were a new client.</p>
-        <p style="{{ pWarn }}">Because the script writes client photos into your Drive, Google will also ask you to <strong style="color:#F4F3F0">authorise it again</strong> the first time &#8212; the permission list is longer than before, and it will not run until you accept. Open the script editor, press <em>Run</em> once, and approve.</p>
+        <p style="{{ pWarn }}"><strong style="color:#F4F3F0">Then run it once by hand, or photos will never save.</strong> Writing to Drive needs a permission the script did not have before, and a web app request <em>cannot ask you for it</em> &#8212; it simply fails with <em>you do not have permission to call DriveApp</em>, which looks like a broken feature rather than a missing tick box.</p>
+        <p style="{{ p }}">In the editor, choose <code>authorizeDrive</code> from the function dropdown next to <strong style="color:#F4F3F0">Run</strong>, press Run, then <strong style="color:#F4F3F0">Advanced &#8594; Go to project (unsafe) &#8594; Allow</strong>. The permission list must mention <strong style="color:#F4F3F0">Google Drive</strong>; if it does not, save the file first &#8212; Google reads the permissions it needs from the saved code. The function makes a folder and throws it away, so nothing is left behind.</p>
+        <div style="{{ kv }}"><span style="{{ kvK }}">Then check</span><span style="{{ kvV }}"><code>YOUR_EXEC_URL?action=version</code> should report <code>drive: true</code></span></div>
+        <p style="{{ p }}">Authorising is per account, not per deployment, so there is no need to deploy again afterwards.</p>
         <p style="{{ p }}"><strong style="color:#F4F3F0">If the console works on one device but not another,</strong> this step is almost always why. <em>Who has access</em> must be <strong style="color:#F4F3F0">Anyone</strong> — not <em>Only myself</em> and not <em>Anyone with a Google account</em>, both of which let you in and lock everyone else out. There is no per-person or per-device limit in the code: the access code is a single shared password, so the same code works on as many phones and computers as you like. Each device asks for it once, then remembers it.</p>
         <p style="{{ p }}">The other cause is Google being slow to wake a script it has not run in a while — the first load after a quiet spell can take most of a minute. The console now waits 30 seconds and retries once on its own, and it will tell you which of these two it hit instead of blaming your setup.</p>
       </section>
@@ -136,10 +139,12 @@ const CODE = [
   "const PHOTO_DIR = 'FORMA client photos';   // created in your Drive on the first upload",
   "const PHOTO_MAX = 4000000;          // base64 characters, about 3MB of image",
   "",
-  "// Bump nothing here — it is a stamp, so you can prove which version is really",
-  "// live. Editing the code changes nothing until you Deploy again, and that is",
-  "// the single most common reason photos stop arriving.",
-  "const BUILD = '2026-08-18-photos';",
+  "// A stamp, so you can prove which version is really live: open",
+  "// YOUR_EXEC_URL?action=version and compare. Change this string whenever you",
+  "// change anything below it, or two different versions will claim to be the",
+  "// same one. Editing code changes nothing until you Deploy again, which is the",
+  "// most common reason a fix appears to do nothing.",
+  "const BUILD = '2026-08-19-auth';",
   "",
   "function sheet_() {",
   "  const ss = SpreadsheetApp.openById(SHEET_ID);",
@@ -229,6 +234,23 @@ const CODE = [
   "  } finally {",
   "    lock.releaseLock();",
   "  }",
+  "}",
+  "",
+  "// RUN THIS ONCE, from the editor, after pasting the code.",
+  "//",
+  "// Writing to Drive needs a permission the script did not have before, and a web",
+  "// app request can never ask you for it — it just fails with \"you do not have",
+  "// permission to call DriveApp\". Only running a function here brings up the",
+  "// consent screen. Pick authorizeDrive in the dropdown, press Run, and approve;",
+  "// the permission list must mention Google Drive. It creates a folder and throws",
+  "// it away, so nothing is left behind.",
+  "function authorizeDrive() {",
+  "  const probe = DriveApp.createFolder('FORMA permission check');",
+  "  probe.setTrashed(true);",
+  "  const dir = folder_('__authorised__');",
+  "  dir.setTrashed(true);",
+  "  Logger.log('Drive is authorised. Photos will be stored in: ' + PHOTO_DIR);",
+  "  return 'ok';",
   "}",
   "",
   "function doPost(e) {",

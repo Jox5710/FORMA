@@ -12,10 +12,12 @@ const MAX_ROWS = 500;               // how many recent clients the console loads
 const PHOTO_DIR = 'FORMA client photos';   // created in your Drive on the first upload
 const PHOTO_MAX = 4000000;          // base64 characters, about 3MB of image
 
-// Bump nothing here — it is a stamp, so you can prove which version is really
-// live. Editing the code changes nothing until you Deploy again, and that is
-// the single most common reason photos stop arriving.
-const BUILD = '2026-08-18-photos';
+// A stamp, so you can prove which version is really live: open
+// YOUR_EXEC_URL?action=version and compare. Change this string whenever you
+// change anything below it, or two different versions will claim to be the
+// same one. Editing code changes nothing until you Deploy again, which is the
+// most common reason a fix appears to do nothing.
+const BUILD = '2026-08-19-auth';
 
 function sheet_() {
   const ss = SpreadsheetApp.openById(SHEET_ID);
@@ -105,6 +107,23 @@ function photo_(obj) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// RUN THIS ONCE, from the editor, after pasting the code.
+//
+// Writing to Drive needs a permission the script did not have before, and a web
+// app request can never ask you for it — it just fails with "you do not have
+// permission to call DriveApp". Only running a function here brings up the
+// consent screen. Pick authorizeDrive in the dropdown, press Run, and approve;
+// the permission list must mention Google Drive. It creates a folder and throws
+// it away, so nothing is left behind.
+function authorizeDrive() {
+  const probe = DriveApp.createFolder('FORMA permission check');
+  probe.setTrashed(true);
+  const dir = folder_('__authorised__');
+  dir.setTrashed(true);
+  Logger.log('Drive is authorised. Photos will be stored in: ' + PHOTO_DIR);
+  return 'ok';
 }
 
 function doPost(e) {
