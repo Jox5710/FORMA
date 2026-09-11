@@ -66,6 +66,25 @@ Only six of the thirteen are named in `dashboard.html`'s `CUT_SRC`, because each
 one is embedded into every plan you export. The other seven cost nothing until you
 put them in that line, so swapping a pose is a one-line edit.
 
+## Your logo
+
+The mark in `images/brand/` becomes four things: the tab icon, the home-screen
+icon, the logo in every page header and on the exported plans, and the animation
+on the loading screen.
+
+Both originals are far too heavy to publish — the animation alone arrived at
+3.8MB, which would have made the loading screen the slowest thing on the site. It
+ships as a 55KB animated WebP instead: cropped to the part that actually moves,
+a third of the frames, ten a second. The tab icon is cropped to where the ink is
+rather than fitted whole, because a tall mark centred in a square turns to mush
+at 16px, and it is inlined into each page as a data URI so it costs no request.
+
+To swap either, replace the file in `images/brand/` and run:
+
+```bash
+python3 tools/build-assets.py brand
+```
+
 ## The only thing to edit
 
 Both pages have one line near the top of their script block:

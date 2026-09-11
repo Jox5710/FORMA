@@ -18,6 +18,8 @@ import io
 
 import numpy as np
 import cv2
+import subprocess
+import tempfile
 from PIL import Image, ImageOps
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -400,5 +402,89 @@ def main():
     print("\ntotal shipped: %.1f KB across %d files" % (total / 1024, len(os.listdir(OUT))))
 
 
+
+
+# --------------------------------------------------------------------------
+# Brand: the logo mark and the loading animation.
+#
+# Both arrive far too heavy to publish — the animation was 3.8MB, which would
+# have made the loading screen the slowest thing on the site. Run with:
+#     python3 tools/build-assets.py brand
+# --------------------------------------------------------------------------
+
+BRAND_LOGO = "images/brand/logoandicon.png"
+BRAND_LOOP = "images/brand/Untitled design (1).gif"
+LOOP_BOX = (218, 0, 1590, 1075)   # the part of the frame that actually animates
+LOOP_SIZE = (300, 235)
+LOOP_EVERY = 3                    # 100 frames at 30fps -> 34 at 10fps
+
+
+def densest_square(mark):
+    """The squarest crop holding the most of the drawing.
+
+    Fitting a tall mark into a square icon leaves it floating in the middle and
+    it turns to mush at 16px; cropping to where the ink actually is fills the
+    tab icon instead."""
+    a = np.asarray(mark)[:, :, 3]
+    h, w = a.shape
+    side = int(h * 0.78)
+    best = None
+    for y in range(0, h - side + 1, 12):
+        for x in range(0, max(1, w - side + 1), 12):
+            ink = a[y:y + side, x:x + side].sum()
+            if best is None or ink > best[0]:
+                best = (ink, x, y)
+    _, bx, by = best
+    return mark.crop((bx, by, bx + side, by + side))
+
+
+def build_brand():
+    from PIL import Image as I
+    mark = I.open(BRAND_LOGO).convert("RGBA")
+    mark = mark.crop(mark.getbbox())
+    sq = densest_square(mark)
+
+    def fit(img, w, h):
+        s = min(w / img.width, h / img.height)
+        r = img.resize((max(1, round(img.width * s)), max(1, round(img.height * s))), I.LANCZOS)
+        o = I.new("RGBA", (w, h), (0, 0, 0, 0))
+        o.alpha_composite(r, ((w - r.width) // 2, (h - r.height) // 2))
+        return o
+
+    def tile(px, pad=0.02, bg=None):
+        inner = round(px * (1 - pad * 2))
+        o = I.new("RGBA", (px, px), bg or (0, 0, 0, 0))
+        o.alpha_composite(sq.resize((inner, inner), I.LANCZOS), ((px - inner) // 2,) * 2)
+        return o
+
+    fit(mark, 220, 270).save("assets/logo.webp", "WEBP", quality=88, method=6)
+    tile(180, bg=(11, 11, 14, 255)).save("assets/icon-180.png", optimize=True)
+    # the 32px tab icon is inlined into each page as a data URI, so it is only
+    # written here for reference
+    tile(32).save("assets/icon-32.png", optimize=True)
+    print("  logo.webp, icon-180.png, icon-32.png")
+
+    loop = I.open(BRAND_LOOP)
+    tmp = os.path.join(tempfile.mkdtemp(), "%03d.png")
+    kept = list(range(0, loop.n_frames, LOOP_EVERY))
+    for n, i in enumerate(kept):
+        loop.seek(i)
+        loop.convert("RGB").crop(LOOP_BOX).resize(LOOP_SIZE, I.LANCZOS).save(tmp % n)
+    loop.seek(kept[len(kept) // 2])
+    loop.convert("RGB").crop(LOOP_BOX).resize(LOOP_SIZE, I.LANCZOS).save(
+        "assets/loader-still.webp", "WEBP", quality=72, method=6)
+    # animated WebP, not GIF: the same frames are 55KB against 304KB
+    subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                    "-framerate", "10", "-i", tmp, "-c:v", "libwebp_anim",
+                    "-lossless", "0", "-q:v", "58", "-loop", "0", "-an",
+                    "assets/loader.webp"], check=True)
+    print("  loader.webp (%d frames), loader-still.webp" % len(kept))
+
+
 if __name__ == "__main__":
-    main()
+    # `brand` rebuilds just the logo and the loader, which is all that changes
+    # when the brand art does; no argument rebuilds the photo set.
+    if len(sys.argv) > 1 and sys.argv[1] == "brand":
+        build_brand()
+    else:
+        main()
