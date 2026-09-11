@@ -595,6 +595,11 @@ const TOTALS_DEBOUNCE_MS = 200;
 
 /* Whose name and face go on the plan the client receives. */
 const COACH_NAME = "Mahmoud Radwan";
+/* Stamped into every exported plan, in the file's properties rather than on the
+   page, so a PDF can always be traced to the version that made it. A page the
+   browser cached before a fix looks identical to one that never had it. */
+const PLAN_BUILD = "2026-09-11";
+
 const ASSETS = {
   avatar: "assets/coach-avatar.webp",
   hero: "assets/cut-2.webp",
@@ -1736,7 +1741,13 @@ class Component extends DCLogic {
     return '<!DOCTYPE html><html lang="' + (ar ? "ar" : "en") + '" dir="' + (ar ? "rtl" : "ltr") + '"><head>' +
       /* the one sink outside planBody, so it needs its own escape — a client
          called "Ali <3" used to break the document open */
-      '<meta charset="utf-8"><title>' + esc(c.fullName || "FORMA") + ' — ' + (kind === "diet" ? "Diet" : "Training") + '</title>' +
+      /* The title is the only thing Chrome carries into a printed PDF, so the
+         build rides along there: it shows under File > Properties, never on the
+         page the client reads. A meta generator is dropped by the print path,
+         but survives in the HTML export, which is why both are set. */
+      '<meta charset="utf-8"><title>' + esc(c.fullName || "FORMA") + ' — ' +
+      (kind === "diet" ? "Diet" : "Training") + ' · FORMA ' + PLAN_BUILD + '</title>' +
+      '<meta name="generator" content="FORMA plan ' + PLAN_BUILD + '">' +
       '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
       '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">' +
       '<style>' + this.planCss(ar) + '</style></head><body>' + this.planBody(c, kind, A) + '</body></html>';
@@ -2133,12 +2144,17 @@ class Component extends DCLogic {
         "] /Border [0 0 0] /F 4 /A << /S /URI /URI (" + uri(l.url) + ") >> >>"
       ).join(" ") + "]";
     };
-    const total = 2 + pages.length * 3;
+    const info = 2 + pages.length * 3 + 1;
+    const total = info;
     const off = new Array(total + 1).fill(0);
     const open = (n) => { off[n] = len; put(n + " 0 obj\n"); };
     const close = () => put("endobj\n");
 
     put("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+    /* nothing the client sees: it lives in File > Properties */
+    open(info);
+    put("<< /Producer (FORMA plan " + PLAN_BUILD + ") /Creator (FORMA coach console) >>\n");
+    close();
     open(1); put("<< /Type /Catalog /Pages 2 0 R >>\n"); close();
     const kids = [];
     for (let i = 0; i < pages.length; i++) kids.push((3 + i * 3) + " 0 R");
@@ -2171,7 +2187,7 @@ class Component extends DCLogic {
       x += s + " 00000 n \n";
     }
     put(x);
-    put("trailer\n<< /Size " + (total + 1) + " /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
+    put("trailer\n<< /Size " + (total + 1) + " /Root 1 0 R /Info " + info + " 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
 
     const all = new Uint8Array(len);
     let at = 0;
