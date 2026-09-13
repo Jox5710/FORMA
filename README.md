@@ -14,7 +14,7 @@ plan to them as a PDF — without leaving the page.
 | `dashboard.html` | Your private console. Keep this link to yourself. |
 | `setup.html` | The 6-minute Google Drive setup guide, including the Apps Script to paste. |
 | `support.js` | Required runtime. Upload it too. |
-| `vendor/` | React, served from your own site instead of a CDN. Upload it too. |
+| `vendor/` | React, and the plan fonts, served from your own site instead of a CDN. Upload it too. |
 | `assets/` | Your photos, cut out and optimised — 27 files, 850KB in total. Upload it too. |
 | `apps-script.gs` | A copy of the backend code, for pasting into Apps Script. `setup.html` shows the same thing with a Copy button. |
 | `tools/build-assets.py` | Rebuilds `assets/` from your originals. Never needs to run on the server. |
@@ -187,8 +187,18 @@ Client photos, unlike plans, do go through the Apps Script — so adding them **
 re-deploy and one fresh authorisation, because writing to Drive is a permission the script
 did not have before. `setup.html` says so in step 03.
 
-**Export PDF** prints through the browser, which gives selectable text, a small file and
-correctly joined Arabic. **Send on WhatsApp** hands the phone's share sheet a real PDF; on a
+**Every export looks like the HTML** — dark ground, white text, your photos and your fonts.
+**Export PDF** draws the page and saves it, rather than going through the browser's print
+dialog. Printing handed the plan to a pipeline that, on most phones and printers, drops the
+dark ground and turns white text black so it can be read on paper — a plan you designed dark
+came out black-on-white. Drawing it keeps it exactly as it looks on screen, on every device.
+The trade is that the PDF's text is part of the picture, so it can't be selected or searched.
+
+The fonts (Outfit, and Cairo for Arabic) are in `vendor/fonts/` and are embedded into each
+PDF when you export. A page drawn as a picture cannot fetch a webfont, so without them the
+PDF fell back to a serif face. They are fetched only when exporting, never on page load.
+
+**Send on WhatsApp** hands the phone's share sheet a real PDF; on a
 desktop, where no browser will let a page attach a file to a chat, it saves the PDF and opens
 the chat with the plan written out so you attach it in one drag. HTML and image exports sit
 in the same menu, and the image export now saves every page rather than only the first.
