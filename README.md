@@ -13,6 +13,7 @@ plan to them as a PDF — without leaving the page.
 | `index.html` | The client form. This is the link you send to clients. |
 | `dashboard.html` | Your private console. Keep this link to yourself. |
 | `setup.html` | The 6-minute Google Drive setup guide, including the Apps Script to paste. |
+| `transformation.html` | The transformation studio: before and after photos in, a branded post or story image out. Keep this link to yourself too. |
 | `support.js` | Required runtime. Upload it too. |
 | `vendor/` | React, and the plan fonts, served from your own site instead of a CDN. Upload it too. |
 | `assets/` | Your photos, cut out and optimised — 27 files, 850KB in total. Upload it too. |
@@ -152,6 +153,19 @@ back button. On a phone the page itself scrolls rather than a pane inside it, so
 bar collapses and nothing is cut off at the bottom; intake answers stack label-above-value
 instead of squeezing into a 140px column; and every console input is 16px, which is what
 stops iOS zooming in when you tap the search box.
+
+## Transformation posts
+
+`transformation.html` turns a client's before and after photos into a FORMA-branded image ready to post.
+
+- **Photos.** One or more before photos and one or more after photos, up to six on each side. Front, side and back work best. Drag a photo in the preview to frame it; scroll, pinch or use the slider to zoom.
+- **Results.** Weight, body fat, waist and one custom stat. Each shows as a tile once it has both a before and an after value. The big headline works itself out, for example **−14 KG · LOST IN 12 WEEKS**, or you can write your own.
+- **Formats.** Post 4:5 (1080×1350), Story 9:16 (1080×1920, kept clear of Instagram's own UI) and Square 1:1. **All 3 sizes** saves every format at once.
+- **Layouts.** *Auto* picks side-by-side or stacked, whichever crops your photos least. *Spotlight* is a diagonal lime cut with any extra angles in a strip underneath.
+- **Themes.** Night, Forest and Lime, all from the brand palette. The image can be in English or Arabic; Arabic is laid out right-to-left.
+
+Everything is drawn on one canvas at full size, so the PNG you download is exactly the preview. Photos never leave the device. The text fields are remembered on this device, but the photos are not.
+Open it from your site or a local server: a page opened straight from disk cannot load the logo and avatar.
 
 ## Writing plans
 
